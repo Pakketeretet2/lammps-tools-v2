@@ -1,0 +1,24 @@
+This is an attempt to create more structure for LAMMPS-Tools.
+
+The focus will be much more around the C++ lib and much less around Python.
+All data types will be pure C++ and C++ only. Manipulation of them from
+Python will only be by passing a pointer to said data structures around to
+a C-like interface. This way, the library can also be extended to other
+scripting languages and it allows me to program more in C++, in which I am
+much more comfortable. It also enforces better thinking about which parts to
+expose and which parts not to, which should lead to better encapsulation.
+
+
+
+So, the basic design of the code will be like this:
+            (exposed by)                 (called from)
+C++ backend --------------> C interface  --------------> Scripting languages
+
+
+Here are some examples of functionality in the three domains:
+
+    C++ backend      |     C interface       |    Scripting languages
+ --------------------+-----------------------+-------------------------
+    neighborize      |  lt_neighborize(...)  |  cdll.LoadLibrary(....so)
+                     |                       |
+
