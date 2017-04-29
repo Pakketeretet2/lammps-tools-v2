@@ -1,6 +1,7 @@
-#ifndef BLOCK_DATA_H
-#define BLOCK_DATA_H
+#ifndef BLOCK_DATA_HPP
+#define BLOCK_DATA_HPP
 
+#include "atom_type_info.hpp"
 #include "domain.hpp"
 #include "data_field.hpp"
 #include "topology.hpp"
@@ -18,19 +19,87 @@ public:
 	
 	bigint tstep;    ///< The current time step
 	bigint N;        ///< The number of atoms
+	int    N_types;  ///< The number of atom types
 	int atom_style;  ///< The current atom style
+	
 	domain dom;      ///< Domain information
 	topology top;    ///< Topology information
+	
+
+	/**
+	   Simple, empty constructor.
+	*/
+	block_data();
+
+	/**
+	   Constructor that sets the expected number of atoms
+	*/
+	block_data( std::size_t n_atoms );
+
+	/**
+	   Copy constructor.
+	*/
+	block_data( const block_data &o );
+	
+	/**
+	   Destructor. Makes sure contents of data are properly deleted.
+	*/
+	~block_data();
+
+	/**
+	   Assignment operator performs deep copy.
+
+	   \param o The block_data whose contents to copy.
+
+	   \returns Ref to this.
+	*/
+	block_data &operator=( block_data o );
+
+	/**
+	   Swaps contents of f and s.
+
+	   \param f The first block_data to swap with second.
+	   \param s The second block_data to swap with first.
+	*/
+	friend void swap( block_data &f, block_data &s );
+
+	/**
+	   Copies only the meta-data from block_data o.
+
+	   \param o the block_data to copy from.
+	*/
+	void copy_meta( const block_data &o );
+
 
 	/**
 	   Returns a pointer to an underlying data field.
 
+	   \warning It is _your_ responsibility to make sure
+	            the data is actually present (by calling
+	            get_data or checking for nullptr) before
+	            using the data!
+
 	   \param name The name of the data field.
 
-	   \returns A pointer to the found data field, or nullptr if the
-	            data field is not available.
+	   \returns A ptr to the data field, or nullptr
+                    if the field is not found.
 	*/
-	data_field *get_field( const std::string &name );
+	data_field *get_data_rw( const std::string &name );
+	
+	/**
+	   Returns a pointer to an underlying data field.
+
+	   \warning It is _your_ responsibility to make sure
+	            the data is actually present (by calling
+	            get_data or checking for nullptr) before
+	            using the data!
+
+	   \param name The name of the data field.
+
+	   \returns A ptr to the data field, or nullptr
+                    if the field is not found.
+	*/
+	const data_field *get_data( const std::string &name ) const;
 	
 	/**
 	   Returns a pointer to an underlying data field.
@@ -50,55 +119,11 @@ public:
 	void add_field( const data_field &data );
 
 	/**
-	   Simple, empty constructor.
-	*/
-	block_data();
-
-	/**
-	   Copy constructor.
-	*/
-	block_data( const block_data &o );
-	
-	/**
-	   Destructor. Makes sure contents of data are properly deleted.
-	*/
-	~block_data();
-
-	/**
-	   Assignment operator performs deep copy.
-	   Deliberately void to prevent assignment chaining.
-
-	   \param o The block_data whose contents to copy.
-	*/
-	void operator=( const block_data &o );
-
-	/**
-	   Swaps contents of this with o's.
-
-	   \param o The block_data to swap with.
-	*/
-	void swap( block_data &o ) throw(); // For copy-and-swap idiom.
-
-	/**
-	   Copies only the meta-data from block_data o.
-
-	   \param o the block_data to copy from.
-	*/
-	void copy_meta( const block_data &o );
-
-	/**
 	   Resizes all data_fields.
 
 	   \param N New size to give to data fields.
 	*/
-	void resize( std::size_t N );
-
-	/**
-	   Initialises all data_fields.
-
-	   \param N New size to give to data fields.
-	*/
-	void init( std::size_t N );
+	void set_natoms( std::size_t N );
 
 	/**
 	   Returns the names of the data fields contained
@@ -108,24 +133,15 @@ public:
 	/**
 	   Returns the number of data fields contained.
 	*/
-	std::size_t get_data_size() const;
+	std::size_t n_data_fields() const;
 
 private:
 	/// A vector containing pointers to all data fields.
 	std::vector<data_field*> data;
 };
 
-/*
-block_data block_data_from_data_file( const char *fname, int &status );
-
-
-void print_block_data_lmp( const block_data &b, std::ostream &o );
-void print_block_data_lmp( const block_data &b, const std::string &s );
-void print_block_data_lmp( const block_data &b, const std::string &s,
-                           std::ios_base::openmode mode );
-*/
 
 
 
 
-#endif // BLOCK_DATA_H
+#endif // BLOCK_DATA_HPP

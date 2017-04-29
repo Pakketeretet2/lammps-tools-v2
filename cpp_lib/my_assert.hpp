@@ -7,10 +7,10 @@
 
 
 #ifdef NDEBUG
-#define my_assert( test, msg, file, line ) \
+#define my_assert( file, line, test, msg )  \
 	do {} while(0)
 #else
-#define my_assert( test, msg, file, line )  \
+#define my_assert( file, line, test, msg )  \
 	do { \
 	if( !(test) ){ \
 		std::cerr << file << " ( " << line << " ): Assertion failed: " \
@@ -21,9 +21,15 @@
 #endif
 
 
-#define logic_error( msg, file, line ) \
+#define my_logic_error( file, line, msg )	  \
 	do { \
 		std::cerr << file << " ( " << line << " ): Logic error: " \
+		          << msg << "\n"; \
+	}while(0)
+
+#define my_runtime_error( file, line, msg ) \
+	do { \
+		std::cerr << file << " ( " << line << " ): Runtime error: " \
 		          << msg << "\n"; \
 	}while(0)
 

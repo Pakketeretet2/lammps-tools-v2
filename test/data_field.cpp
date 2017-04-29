@@ -52,5 +52,29 @@ TEST_CASE ( "Data field copying works as expected.", "[data_field_copy]" ) {
 	data_field *copy_of_c = copy( &c );
 	REQUIRE( copy_of_c != nullptr );
 	REQUIRE( copy_of_c->type() == c.type() );
+	delete copy_of_c;
+}
+
+TEST_CASE ( "Data field's data_as works as expected.", "[data_field_data_as]" ) {
+	data_field_double c( "c", 5 );
+	data_field_int d( "d", 5 );
+
+	c[0] = 1.2;
+	c[1] = 0.3 * c[0];
+	c[2] = 0.3 * c[1];
+	c[3] = 0.3 * c[2];
+	c[4] = 0.3 * c[3];
+
+	d[0] = 1;
+	d[1] = 2 * d[0];
+	d[2] = 2 * d[1];
+	d[3] = 2 * d[2];
+	d[4] = 2 * d[3];
+
+
+	const std::vector<double> &c_data = data_as<double>( &c );
+	const std::vector<int> &d_data    = data_as<int>( &d );
+	
+	
 
 }

@@ -3,7 +3,10 @@
 
 struct topology
 {
-	
+
+	void friend swap( topology &f, topology &s );
 };
+
+
 
 #endif // TOPOLOGY_HPP
