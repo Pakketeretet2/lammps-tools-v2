@@ -1,11 +1,20 @@
 #ifndef DATA_FIELD_HPP
 #define DATA_FIELD_HPP
 
+/**
+   \file data_field.hpp
+   
+   Definition of data_field and associated functions.
+*/
+
 #include <string>
 #include <typeinfo>
 #include <vector>
 
 #include "my_assert.hpp"
+
+namespace lammps_tools {
+
 
 /**
    This is basically any type of data that could be in a
@@ -253,6 +262,13 @@ const std::vector<int> &data_as<int>( const data_field *df )
 
 	const dfi *df_c = static_cast<const dfi*>( df );
 	return df_c->get_data();
+}
+
+
+
+void swap( data_field_double &f, data_field_double &s );
+void swap( data_field_int &f, data_field_int &s );
+
 }
 
 

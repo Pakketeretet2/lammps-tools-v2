@@ -1,6 +1,12 @@
 #ifndef DUMP_READER_LAMMPS_GZIP_HPP
 #define DUMP_READER_LAMMPS_GZIP_HPP
 
+/**
+   \file dump_reader_lammps_gzip.hpp
+   
+   Declaration of dump reader for lammps gzip dump files.
+*/
+
 #include "dump_reader_lammps_plain.hpp"
 
 #ifdef HAVE_BOOST_GZIP
@@ -9,6 +15,8 @@
 #endif
 
 #include <fstream>
+
+namespace lammps_tools {
 
 namespace dump_readers {
 
@@ -34,7 +42,9 @@ private:
 
 };
 
-}
+} // namespace dump_readers
+
+} // namespace lammps_tools
 
 
 #endif // DUMP_READER_LAMMPS_GZIP_HPP

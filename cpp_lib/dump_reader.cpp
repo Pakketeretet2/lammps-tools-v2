@@ -6,9 +6,10 @@
 
 #include <memory> // Smart pointers.
 
-
+using namespace lammps_tools;
 using namespace dump_readers;
 
+namespace lammps_tools {
 
 const char *dump_readers::fformat_to_str( int file_format )
 {
@@ -149,3 +150,5 @@ std::size_t dump_readers::dump_reader::block_count()
 	}
 	return c;
 }
+
+} // namespace lammps_tools

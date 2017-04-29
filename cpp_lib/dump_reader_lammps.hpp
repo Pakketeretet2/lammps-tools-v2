@@ -8,6 +8,8 @@
 
 #include "dump_reader.hpp"
 
+namespace lammps_tools {
+
 class block_data;
 
 namespace dump_readers {
@@ -33,7 +35,7 @@ public:
 
 	
 private:
-	virtual int  get_next_block( block_data &block ) = 0;
+	virtual int  get_next_block( lammps_tools::block_data &block ) = 0;
 	virtual bool check_eof()  const = 0;
 	virtual bool check_good() const = 0;
 
@@ -45,8 +47,8 @@ private:
 /// Checks if given column header corresponds to an integer quantity.
 bool is_int_data_field( const std::string header );
 
+} // namespace dump_readers
 
-
-}
+} // namespace lammps_tools
 
 #endif // DUMP_READER_LAMMPS_HPP

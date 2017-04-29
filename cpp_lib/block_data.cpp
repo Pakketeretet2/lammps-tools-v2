@@ -1,6 +1,8 @@
 #include "block_data.hpp"
 #include "my_assert.hpp"
 
+using namespace lammps_tools;
+
 block_data::block_data() : tstep( 0 ),
                            N( 0 ),
                            N_types( 1 ),
@@ -126,6 +128,7 @@ void block_data::set_natoms( std::size_t new_size )
 	}
 }
 
+namespace lammps_tools {
 
 void swap( block_data &f, block_data &s )
 {
@@ -139,3 +142,5 @@ void swap( block_data &f, block_data &s )
 	swap( f.data, s.data );
 
 }
+
+} // namespace lammps_tools

@@ -1,10 +1,18 @@
 #ifndef DUMP_READER_LAMMPS_PLAIN_HPP
 #define DUMP_READER_LAMMPS_PLAIN_HPP
 
+/**
+   \file dump_reader_lammps_gzip.hpp
+   
+   Declaration of dump reader for lammps plain text dump files.
+*/
+
 #include "dump_reader_lammps.hpp"
 
 #include <string>
 #include <iosfwd>
+
+namespace lammps_tools {
 
 namespace dump_readers {
 
@@ -32,6 +40,8 @@ private:
 	std::ifstream *in_file;
 };
 
-}
+} // namespace dump_readers
+
+} // namespace lammps_tools
 
 #endif // DUMP_READER_LAMMPS_PLAIN_HPP

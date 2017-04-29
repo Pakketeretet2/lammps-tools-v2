@@ -1,12 +1,20 @@
 #ifndef TOPOLOGY_HPP
 #define TOPOLOGY_HPP
 
+/**
+   \file topology.hpp
+   
+   Declarations/definitions related to molecular topology.
+*/
+
+namespace lammps_tools {
+
 struct topology
 {
-
-	void friend swap( topology &f, topology &s );
+	/// Swaps \p f and \p s.
+	friend void swap( topology &f, topology &s );
 };
 
-
+}
 
 #endif // TOPOLOGY_HPP

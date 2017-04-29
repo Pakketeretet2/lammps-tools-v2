@@ -1,8 +1,8 @@
 #include "data_field.hpp"
 
-void swap( data_field_double &f, data_field_double &s );
-void swap( data_field_int &f, data_field_int &s );
+using namespace lammps_tools;
 
+namespace lammps_tools {
 
 void swap( data_field &f, data_field &s )
 {
@@ -29,3 +29,5 @@ void swap( data_field &f, data_field &s )
 		}
 	}
 }
+
+} // namespace lammps_tools

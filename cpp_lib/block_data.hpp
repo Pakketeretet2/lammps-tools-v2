@@ -1,11 +1,21 @@
 #ifndef BLOCK_DATA_HPP
 #define BLOCK_DATA_HPP
 
+/**
+   \file block_data.hpp
+
+   Definitions of block_data type and associated functions.
+*/
+
+
 #include "atom_type_info.hpp"
 #include "domain.hpp"
 #include "data_field.hpp"
 #include "topology.hpp"
 #include "types.hpp"
+
+
+namespace lammps_tools {
 
 /**
    A class that represents information about a single time step.
@@ -140,7 +150,6 @@ private:
 };
 
 
-
-
+} // namespace lammps_tools
 
 #endif // BLOCK_DATA_HPP

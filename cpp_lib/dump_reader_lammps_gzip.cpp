@@ -5,7 +5,10 @@
 #  include <boost/iostreams/filtering_stream.hpp>
 #endif
 
+using namespace lammps_tools;
 using namespace dump_readers;
+
+namespace lammps_tools {
 
 #ifdef HAVE_BOOST_GZIP
 dump_reader_lammps_gzip::dump_reader_lammps_gzip( const std::string &fname )
@@ -41,3 +44,4 @@ bool dump_reader_lammps_gzip::get_line( std::string &line )
 	}
 }
 
+} // namespace lammps_tools

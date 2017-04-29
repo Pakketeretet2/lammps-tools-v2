@@ -2,6 +2,10 @@
 
 #include <algorithm>
 
+using namespace lammps_tools;
+
+namespace lammps_tools {
+
 void swap( domain &f, domain &s )
 {
 	using std::swap;
@@ -20,3 +24,5 @@ domain::domain( const domain &o )
 	std::copy( o.xhi, o.xhi + 3, xhi );
 	
 }
+
+} // namespace lammps_tools

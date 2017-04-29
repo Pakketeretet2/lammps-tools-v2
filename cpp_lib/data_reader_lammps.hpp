@@ -1,10 +1,18 @@
 #ifndef DATA_READER_LAMMPS_HPP
 #define DATA_READER_LAMMPS_HPP
 
+/**
+   \file data_reader_lammps.hpp
+   
+   \brief Contanins functions for reading in data files.
+*/
+
 #include <iosfwd>
 #include <string>
 
 #include "block_data.hpp"
+
+namespace lammps_tools {
 
 /// Contains functions and classes that are related to reading data files.
 namespace data_readers {
@@ -20,7 +28,8 @@ namespace data_readers {
 block_data block_data_from_lammps_data( std::istream &in, int &status,
                                         bool quiet = true );
 
-
 } // namespace data_readers
+
+} // namespace lammps_tools
 
 #endif // DATA_READER_LAMMPS_HPP

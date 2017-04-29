@@ -1,5 +1,10 @@
 #include "dump_reader_lammps.hpp"
 
+using namespace lammps_tools;
+using namespace dump_readers;
+
+namespace lammps_tools {
+
 namespace dump_readers {
 
 bool is_int_data_field( const std::string header )
@@ -21,7 +26,6 @@ const std::vector<std::string> &dump_reader_lammps::get_column_headers() const
 	return column_headers;
 }
 
-
-
-
 } // namespace dump_readers
+
+} // namespace lammps_tools

@@ -1,10 +1,19 @@
 #ifndef DUMP_READER_HPP
 #define DUMP_READER_HPP
 
+/**
+   \file dump_reader.hpp
+   
+   Contains declaration of general dump_reader interface and helper functions.
+*/
+
 #include "block_data.hpp"
 
 #include <iosfwd>
 #include <memory>
+
+
+namespace lammps_tools {
 
 /// Contains functions and classes that are related to reading dump files.
 namespace dump_readers {
@@ -173,5 +182,6 @@ dump_reader *make_dump_reader_lammps( std::istream &input );
 
 } // namespace dump_readers
 
+} // namespace lammps_tools
 
 #endif // DUMP_READER_HPP

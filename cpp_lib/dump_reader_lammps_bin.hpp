@@ -1,12 +1,19 @@
 #ifndef DUMP_READER_LAMMPS_BIN_HPP
 #define DUMP_READER_LAMMPS_BIN_HPP
 
+/**
+   \file dump_reader_lammps_bin.hpp
+
+   Declarations for binary lammps dump file reader, which is mostly
+   based on the binary2txt tool that comes with lammps.
+*/
+
 #include "dump_reader_lammps.hpp"
 
 #include <string>
 #include <cstdio>
 
-// This code is mostly based on the binary2txt tool provided with LAMMPS.
+namespace lammps_tools {
 
 namespace dump_readers {
 
@@ -49,8 +56,9 @@ private:
 	std::FILE* in;
 };
 
-}
+} // namespace dump_readers
 
+} // namespace lammps_tools
 
 
 #endif // DUMP_READER_LAMMPS_BIN_HPP

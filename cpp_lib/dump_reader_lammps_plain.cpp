@@ -5,10 +5,16 @@
 #include <fstream>
 
 
-
+using namespace lammps_tools;
 using namespace dump_readers;
 
 
+using lammps_tools::util::starts_with;
+using lammps_tools::util::ends_with;
+using lammps_tools::util::split;
+using lammps_tools::util::contains;
+
+namespace lammps_tools {
 
 
 dump_reader_lammps_plain::dump_reader_lammps_plain( const std::string &fname )
@@ -277,3 +283,5 @@ bool dump_reader_lammps_plain::get_line( std::string &line )
 		return false;
 	}
 }
+
+} // namespace lammps_tools

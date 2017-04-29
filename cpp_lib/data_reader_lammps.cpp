@@ -5,6 +5,11 @@
 #include <string>
 #include <sstream>
 
+
+namespace lammps_tools {
+
+
+/// Contains stuff that has to do with reading data.
 namespace data_readers {
 
 /**
@@ -31,7 +36,7 @@ int get_header_info( std::istream &in, block_data &b,
 		
 		if( line.empty() ) continue;
 		
-		std::vector<std::string> words = split(line);
+		std::vector<std::string> words = util::split(line);
 		// Search for keywords:
 		if( words.size() >= 2 ){
 			if( words[1] == "atoms" ){
@@ -70,7 +75,7 @@ int read_data_atoms_atomic( std::istream &in, block_data &b, bool quiet )
 {
 	std::string line;
 	std::getline(in,line);
-	std::vector<std::string> words = split(line);
+	std::vector<std::string> words = util::split(line);
 	// Check size.
 	std::size_t n_cols = words.size();
 	my_assert( __FILE__, __LINE__, n_cols == 5 || n_cols == 8,
@@ -124,7 +129,7 @@ int read_data_atoms_velocities( std::istream &in, block_data &b, bool quiet )
 {
 	std::string line;
 	std::getline(in,line);
-	std::vector<std::string> words = split(line);
+	std::vector<std::string> words = util::split(line);
 	// Check size.
 	std::size_t n_cols = words.size();
 	my_assert( __FILE__, __LINE__, n_cols == 4,
@@ -175,7 +180,7 @@ int get_data_body( std::istream &in, block_data &b,
 	std::string line = last_line;
 	int status = 0;
 	while( in ){
-		std::vector<std::string> words = split(line);
+		std::vector<std::string> words = util::split(line);
 		std::string keyword = words[0];
 		if( keyword == "Masses" ){
 			if( !quiet ) std::cerr << "    ....Reading Masses...\n";
@@ -225,7 +230,7 @@ int get_data_body( std::istream &in, block_data &b,
 				std::stringstream ss(line);
 				int type;
 				// Determine the number of coeffs.
-				int ncoeffs = split(line).size() - 1;
+				int ncoeffs = util::split(line).size() - 1;
 				std::vector<double> coeffs(ncoeffs);
 				for( int j = 0; j < ncoeffs; ++j ){
 					ss >> coeffs[j];
@@ -288,3 +293,5 @@ block_data block_data_from_lammps_data( std::istream &in, int &status,
 }
 
 } // namespace data_readers
+
+} // namespace lammps_tools

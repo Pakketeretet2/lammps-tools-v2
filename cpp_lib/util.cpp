@@ -4,6 +4,12 @@
 #include <string>
 #include <sstream>
 
+using namespace lammps_tools;
+
+namespace lammps_tools {
+
+namespace util {
+
 std::vector<std::string> split( std::string line )
 {
 	std::stringstream ss(line);
@@ -15,3 +21,5 @@ std::vector<std::string> split( std::string line )
 	return words;
 }
 
+} // namespace util
+} // namespace lammps_tools

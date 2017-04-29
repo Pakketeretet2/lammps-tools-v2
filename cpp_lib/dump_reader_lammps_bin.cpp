@@ -22,8 +22,10 @@ typedef int64_t bigint;
 #define BIGINT_FORMAT "%" PRId64
 #endif
 
-namespace dump_readers {
+using namespace lammps_tools;
+using namespace dump_readers;
 
+namespace lammps_tools {
 
 dump_reader_lammps_bin::dump_reader_lammps_bin( const std::string &fname )
 	: in( nullptr )
@@ -238,5 +240,4 @@ bool dump_reader_lammps_bin::check_good() const
 	return !std::ferror(in);
 }
 
-
-} // namespace dump_readers
+} // namespace lammps_tools

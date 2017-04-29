@@ -1,11 +1,18 @@
 #ifndef ID_MAP_HPP
 #define ID_MAP_HPP
 
+/**
+   \file id_map.hpp
+   
+   Declarations for a mapping of atom ids to atom indices.
+*/
 
 #include <algorithm>
 #include <vector>
 
 #include "my_assert.hpp"
+
+namespace lammps_tools {
 
 /**
    Contains a mapping from atom ids to indices.
@@ -40,6 +47,8 @@ public:
 private:
 	std::vector<int> m; ///< std::map the mapping is stored in
 };
+
+} // namespace lammps_tools
 
 
 #endif // ID_MAP_HPP

@@ -1,6 +1,12 @@
 #ifndef UTIL_HPP
 #define UTIL_HPP
 
+/**
+   \file util.hpp
+   
+   Declarations/definitions of various helper functions.
+*/
+
 #include <string>
 #include <sstream>
 #include <algorithm>
@@ -8,6 +14,14 @@
 #include <algorithm>
 #include <fstream>
 #include <vector>
+
+namespace lammps_tools {
+
+
+/**
+   \brief Wraps useful functions in a namespace to prevent name clashes.
+*/
+namespace util {
 
 /**
    Checks if string starts with substring.
@@ -220,5 +234,9 @@ inline bool file_exists( const std::string &fname )
 	return std::ifstream(fname).good();
 }
 
+
+} // namespace util
+
+} // namespace lammps_tools
 
 #endif // UTIL_HPP
