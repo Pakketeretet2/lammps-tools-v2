@@ -74,10 +74,9 @@ public:
 	/**
 	   Returns a pointer to an underlying data field.
 
-	   \warning It is _your_ responsibility to make sure
-	            the data is actually present (by calling
-	            get_data or checking for nullptr) before
-	            using the data!
+	   \warning It is _your_ responsibility to make sure the data
+	            is actually present (by calling get_field_type or
+		    checking for nullptr) before using the data!
 
 	   \param name The name of the data field.
 
