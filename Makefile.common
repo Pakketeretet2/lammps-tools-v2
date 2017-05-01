@@ -14,9 +14,9 @@ LNK = -L./ -L$(TIMER_DIR) -lm -larmadillo -lpython2.7
 INC = -I./ -I$(PY_DIR) -I$(TIMER_DIR)
 
 
-EXT = cpp
-SRC = $(wildcard *.$(EXT))
-
+EXT  = cpp
+SRC  = $(wildcard cpp_lib/*.$(EXT))
+SRC += $(wildcard c_interface/*.$(EXT))
 
 # Conditional flags:
 ifeq ($(HAVE_LIB_CGAL), 1)
@@ -64,7 +64,7 @@ COMP = $(CC) $(FLAGS) $(INC)
 LINK = $(CC) $(FLAGS) $(INC) $(LNK)
 AR   = ar rcs
 
-OBJ_DIR = Obj
+OBJ_DIR = obj
 OBJ = $(SRC:%.$(EXT)=$(OBJ_DIR)$(S)%.o)
 OBJ_DIRS = $(dir $(OBJ))
 DEPS = $(OBJ:%.o=%.d)

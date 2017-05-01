@@ -1,4 +1,4 @@
-.PHONY: dirs all help clean print-flags install uninstall cppcheck
+.PHONY: dirs all help clean print-flags install uninstall cppcheck test
 
 all : dirs $(EXE)
 
@@ -14,6 +14,9 @@ help :
 	@echo "INC    is   $(INC)"
 	@echo "LIB    is   $(LIB)"
 
+test :
+	$(MAKE) -C test
+	@cd test; ./test_cpp_lib
 
 $(EXE) : $(OBJ)
 	$(LINK) -o $@ $(OBJ) -Wl,-z,defs
