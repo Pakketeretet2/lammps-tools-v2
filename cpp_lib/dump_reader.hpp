@@ -59,13 +59,11 @@ public:
 	/// Checks if the internal file is good:
 	bool good() const { return check_good(); }
 	
-	/// Returns the number of blocks in the file.
-	std::size_t block_count();
-
 	bool quiet;
 
 private:
-
+	int current_block;
+	
 	virtual int  get_next_block( block_data &block ) = 0;
 	virtual bool check_eof()  const = 0;
 	virtual bool check_good() const = 0;
@@ -179,6 +177,16 @@ dump_reader *make_dump_reader_lammps( const std::string &fname, int fformat );
 dump_reader *make_dump_reader_lammps( std::istream &input );
 
 
+/**
+   \brief Counts the number of blocks left in given dump reader.
+   
+   \warning This function is _destructive_ in the sense that the
+            state of dump_reader is changed. If you want to know
+            the number of blocks of a dump file you are going to
+            read, you should make a dump_reader, call this function,
+            and open a new dump_reader to re-read the dump file.
+*/
+std::size_t number_of_blocks( dump_reader &dr );
 
 } // namespace dump_readers
 

@@ -22,4 +22,5 @@ std::vector<std::string> split( std::string line )
 }
 
 } // namespace util
+
 } // namespace lammps_tools

@@ -109,10 +109,26 @@ inline int word_count( const std::string &s )
    \returns true if container contains val, false otherwise.
 */
 template <typename container_type, typename val_type>
-inline bool contains( const container_type &l, val_type val )
+inline bool contains( const container_type &l, const val_type &val )
 {
 	return std::find( l.begin(), l.end(), val ) != l.end();
 }
+
+/**
+   Specialises contains for strings.
+
+   \overloads contains
+   
+   \param s   String to check.
+   \param sub Substring to find.
+   
+   \returns true if container contains val, false otherwise.
+*/
+inline bool str_contains( const std::string &s, const std::string &sub )
+{
+	return s.find(sub) != std::string::npos;
+}
+
 
 /**
    Returns maximum of \p a and \p b.

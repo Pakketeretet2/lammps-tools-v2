@@ -3,11 +3,13 @@
 
 using namespace lammps_tools;
 
+namespace lammps_tools {
+
 block_data::block_data() : tstep( 0 ),
                            N( 0 ),
                            N_types( 1 ),
                            atom_style( ATOMIC )
-{ }
+{}
 
 block_data::block_data( std::size_t n_atoms ) : tstep( 0 ),
                                                 N( n_atoms ),
@@ -78,7 +80,6 @@ void block_data::add_field( const data_field &data_f )
 	// Check if this name is already in block or not.
 	my_assert( __FILE__, __LINE__, get_data( data_f.name ) == nullptr,
 	           "Named data already in block_data" );
-
 	
 	// Now you need to copy the data.
 	data_field *cp = copy( &data_f );
@@ -128,7 +129,6 @@ void block_data::set_natoms( std::size_t new_size )
 	}
 }
 
-namespace lammps_tools {
 
 void swap( block_data &f, block_data &s )
 {
@@ -142,5 +142,6 @@ void swap( block_data &f, block_data &s )
 	swap( f.data, s.data );
 
 }
+
 
 } // namespace lammps_tools

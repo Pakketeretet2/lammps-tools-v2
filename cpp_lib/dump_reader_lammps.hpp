@@ -32,7 +32,7 @@ public:
 
 	/// Returns a vector containing the expected column headers.
 	const std::vector<std::string> &get_column_headers() const;
-
+	
 	
 private:
 	virtual int  get_next_block( lammps_tools::block_data &block ) = 0;

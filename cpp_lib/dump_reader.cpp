@@ -6,12 +6,11 @@
 
 #include <memory> // Smart pointers.
 
-using namespace lammps_tools;
-using namespace dump_readers;
-
 namespace lammps_tools {
 
-const char *dump_readers::fformat_to_str( int file_format )
+namespace dump_readers {
+
+const char *fformat_to_str( int file_format )
 {
 	switch( file_format ){
 		default:
@@ -26,7 +25,7 @@ const char *dump_readers::fformat_to_str( int file_format )
 }
 
 
-const char *dump_readers::dformat_to_str( int dformat )
+const char *dformat_to_str( int dformat )
 {
 	switch( dformat ){
 		default:
@@ -41,8 +40,8 @@ const char *dump_readers::dformat_to_str( int dformat )
 }
 
 
-dump_reader *dump_readers::make_dump_reader( const std::string &fname,
-                                             int dformat, int fformat )
+dump_reader *make_dump_reader( const std::string &fname,
+                               int dformat, int fformat )
 {
 	dump_reader *reader = nullptr;
 
@@ -68,7 +67,7 @@ dump_reader *dump_readers::make_dump_reader( const std::string &fname,
 	return reader;
 }
 
-dump_reader *dump_readers::make_dump_reader( std::istream &input,
+dump_reader *make_dump_reader( std::istream &input,
                                              int dformat, int fformat )
 {
 	dump_reader *reader = nullptr;
@@ -93,19 +92,15 @@ dump_reader *dump_readers::make_dump_reader( std::istream &input,
 
 
 
-dump_reader *dump_readers::make_dump_reader_lammps( const std::string &fname,
-                                                    int fformat,
-                                                    std::vector<std::string> headers )
+dump_reader *make_dump_reader_lammps( const std::string &fname,
+                                      int fformat,
+                                      std::vector<std::string> headers )
 {
 	dump_reader_lammps *reader = nullptr;
 	if( fformat == PLAIN ){
 		reader = new dump_reader_lammps_plain( fname );
 	}else if( fformat == BIN ){
 		reader = new dump_reader_lammps_bin( fname );
-		if( headers.empty() ){
-			my_logic_error( __FILE__, __LINE__, "Column headers are "
-			                "required for binary LAMMPS dump files!" );
-		}
 	}else if( fformat == GZIP ){
 		reader = new dump_reader_lammps_gzip( fname );
 	}
@@ -113,8 +108,8 @@ dump_reader *dump_readers::make_dump_reader_lammps( const std::string &fname,
 	return reader;
 }
 
-dump_reader *dump_readers::make_dump_reader_lammps( std::istream &input,
-                                                    std::vector<std::string> headers )
+dump_reader *make_dump_reader_lammps( std::istream &input,
+                                      std::vector<std::string> headers )
 {
 	dump_reader_lammps *reader = nullptr;
 	reader = new dump_reader_lammps_plain( input );
@@ -123,14 +118,13 @@ dump_reader *dump_readers::make_dump_reader_lammps( std::istream &input,
 	
 }
 
-dump_reader *dump_readers::make_dump_reader_lammps( std::istream &input )
+dump_reader *make_dump_reader_lammps( std::istream &input )
 {
 	std::vector<std::string> empty;
 	return make_dump_reader_lammps( input, empty );
 }
 
-dump_reader *dump_readers::make_dump_reader_lammps( const std::string &fname,
-                                                    int fformat )
+dump_reader *make_dump_reader_lammps( const std::string &fname, int fformat )
 {
 	std::vector<std::string> empty;
 	return make_dump_reader_lammps( fname, fformat, empty );	
@@ -138,17 +132,14 @@ dump_reader *dump_readers::make_dump_reader_lammps( const std::string &fname,
 
 
 
-
-std::size_t dump_readers::dump_reader::block_count()
+std::size_t number_of_blocks( dump_reader &dr )
 {
 	std::size_t c = 0;
-	int status = 0;
-	while( !status ){
-		block_data b;
-		status = next_block(b);
-		++c;
-	}
+	block_data b;
+	while( dr.next_block( b ) == 0 ) ++c;
 	return c;
 }
+
+} // namespace dump_readers
 
 } // namespace lammps_tools

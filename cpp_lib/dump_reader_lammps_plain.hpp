@@ -36,6 +36,16 @@ private:
 	int next_block_meta( block_data &block, std::string &last_line );
 	int next_block_body( block_data &block, const std::string &last_line );
 
+	// Extracts the custom names for each data field from given line.
+	void set_custom_data_fields( block_data &block,
+	                             const std::string &line,
+	                             std::vector<std::string> &headers,
+	                             std::vector<data_field*> &data_fields );
+
+	// Reads the info of the current block into block_data from file.
+	void append_data_to_fields( block_data &block,
+	                            std::vector<data_field*> &data_fields );
+	
 	std::istream  *in;
 	std::ifstream *in_file;
 };

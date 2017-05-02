@@ -60,7 +60,7 @@ int dump_reader_lammps_bin::get_next_block( block_data &block )
 	block_data tmp;
 	int status = next_block_meta( tmp, size_one, nchunk );
 	if( status > 0 ){
-		if( status == 1 ) std::cerr << "EOF reached.\n";
+		if( status == 1 && !quiet ) std::cerr << "EOF reached.\n";
 		return status;
 	}else if( status < 0 ){
 		std::cerr << "Failed to get meta!\n";
@@ -167,6 +167,11 @@ int dump_reader_lammps_bin::next_block_body( block_data &block,
 	const std::vector<std::string> &headers = get_column_headers();
 	std::vector<data_field*> data_fields(size_one);
 
+	
+	my_assert( __FILE__, __LINE__, !headers.empty(),
+	           "Column headers required for binary LAMMPS dump files!" );
+
+	
 	my_assert( __FILE__, __LINE__, headers.size() == size_one,
 	           "Column number does not match number of headers!" );
 
