@@ -1,3 +1,2 @@
-""" Imports all interesting modules for use in Python. """
+import dumpreader
 
-from dumpreader import *
