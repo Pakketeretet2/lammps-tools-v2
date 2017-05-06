@@ -6,9 +6,11 @@
 #endif
 
 using namespace lammps_tools;
-using namespace dump_readers;
+using namespace readers;
 
 namespace lammps_tools {
+
+namespace readers {
 
 #ifdef HAVE_BOOST_GZIP
 dump_reader_lammps_gzip::dump_reader_lammps_gzip( const std::string &fname )
@@ -17,7 +19,7 @@ dump_reader_lammps_gzip::dump_reader_lammps_gzip( const std::string &fname )
 {
 	in.push( boost::iostreams::gzip_decompressor() );
 	in.push( infile );
-	
+
 }
 #else
 dump_reader_lammps_gzip::dump_reader_lammps_gzip( const std::string &fname )
@@ -43,5 +45,7 @@ bool dump_reader_lammps_gzip::get_line( std::string &line )
 		return false;
 	}
 }
+
+} // namespace readers
 
 } // namespace lammps_tools

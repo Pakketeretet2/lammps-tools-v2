@@ -3,7 +3,7 @@
 
 /**
    \file util.hpp
-   
+
    Declarations/definitions of various helper functions.
 */
 
@@ -25,7 +25,7 @@ namespace util {
 
 /**
    Checks if string starts with substring.
-   
+
    \param s      String to check.
    \param begin  Beginning to check for.
 
@@ -38,7 +38,7 @@ inline bool starts_with( const std::string &s, const std::string &begin )
 
 /**
    Checks if string ends with substring.
-   
+
    \param s      String to check.
    \param end    Ending to check for.
 
@@ -56,7 +56,7 @@ inline bool ends_with( const std::string &s, const std::string &end )
 
 /**
    Strips string starting at given delimiter.
-   
+
    \param s      String to strip.
    \param delim  Delimiter to strip at.
 
@@ -76,7 +76,7 @@ inline std::string rstrip( std::string s, char delim )
 
 /**
    Splits line into a list of words, splitting on any whitespace.
-   
+
    \param    line The line to split.
    \returns       A vector of words.
  */
@@ -102,7 +102,7 @@ inline int word_count( const std::string &s )
 
 /**
    Checks if container contains value.
-   
+
    \param l    Container to check.
    \param val  Value to look for.
 
@@ -118,10 +118,10 @@ inline bool contains( const container_type &l, const val_type &val )
    Specialises contains for strings.
 
    \overloads contains
-   
+
    \param s   String to check.
    \param sub Substring to find.
-   
+
    \returns true if container contains val, false otherwise.
 */
 inline bool str_contains( const std::string &s, const std::string &sub )
@@ -132,7 +132,7 @@ inline bool str_contains( const std::string &s, const std::string &sub )
 
 /**
    Returns maximum of \p a and \p b.
-   
+
    \param a
    \param b
 */
@@ -144,7 +144,7 @@ T1 max( T1 a, T2 b )
 
 /**
    Returns minimum of \p a and \p b.
-   
+
    \param a
    \param b
 */
@@ -157,9 +157,9 @@ T1 min( T1 a, T2 b )
 
 /**
    Calculates average of all entries in container.
-   
+
    \param c  Container whose values to average.
-   
+
    \returns  The average of all values in container.
 */
 template <typename container_type> inline
@@ -171,9 +171,9 @@ double mean( const container_type &c )
 
 /**
    Calculates variance of all entries in container.
-   
+
    \param c  Container whose values to calculate the variance for.
-   
+
    \returns  The variance of all values in container.
 */
 template <typename container_type> inline
@@ -240,9 +240,9 @@ inline bool is_non_negative( const std::string &s )
 
 /**
    Checks if file name exists.
-   
+
    \param  fname File name to check.
-   
+
    \returns True if file with name exists, false otherwise.
 */
 inline bool file_exists( const std::string &fname )
@@ -250,6 +250,19 @@ inline bool file_exists( const std::string &fname )
 	return std::ifstream(fname).good();
 }
 
+/**
+   Checks if entry is unique in container.
+
+   \param c container to check.
+   \param v value to check.
+
+   \returns True if v appears once in container, false otherwise.
+*/
+template <typename container, typename val>
+inline bool is_unique( const container &c, const val &v )
+{
+	return std::count( c.begin(), c.end(), v ) == 1;
+}
 
 } // namespace util
 

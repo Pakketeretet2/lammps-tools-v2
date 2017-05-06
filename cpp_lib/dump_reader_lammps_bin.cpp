@@ -23,9 +23,11 @@ typedef int64_t bigint;
 #endif
 
 using namespace lammps_tools;
-using namespace dump_readers;
+using namespace readers;
 
 namespace lammps_tools {
+
+namespace readers {
 
 dump_reader_lammps_bin::dump_reader_lammps_bin( const std::string &fname )
 	: in( nullptr )
@@ -39,7 +41,7 @@ dump_reader_lammps_bin::dump_reader_lammps_bin( const std::string &fname,
 	: in( nullptr )
 {
 	in = fopen( fname.c_str(), "rb" );
-	my_assert( __FILE__, __LINE__, in, "Failed to open dump file!" );	
+	my_assert( __FILE__, __LINE__, in, "Failed to open dump file!" );
 }
 
 dump_reader_lammps_bin::~dump_reader_lammps_bin()
@@ -50,9 +52,9 @@ dump_reader_lammps_bin::~dump_reader_lammps_bin()
 
 
 int dump_reader_lammps_bin::get_next_block( block_data &block )
-{	
+{
 	if( !in ) return -1;
-	
+
 	if( feof(in) ){
 		return 1;
 	}
@@ -90,7 +92,7 @@ int dump_reader_lammps_bin::next_block_meta( block_data &block,
 	while( true ){
 		fread( &ntimestep, sizeof(bigint), 1, in );
 		if( !in ) return -1;
-		
+
 		if( feof(in) ){
 			return 1;
 		}
@@ -167,11 +169,11 @@ int dump_reader_lammps_bin::next_block_body( block_data &block,
 	const std::vector<std::string> &headers = get_column_headers();
 	std::vector<data_field*> data_fields(size_one);
 
-	
+
 	my_assert( __FILE__, __LINE__, !headers.empty(),
 	           "Column headers required for binary LAMMPS dump files!" );
 
-	
+
 	my_assert( __FILE__, __LINE__, headers.size() == size_one,
 	           "Column number does not match number of headers!" );
 
@@ -179,7 +181,7 @@ int dump_reader_lammps_bin::next_block_body( block_data &block,
 		fread(&n,sizeof(int),1,in);
 
 		// extend buffer to fit chunk size
-		
+
 		if( n > maxbuf ){
 			if (buf) delete [] buf;
 			buf = new double[n];
@@ -191,7 +193,7 @@ int dump_reader_lammps_bin::next_block_body( block_data &block,
 		fread(buf,sizeof(double),n,in);
 		n /= size_one;
 
-		
+
 		int m = 0, j = 0;
 		for( std::string h : headers ){
 			// Depending on the keyword, you want to take
@@ -206,7 +208,7 @@ int dump_reader_lammps_bin::next_block_body( block_data &block,
 			}
 			++i;
 		}
-		
+
 		for( j = 0; j < n; j++ ){
 			for( int k = 0; k < size_one; k++ ){
 				int type = data_fields[k]->type();
@@ -229,7 +231,7 @@ int dump_reader_lammps_bin::next_block_body( block_data &block,
 		block.add_field(*df);
 		delete df;
 	}
-	
+
 	if( buf ) delete [] buf;
 
 	return 0;
@@ -244,5 +246,7 @@ bool dump_reader_lammps_bin::check_good() const
 {
 	return !std::ferror(in);
 }
+
+} // namespace readers
 
 } // namespace lammps_tools

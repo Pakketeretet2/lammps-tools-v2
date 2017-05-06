@@ -24,7 +24,7 @@ public:
 
 	   \param ids  Vector containing the atom ids.
 	*/
-	template <typename int_type>
+	template <typename int_type> explicit
 	id_map( const std::vector<int_type> &ids )
 	{
 		auto max_id_p = std::max_element( ids.begin(), ids.end() );

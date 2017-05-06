@@ -1,16 +1,16 @@
 SHELL = /bin/sh
 
 CC = g++
-FLAGS = -std=c++11 -g -pedantic -frounding-math -shared -fPIC -g \
+FLAGS = -std=c++11 -g -pedantic -frounding-math -shared -fPIC \
 	-Werror=int-conversion -Werror=implicit -L/usr/lib/openmpi/  \
 	-Werror=return-type -Werror=uninitialized -Wall
 
-PY_DIR     = "/usr/include/python2.7/"
+PY_DIR     = "/usr/include/python3.6m/"
 LAMMPS_DIR = "/home/stefan/projects/lammps-mine/src/"
 TIMER_DIR  = "$(HOME)/projects/my_timer/lib/"
 GSD_DIR    = "/usr/local/lib/"
 
-LNK = -L./ -L$(TIMER_DIR) -lm -larmadillo -lpython2.7
+LNK = -L./ -L$(TIMER_DIR) -lm -larmadillo
 INC = -I./ -I$(PY_DIR) -I$(TIMER_DIR)
 
 
@@ -58,7 +58,6 @@ ifeq ($(HAVE_BOOST_GZIP), 1)
 	FLAGS += -DHAVE_BOOST_GZIP
 	LNK   += -lboost_iostreams
 endif
-
 
 COMP = $(CC) $(FLAGS) $(INC)
 LINK = $(CC) $(FLAGS) $(INC) $(LNK)

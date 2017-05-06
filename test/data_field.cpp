@@ -1,6 +1,8 @@
 #include "data_field.hpp"
 #include <catch.hpp>
 
+using namespace lammps_tools;
+
 TEST_CASE ( "Data indicators are properly set up.", "[data_field_data_types]" ) {
 	data_field_int    ids( "id" );
 	data_field_int    types( "types" );

@@ -3,7 +3,7 @@
 
 /**
    \file dump_reader.hpp
-   
+
    Contains declaration of general dump_reader interface and helper functions.
 */
 
@@ -16,7 +16,9 @@
 namespace lammps_tools {
 
 /// Contains functions and classes that are related to reading dump files.
-namespace dump_readers {
+namespace readers {
+
+class dump_reader_lammps;
 
 /// Specifies various file formats
 enum FILE_FORMATS {
@@ -38,14 +40,14 @@ class dump_reader
 {
 public:
 	/// Empty constructor; this just defines the interface.
-	dump_reader() : quiet(true) {}
+	dump_reader() : quiet(true), current_block(-1) {}
 
 	/// Empty destructor:
 	virtual ~dump_reader(){}
 
 	/**
 	   Attempts to read in the next block from file.
-	   
+
 	   \param block   Will contain the new block_data on success, and shall
 	                  be  unchanged upon failure.
 
@@ -58,12 +60,12 @@ public:
 
 	/// Checks if the internal file is good:
 	bool good() const { return check_good(); }
-	
+
 	bool quiet;
 
 private:
 	int current_block;
-	
+
 	virtual int  get_next_block( block_data &block ) = 0;
 	virtual bool check_eof()  const = 0;
 	virtual bool check_good() const = 0;
@@ -94,16 +96,16 @@ const char *dformat_to_str( int dformat );
 
 /**
    \brief Constructs correct dump_reader for file of given file and dump format.
-   
+
    \param fname    Name of the dump file.
    \param dformat  Dump format (see \p DUMP_FORMATS).
    \param fformat  File format (see \p FILE_FORMATS).
 
    \returns a pointer to the open dump_reader object, or nullptr on failure.
- 
+
    \warning The dump_reader object is heap-allocated. Be sure to delete it
             or wrap it in a smart pointer.
-    
+
 */
 dump_reader* make_dump_reader( const std::string &fname,
                                int dformat, int fformat );
@@ -111,7 +113,7 @@ dump_reader* make_dump_reader( const std::string &fname,
 
 /**
    \brief Constructs correct dump_reader for input stream of given dump format.
-   
+
    \param fname    Name of the dump file.
    \param dformat  Dump format (see \p DUMP_FORMATS).
    \param fformat  File format (see \p FILE_FORMATS).
@@ -127,7 +129,7 @@ dump_reader* make_dump_reader( std::istream &input,
 
 /**
    \brief Constructs a LAMMPS dump reader from file name.
-   
+
    \param fname    Name of the dump file.
    \param fformat  File format (see \p FILE_FORMATS).
    \param header   Optionally you can pass the expected headers.
@@ -141,12 +143,12 @@ dump_reader* make_dump_reader( std::istream &input,
   \warning The dump_reader object is heap-allocated. Be sure to delete it
            or wrap it in a smart pointer.
 */
-dump_reader *make_dump_reader_lammps( const std::string &fname, int fformat,
-                                      std::vector<std::string> headers );
+dump_reader_lammps *make_dump_reader_lammps( const std::string &fname, int fformat,
+                                             std::vector<std::string> headers );
 
 /**
    \brief Constructs a LAMMPS dump reader from input file stream.
-   
+
    \param fname    Name of the dump file.
    \param header   Optionally you can pass the expected headers.
                    If the file is binary these are assumed to be
@@ -159,27 +161,27 @@ dump_reader *make_dump_reader_lammps( const std::string &fname, int fformat,
   \warning The dump_reader object is heap-allocated. Be sure to delete it
            or wrap it in a smart pointer.
 */
-dump_reader *make_dump_reader_lammps( std::istream &input,
-                                      std::vector<std::string> headers );
+dump_reader_lammps *make_dump_reader_lammps( std::istream &input,
+                                             std::vector<std::string> headers );
 
 
 /**
    \brief Constructs a LAMMPS dump reader from file name.
    \overloads make_dump_reader_lammps
 */
-dump_reader *make_dump_reader_lammps( const std::string &fname, int fformat );
+dump_reader_lammps *make_dump_reader_lammps( const std::string &fname, int fformat );
 
 
 /**
    \brief Constructs a LAMMPS dump reader from input file stream.
    \overloads make_dump_reader_lammps
 */
-dump_reader *make_dump_reader_lammps( std::istream &input );
+dump_reader_lammps *make_dump_reader_lammps( std::istream &input );
 
 
 /**
    \brief Counts the number of blocks left in given dump reader.
-   
+
    \warning This function is _destructive_ in the sense that the
             state of dump_reader is changed. If you want to know
             the number of blocks of a dump file you are going to
@@ -188,7 +190,7 @@ dump_reader *make_dump_reader_lammps( std::istream &input );
 */
 std::size_t number_of_blocks( dump_reader &dr );
 
-} // namespace dump_readers
+} // namespace readers
 
 } // namespace lammps_tools
 

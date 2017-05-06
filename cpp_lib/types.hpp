@@ -1,6 +1,8 @@
 #ifndef TYPES_HPP
 #define TYPES_HPP
 
+#include <cstdint>
+
 /*!
   \file  types.h
   \brief This file contains type definitions.

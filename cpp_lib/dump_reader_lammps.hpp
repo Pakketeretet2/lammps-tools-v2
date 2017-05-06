@@ -12,28 +12,29 @@ namespace lammps_tools {
 
 class block_data;
 
-namespace dump_readers {
+namespace readers {
 
 class dump_reader_lammps : public dump_reader
 {
 public:
 	enum dump_styles { ATOMIC,
 	                   CUSTOM };
-	
+
 	/// Empty constructor
 	dump_reader_lammps(){}
-	
+
 
 	/// Empty destructor
 	virtual ~dump_reader_lammps() {}
 
 	/// Sets up a vector containing the expected columns.
 	void set_column_headers( const std::vector<std::string> &headers );
+	void set_column_header( std::size_t idx, const std::string &header );
 
 	/// Returns a vector containing the expected column headers.
 	const std::vector<std::string> &get_column_headers() const;
-	
-	
+
+
 private:
 	virtual int  get_next_block( lammps_tools::block_data &block ) = 0;
 	virtual bool check_eof()  const = 0;
@@ -45,9 +46,9 @@ private:
 
 
 /// Checks if given column header corresponds to an integer quantity.
-bool is_int_data_field( const std::string header );
+bool is_int_data_field( const std::string &header );
 
-} // namespace dump_readers
+} // namespace readers
 
 } // namespace lammps_tools
 

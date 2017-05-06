@@ -15,7 +15,7 @@
 
 namespace lammps_tools {
 
-namespace dump_readers {
+namespace readers {
 
 /**
    A dump reader for binary LAMMPS dump files.
@@ -24,7 +24,7 @@ class dump_reader_lammps_bin : public dump_reader_lammps
 {
 public:
 	/**
-	   Initialises dump reader from file. 
+	   Initialises dump reader from file.
 
 	   \param fname Name of dump file.
 
@@ -33,18 +33,18 @@ public:
 	dump_reader_lammps_bin( const std::string &fname );
 
 	/**
-	   Initialises dump reader from file. 
+	   Initialises dump reader from file.
 
 	   \param fname Name of dump file.
 	   \param h     Vector containing the columns contained in the file.
 	*/
 	dump_reader_lammps_bin( const std::string &fname,
 	                        std::vector<std::string> h );
-	
+
 
 	/// Cleanup:
 	virtual ~dump_reader_lammps_bin();
-	
+
 private:
 	virtual int  get_next_block( block_data &block );
 	virtual bool check_eof()  const;

@@ -3,7 +3,7 @@
 
 /**
    \file dump_reader_lammps_gzip.hpp
-   
+
    Declaration of dump reader for lammps plain text dump files.
 */
 
@@ -14,12 +14,12 @@
 
 namespace lammps_tools {
 
-namespace dump_readers {
+namespace readers {
 
 class dump_reader_lammps_plain : public dump_reader_lammps
 {
 public:
-	/// Initialises dump reader from file. 
+	/// Initialises dump reader from file.
 	dump_reader_lammps_plain( const std::string &fname );
 	/// Initialises dump reader from input stream.
 	dump_reader_lammps_plain( std::istream &istream );
@@ -45,12 +45,12 @@ private:
 	// Reads the info of the current block into block_data from file.
 	void append_data_to_fields( block_data &block,
 	                            std::vector<data_field*> &data_fields );
-	
+
 	std::istream  *in;
 	std::ifstream *in_file;
 };
 
-} // namespace dump_readers
+} // namespace readers
 
 } // namespace lammps_tools
 

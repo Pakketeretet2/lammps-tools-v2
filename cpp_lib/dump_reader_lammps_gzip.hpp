@@ -3,7 +3,7 @@
 
 /**
    \file dump_reader_lammps_gzip.hpp
-   
+
    Declaration of dump reader for lammps gzip dump files.
 */
 
@@ -18,12 +18,12 @@
 
 namespace lammps_tools {
 
-namespace dump_readers {
+namespace readers {
 
 class dump_reader_lammps_gzip : public dump_reader_lammps_plain
 {
 public:
-	/// Initialises dump reader from file. 
+	/// Initialises dump reader from file.
 	dump_reader_lammps_gzip( const std::string &fname );
 
 	/// Cleanup:
@@ -42,7 +42,7 @@ private:
 
 };
 
-} // namespace dump_readers
+} // namespace readers
 
 } // namespace lammps_tools
 

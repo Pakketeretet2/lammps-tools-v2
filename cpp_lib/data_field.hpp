@@ -22,15 +22,20 @@ namespace lammps_tools {
 */
 struct data_field
 {
+	/// Defines possible data types contained in data_field.
 	enum types { DOUBLE = 0,
 	             INT };
-	
-	data_field( const std::string &n ) : name(n) {}
+
+	/// Constructor that only sets the name of the data_field
+	explicit data_field( const std::string &n ) : name(n) {}
+	/// Empty destructor
 	virtual ~data_field(){}
 
+	/// Returns the type of the underlying data. See \p types.
 	virtual int type()     const = 0;
+	/// Returns the size of the data_field
 	virtual std::size_t size() const = 0;
-	
+	/// Resizes so that the data_field can accomodate N values.
 	virtual void resize( std::size_t N ) = 0;
 
 	/**
@@ -62,14 +67,17 @@ struct data_field_der : public data_field
 	   
 	   Sets up name only.
 	*/
-	data_field_der( const std::string &n ) : data_field( n ) {}
+	explicit data_field_der( const std::string &n )
+		: data_field( n )
+	{}
 
 	/**
 	   Constructor that takes a name and a size.
 	   
 	   Sets up name and size of data.
 	*/
-	data_field_der( const std::string &n, std::size_t size ) : data_field( n )
+	data_field_der( const std::string &n, std::size_t size )
+		: data_field( n )
 	{
 		data.resize(size);
 	}
@@ -79,18 +87,42 @@ struct data_field_der : public data_field
 	   
 	   Sets up name and complete data.
 	*/
-	data_field_der( const data_field_der<T, TYPE> *other ) : data_field( other->name )
+	explicit data_field_der( const data_field_der<T, TYPE> *other )
+		: data_field( other->name )
 	{
-		my_assert( __FILE__, __LINE__, other->type() == TYPE,
+		construct_from_other( *other );
+	}
+
+	/**
+	   Copy constructor from reference.
+	   
+	   Sets up name and complete data.
+	*/
+	explicit data_field_der( const data_field_der<T, TYPE> &other )
+		: data_field( other.name )
+	{
+		construct_from_other( other );
+	}
+
+	
+	/**
+	   \brief Helper to ease construction from other, either ref or pointer
+	*/
+	void construct_from_other( const data_field_der<T, TYPE> &other )
+	{
+		my_assert( __FILE__, __LINE__, other.type() == TYPE,
 		           "Type mismatch in constructor!" );
 		
-		data.resize( other->size() );
-		const std::vector<T> &d_o = other->get_data();
+		data.resize( other.size() );
+		const std::vector<T> &d_o = other.get_data();
 		for( std::size_t i = 0; i < size(); ++i ){
 			data[i] = d_o[i];
 		}
 	}
 
+	/**
+	   Assingment operator
+	*/
 	data_field_der &operator=( data_field_der<T, TYPE> other )
 	{
 		swap( *this, other );

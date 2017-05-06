@@ -3,7 +3,7 @@
 
 /**
    \file lt_dump_reader.h
-   
+
    This part of the interface exposes a dump reader via a handle.
 */
 
@@ -28,7 +28,7 @@ enum LT_DUMP_READER_STATUS {
 */
 struct lt_dump_reader_handle
 {
-	lammps_tools::dump_readers::dump_reader *dr;
+	lammps_tools::readers::dump_reader *dr;
 	int fformat, dformat;
 };
 
@@ -46,7 +46,7 @@ struct lt_dump_reader_handle
    \param dformat  Specifies the dump format.
 
    \returns a handle to a new dump reader handle. The internal
-            dump_reader pointer can be nullptr. Use 
+            dump_reader pointer can be nullptr. Use
 */
 lt_dump_reader_handle lt_new_dump_reader( const char *fname,
                                           int fformat, int dformat );
@@ -61,7 +61,7 @@ void lt_delete_dump_reader( lt_dump_reader_handle drh );
 /**
    \brief Returns the status of the dump reader handle.
 
-   See lt_dump_reader_status for more info. 
+   See lt_dump_reader_status for more info.
 
    \param drh The dump reader handle to check.
 
@@ -100,11 +100,11 @@ int lt_number_of_blocks( lt_dump_reader_handle drh );
    \brief Sets the column headers that some dump formats expect for dump reader.
 
    \param drh      Handle to the dump reader.
-   \param n        The number of headers.
-   \param headers  The headers as array of '\0'-terminated char arrays.
+   \param n        The column index to set.
+   \param headers  The header as array of '\0'-terminated char arrays.
 */
-void lt_set_col_headers( lt_dump_reader_handle drh, int n, char **headers );
-   
+void lt_set_col_header( lt_dump_reader_handle drh, int n, const char *header );
+
 
 } // extern "C"
 

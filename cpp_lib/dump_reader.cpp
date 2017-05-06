@@ -8,7 +8,7 @@
 
 namespace lammps_tools {
 
-namespace dump_readers {
+namespace readers {
 
 const char *fformat_to_str( int file_format )
 {
@@ -49,7 +49,7 @@ dump_reader *make_dump_reader( const std::string &fname,
 		reader = make_dump_reader_lammps( fname, fformat );
 	}else if( dformat == HOOMD ){
 		if( fformat == BIN ){
-			// reader = dump_reader_hoomd_gsd( fname );			
+			// reader = dump_reader_hoomd_gsd( fname );
 		}
 	}else if( dformat == NAMD ){
 		if( fformat == BIN ){
@@ -71,13 +71,13 @@ dump_reader *make_dump_reader( std::istream &input,
                                              int dformat, int fformat )
 {
 	dump_reader *reader = nullptr;
-	
+
 	if( dformat == LAMMPS ){
 		if( fformat == PLAIN ){
 			reader = make_dump_reader_lammps( input );
 		}
 	}
-	
+
 	if( !reader ){
 		std::string msg = "Failed to construct reader; file format = ";
 		msg += fformat_to_str(fformat);
@@ -92,9 +92,9 @@ dump_reader *make_dump_reader( std::istream &input,
 
 
 
-dump_reader *make_dump_reader_lammps( const std::string &fname,
-                                      int fformat,
-                                      std::vector<std::string> headers )
+dump_reader_lammps *make_dump_reader_lammps( const std::string &fname,
+                                             int fformat,
+                                             std::vector<std::string> headers )
 {
 	dump_reader_lammps *reader = nullptr;
 	if( fformat == PLAIN ){
@@ -108,26 +108,26 @@ dump_reader *make_dump_reader_lammps( const std::string &fname,
 	return reader;
 }
 
-dump_reader *make_dump_reader_lammps( std::istream &input,
-                                      std::vector<std::string> headers )
+dump_reader_lammps *make_dump_reader_lammps( std::istream &input,
+                                             std::vector<std::string> headers )
 {
 	dump_reader_lammps *reader = nullptr;
 	reader = new dump_reader_lammps_plain( input );
 	if( reader ) reader->set_column_headers( headers );
 	return reader;
-	
+
 }
 
-dump_reader *make_dump_reader_lammps( std::istream &input )
+dump_reader_lammps *make_dump_reader_lammps( std::istream &input )
 {
 	std::vector<std::string> empty;
 	return make_dump_reader_lammps( input, empty );
 }
 
-dump_reader *make_dump_reader_lammps( const std::string &fname, int fformat )
+dump_reader_lammps *make_dump_reader_lammps( const std::string &fname, int fformat )
 {
 	std::vector<std::string> empty;
-	return make_dump_reader_lammps( fname, fformat, empty );	
+	return make_dump_reader_lammps( fname, fformat, empty );
 }
 
 
@@ -140,6 +140,6 @@ std::size_t number_of_blocks( dump_reader &dr )
 	return c;
 }
 
-} // namespace dump_readers
+} // namespace readers
 
 } // namespace lammps_tools

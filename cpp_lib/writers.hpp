@@ -8,4 +8,7 @@
 */
 
 
-#endif WRITERS_HPP
+#include "writers_lammps.hpp"
+
+
+#endif // WRITERS_HPP

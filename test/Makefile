@@ -4,9 +4,10 @@ FLAGS = -O3 -std=c++11 -pedantic -g \
 
 CATCH_DIR = /home/stefan/projects/Catch/include/
 LAMMPSTOOLS_DIR = ../cpp_lib/
+INTERFACE_DIR   = ../c_interface/
 
-LNK = -L./
-INC = -I./ -I$(CATCH_DIR) -I$(LAMMPSTOOLS_DIR)
+LNK = -L./ -L../ -llammpstools
+INC = -I./ -I$(CATCH_DIR) -I$(LAMMPSTOOLS_DIR) -I$(INTERFACE_DIR)
 
 COMP = $(CC) $(FLAGS) $(INC)
 LINK = $(CC) $(FLAGS) $(INC) $(LNK)

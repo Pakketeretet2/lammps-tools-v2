@@ -7,7 +7,7 @@
 
 
 using namespace lammps_tools;
-using namespace dump_readers;
+using namespace readers;
 
 
 using lammps_tools::util::starts_with;
@@ -17,6 +17,7 @@ using lammps_tools::util::contains;
 
 namespace lammps_tools {
 
+namespace readers {
 
 dump_reader_lammps_plain::dump_reader_lammps_plain( const std::string &fname )
 	: in_file( nullptr ), in( nullptr )
@@ -44,7 +45,7 @@ dump_reader_lammps_plain::~dump_reader_lammps_plain()
 int dump_reader_lammps_plain::get_next_block( block_data &block )
 {
 	if( !quiet ) std::cerr << "Reading block from LAMMPS dump file....\n";
-	
+
 	std::string last_line = "";
 	block_data tmp_block;
 	if( !quiet ) std::cerr << "  ....Reading block meta....\n";
@@ -61,16 +62,16 @@ int dump_reader_lammps_plain::get_next_block( block_data &block )
 	if( status ) return status;
 
 	// At this point, tmp_block should be in a 100% correct state.
-	
-	
+
+
 	block = tmp_block;
-	
+
 	return 0;
 }
 
 bool dump_reader_lammps_plain::check_eof() const
 {
-	return in->eof();	
+	return in->eof();
 }
 bool dump_reader_lammps_plain::check_good() const
 {
@@ -84,7 +85,9 @@ int dump_reader_lammps_plain::next_block_meta( block_data &block,
 	std::string line;
 	bigint tstep, N;
 	std::string boxline;
-	double xlo[3], xhi[3];
+	double xlo[3] = {0,0,0};
+	double xhi[3] = {0,0,0};
+	tstep = N = 0;
 
 	while( get_line( line ) ){
 		if( line == "ITEM: TIMESTEP" ){
@@ -100,7 +103,7 @@ int dump_reader_lammps_plain::next_block_meta( block_data &block,
 			get_line( line );
 			std::stringstream dims( line );
 			dims >> xlo[0] >> xhi[0];
-			
+
 			get_line( line );
 			dims.str(""); dims.clear();
 			dims.str( line );
@@ -173,12 +176,12 @@ void dump_reader_lammps_plain::set_custom_data_fields(
 {
 	using dfi = data_field_int;
 	using dfd = data_field_double;
-	
+
 	my_assert( __FILE__, __LINE__,
 	           util::starts_with( line, "ITEM: ATOMS" ),
 	           "Wrong line passed to set_custom_data_fields!" );
 	std::vector<std::string> words = split(line);
-	
+
 	const std::vector<std::string> &col_headers = get_column_headers();
 
 
@@ -186,13 +189,13 @@ void dump_reader_lammps_plain::set_custom_data_fields(
 		std::string w = words[i];
 		if( !col_headers.empty() &&
 		    !contains( col_headers, w ) ){
-			
+
 			std::cerr << "Column header " << w << " encountered "
 			          << " but was not in column headers!\n";
 			my_runtime_error(__FILE__, __LINE__,
 			                 "Column header mismatch");
 		}
-		
+
 		headers.push_back(w);
 		if( !quiet ) std::cerr << "      ....Current header is \""
 		                       << w << "\"....\n";
@@ -204,9 +207,9 @@ void dump_reader_lammps_plain::set_custom_data_fields(
 		}else{
 			// Assume it's a double.
 			dfd *new_field = new dfd( w, block.N );
-			data_fields.push_back( new_field );					
+			data_fields.push_back( new_field );
 		}
-		
+
 		if( w == "mol" ){
 			// Assume atom_style is molecular.
 			block.atom_style = block_data::MOLECULAR;
@@ -221,7 +224,7 @@ void dump_reader_lammps_plain::append_data_to_fields(
 	std::string line;
 	for( int i = 0; i < block.N; ++i ){
 		get_line( line );
-		
+
 		std::stringstream ss( line );
 		for( int j = 0; j < n_cols; ++j ){
 			int type = data_fields[j]->type();
@@ -243,7 +246,7 @@ int dump_reader_lammps_plain::next_block_body(
 {
 	using dfi = data_field_int;
 	using dfd = data_field_double;
-		
+
 	std::string line = last_line;
 
 	block.set_natoms( block.N );
@@ -256,7 +259,7 @@ int dump_reader_lammps_plain::next_block_body(
 		std::vector<std::string> headers;
 		std::vector<data_field*> data_fields;
 
-		
+
 		if( line == "ITEM: ATOMS" ){
 			dump_style = ATOMIC;
 			headers.push_back("id");
@@ -276,7 +279,7 @@ int dump_reader_lammps_plain::next_block_body(
 			data_fields.push_back( x );
 			data_fields.push_back( y );
 			data_fields.push_back( z );
-			
+
 		}else{
 			dump_style = CUSTOM;
 			set_custom_data_fields( block, line, headers,
@@ -286,7 +289,7 @@ int dump_reader_lammps_plain::next_block_body(
 		my_assert( __FILE__, __LINE__, n_cols == data_fields.size(),
 		           "# of data fields does not match # of columns!" );
 		append_data_to_fields( block, data_fields );
-		
+
 
 
 		// std::cerr << "Block has atom_style " << block.atom_style << ".\n";
@@ -295,16 +298,16 @@ int dump_reader_lammps_plain::next_block_body(
 			block.add_field( *df );
 			delete df;
 		}
-		
+
 		return 0;
-		
+
 	}else{
 		// std::cerr << "Encountered unknown header!\n";
 		// std::cerr << line << "\n";
 		return -1;
 	}
 
-	
+
 }
 
 bool dump_reader_lammps_plain::get_line( std::string &line )
@@ -315,5 +318,7 @@ bool dump_reader_lammps_plain::get_line( std::string &line )
 		return false;
 	}
 }
+
+} // namespace readers
 
 } // namespace lammps_tools

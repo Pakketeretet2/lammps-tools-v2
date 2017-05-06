@@ -10,7 +10,7 @@ namespace lammps_tools {
 
 
 /// Contains stuff that has to do with reading data.
-namespace data_readers {
+namespace readers {
 
 /**
    Reads in header info from data file in given stream.
@@ -28,14 +28,14 @@ int get_header_info( std::istream &in, block_data &b,
 	std::vector<std::string> body_headers =
 		{ "Atoms", "Velocities", "Masses", "Bonds",
 		  "Angles", "Impropers", "Dihedrals", "Pair", "PairIJ" };
-	
+
 	while( in ){
 		std::getline(in,line);
 		std::stringstream ss(line);
 		bool line_handled = false;
-		
+
 		if( line.empty() ) continue;
-		
+
 		std::vector<std::string> words = util::split(line);
 		// Search for keywords:
 		if( words.size() >= 2 ){
@@ -51,7 +51,7 @@ int get_header_info( std::istream &in, block_data &b,
 				b.dom.xhi[0] = std::stof( words[1] );
 			}else if( words[2] == "ylo" && words[3] == "yhi" ){
 				b.dom.xlo[1] = std::stof( words[0] );
-				b.dom.xhi[1] = std::stof( words[1] );				
+				b.dom.xhi[1] = std::stof( words[1] );
 			}else if( words[2] == "zlo" && words[3] == "zhi" ){
 				b.dom.xlo[2] = std::stof( words[0] );
 				b.dom.xhi[2] = std::stof( words[1] );
@@ -80,7 +80,8 @@ int read_data_atoms_atomic( std::istream &in, block_data &b, bool quiet )
 	std::size_t n_cols = words.size();
 	my_assert( __FILE__, __LINE__, n_cols == 5 || n_cols == 8,
 	           "Incorrect column count for atomic!" );
-	if( !quiet ) std::cerr << "    ....Allocating storage for " << b.N << " worth of atoms.\n";
+	if( !quiet ) std::cerr << "    ....Allocating storage for "
+	                       << b.N << " worth of atoms.\n";
 
 	data_field_int id  ( "id",   b.N );
 	data_field_int type( "type", b.N );
@@ -88,11 +89,15 @@ int read_data_atoms_atomic( std::istream &in, block_data &b, bool quiet )
 	data_field_double y( "y",    b.N );
 	data_field_double z( "z",    b.N );
 
-	data_field_int ix( "iz" );
+	data_field_int mol( "mol" );
+	data_field_int ix( "ix" );
 	data_field_int iy( "iy" );
 	data_field_int iz( "iz" );
 
+	std::cerr << "n_cols == " << n_cols << ".\n";
+	bool has_image_flags = false;
 	if( n_cols == 8 ){
+		has_image_flags = true;
 		ix.resize(b.N);
 		iy.resize(b.N);
 		iz.resize(b.N);
@@ -102,19 +107,25 @@ int read_data_atoms_atomic( std::istream &in, block_data &b, bool quiet )
 		std::stringstream ss(line);
 		ss >> id[i] >> type[i] >> x[i] >> y[i] >> z[i];
 
-		if( n_cols == 8 ){
+		if( has_image_flags ){
 			ss >> ix[i] >> iy[i] >> iz[i];
 		}
-		
+
 		std::getline(in,line);
 	}
 
-	
-	b.add_field( id );
-	b.add_field( type );
-	b.add_field( x );
-	b.add_field( y );
-	b.add_field( z );
+
+	b.add_field(   id, block_data::ID );
+	b.add_field( type, block_data::TYPE );
+	b.add_field(    x, block_data::X );
+	b.add_field(    y, block_data::Y );
+	b.add_field(    z, block_data::Z );
+
+	if( has_image_flags ){
+		b.add_field( ix, block_data::IX );
+		b.add_field( iy, block_data::IY );
+		b.add_field( iz, block_data::IZ );
+	}
 
 	return 0;
 }
@@ -144,7 +155,7 @@ int read_data_atoms_velocities( std::istream &in, block_data &b, bool quiet )
 	data_field_double vx( "vx", b.N );
 	data_field_double vy( "vy", b.N );
 	data_field_double vz( "vz", b.N );
-	
+
 	for( std::size_t i = 0; i < b.N; ++i ){
 		std::stringstream ss(line);
 		int id;
@@ -154,13 +165,11 @@ int read_data_atoms_velocities( std::istream &in, block_data &b, bool quiet )
 		std::getline(in,line);
 	}
 
-	b.add_field( vx );
-	b.add_field( vy );
-	b.add_field( vz );
+	b.add_field( vx, block_data::VX );
+	b.add_field( vy, block_data::VY );
+	b.add_field( vz, block_data::VZ );
 
-	
 	return 0;
-
 }
 
 
@@ -215,13 +224,13 @@ int get_data_body( std::istream &in, block_data &b,
 			           "Error reading in velocities!" );
 			std::getline(in,line);
 		}else if( keyword == "Bonds" ){
-			
+
 		}else if( keyword == "Angles" ){
-			
+
 		}else if( keyword == "Impropers" ){
-			
+
 		}else if( keyword == "Dihedrals" ){
-			
+
 		}else if( keyword == "Pair" ){
 			if( !quiet ) std::cerr << "    ....Reading pair coeffs...\n";
 			std::getline(in,line);
@@ -239,12 +248,12 @@ int get_data_body( std::istream &in, block_data &b,
 			}
 			std::getline(in,line);
 		}else if( keyword == "PairIJ" ){
-			
+
 		}else{
-			
+
 		}
 
-		
+
 		if( !quiet ){
 			std::cerr << "    ....Block_data now has "
 			          << b.n_data_fields() << " data fields:";
@@ -253,7 +262,7 @@ int get_data_body( std::istream &in, block_data &b,
 			}
 			std::cerr << "\n";
 		}
-		
+
 	}
 	return 0;
 }
@@ -277,7 +286,7 @@ block_data block_data_from_lammps_data( std::istream &in, int &status,
 	// Ignore first two lines.
 	std::getline(in,line);
 	std::getline(in,line);
-	
+
 	while( in ){
 		std::string last_line = "";
 		status = get_header_info( in, b, last_line, quiet );
@@ -292,6 +301,6 @@ block_data block_data_from_lammps_data( std::istream &in, int &status,
 	return b;
 }
 
-} // namespace data_readers
+} // namespace readers
 
 } // namespace lammps_tools
