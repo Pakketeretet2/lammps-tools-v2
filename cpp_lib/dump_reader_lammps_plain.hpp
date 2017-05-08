@@ -46,8 +46,8 @@ private:
 	void append_data_to_fields( block_data &block,
 	                            std::vector<data_field*> &data_fields );
 
-	std::istream  *in;
 	std::ifstream *in_file;
+	std::istream  *in;
 };
 
 } // namespace readers

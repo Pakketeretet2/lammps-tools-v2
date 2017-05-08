@@ -276,7 +276,9 @@ void bin_neighborizer::neigh_bin_atom( int i, neigh_list &neighs )
 
 
 
-double bin_neighborizer::build( neigh_list &neighs, particle_filter filt,
+double bin_neighborizer::build( neigh_list &neighs,
+                                const are_neighbours &criterion,
+                                particle_filter filt,
                                 int neigh_count_estimate )
 {
 	my_timer m;

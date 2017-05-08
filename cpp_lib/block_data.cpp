@@ -5,16 +5,16 @@ using namespace lammps_tools;
 
 namespace lammps_tools {
 
-block_data::block_data() : tstep( 0 ),
-                           N( 0 ),
-                           N_types( 1 ),
-                           atom_style( ATOMIC )
+block_data::block_data()
+	: tstep( 0 ), N( 0 ), N_types( 1 ), atom_style( ATOMIC ),
+	  special_fields_by_name ( N_SPECIAL_FIELDS, "" ),
+	  special_fields_by_index( N_SPECIAL_FIELDS, -1 )
 {}
 
-block_data::block_data( std::size_t n_atoms ) : tstep( 0 ),
-                                                N( n_atoms ),
-                                                N_types( 1 ),
-                                                atom_style( ATOMIC )
+block_data::block_data( std::size_t n_atoms )
+	: tstep( 0 ), N( n_atoms ), N_types( 1 ), atom_style( ATOMIC ),
+	  special_fields_by_name ( N_SPECIAL_FIELDS, "" ),
+	  special_fields_by_index( N_SPECIAL_FIELDS, -1 )
 { }
 
 block_data::block_data( const block_data &o )
@@ -24,16 +24,33 @@ block_data::block_data( const block_data &o )
 	  atom_style( o.atom_style ),
 	  data( o.n_data_fields() ),
 	  dom( o.dom ),
-	  top( o.top )
-
+	  top( o.top ),
+	  special_fields_by_name ( N_SPECIAL_FIELDS, "" ),
+	  special_fields_by_index( N_SPECIAL_FIELDS, -1 )
 {
 	my_assert( __FILE__, __LINE__, data.size() == o.n_data_fields(),
 	           "Data size mismatch after copy!" );
+	
 	const std::vector<std::string> &names = o.get_data_names();
 	for( std::size_t i = 0; i < o.n_data_fields(); ++i ){
 		const std::string &name = names[i];
 		data[i] = copy( o.get_data(name) );
 	}
+
+	for( int i = block_data::ID; i < block_data::N_SPECIAL_FIELDS; ++i ){
+		const data_field *df = o.get_special_field(i);
+		if( !df ) continue;
+		
+		special_fields_by_name[i] = df->name;
+		
+		for( int idx = 0; idx < data.size(); ++idx ){
+			const data_field *df = data[idx];
+			if( df->name == special_fields_by_name[i] ){
+				special_fields_by_index[i] = idx;
+			}
+		}
+	}
+
 }
 
 block_data::~block_data()
@@ -78,9 +95,15 @@ void block_data::add_field( const data_field &data_f, int special_field )
 	my_assert( __FILE__, __LINE__, data_f.size() == N,
 	           "Atom number mismatch on add_field! Call set_natoms first!");
 	// Check if this name is already in block or not.
-	my_assert( __FILE__, __LINE__, get_data( data_f.name ) == nullptr,
-	           "Named data already in block_data" );
-
+	if( get_data( data_f.name ) != nullptr ){
+		std::cerr << "Name " << data_f.name << " was already "
+		          << "in block_data!\n";
+		for( const std::string &s : get_data_names() ){
+			std::cerr << s << " ";
+		}std::cerr << "\n";
+		my_runtime_error( __FILE__, __LINE__,
+		                  "Named data already in block_data" );
+	}
 	// Now you need to copy the data.
 	data_field *cp = copy( &data_f );
 	int index = data.size();
@@ -90,17 +113,21 @@ void block_data::add_field( const data_field &data_f, int special_field )
 	if( special_field < ID || special_field > IZ ){
 		return;
 	}
-
-	special_fields_by_name.insert(
-		std::make_pair( special_field, data_f.name ) );
-	special_fields_by_index.insert(
-		std::make_pair( special_field, index ) );
+	
+	my_assert( __FILE__, __LINE__,
+	           special_fields_by_index[special_field] == -1,
+	           "Special field already set!" );
+	
+	special_fields_by_name[special_field]  = data_f.name;
+	special_fields_by_index[special_field] = index;	
 }
 
 
 block_data &block_data::operator=( block_data o )
 {
-	swap( *this, o );
+	using std::swap;
+	block_data n(o);
+	swap( *this, n );
 	return *this;
 }
 
@@ -159,12 +186,8 @@ std::string block_data::get_special_field_name( int field ) const
 {
 	my_assert( __FILE__, __LINE__, field >= ID && field <= IZ,
 	           "Invalid field in get_special_field_name!" );
-	auto name_it = special_fields_by_name.find( field );
-	if( name_it != special_fields_by_name.end() ){
-		return name_it->second;
-	}else{
-		return "";
-	}
+
+	return special_fields_by_name[field];
 }
 
 
@@ -179,21 +202,58 @@ data_field *block_data::remove_field( const std::string &name,
 	// Delete the ptr from all vectors and maps.
 	data.erase( std::find(data.begin(), data.end(), df) );
 	bool found = false;
-	for( auto const &ent : special_fields_by_name ){
-		if( ent.second == name ){
-			special_field = ent.first;
+	
+	for( std::size_t i = 0; i < special_fields_by_name.size(); ++i ){
+		if( special_fields_by_name[i] == name ){
+			special_field = i;
 			found = true;
 			break;
 		}
 	}
 	if( found ){
-		special_fields_by_name.erase( special_field );
-		special_fields_by_index.erase( special_field );
-		return df;
+		special_fields_by_name[ special_field ] = "";
+		special_fields_by_index[ special_field ] = -1;
+	}
+	return df;
+}
+
+void block_data::print_special_fields( std::ostream &out ) const
+{
+	out << "Special fields are now:\n";
+	for( int i = block_data::ID; i <= block_data::IZ; ++i ){
+		out << "  " << i << " --> "
+		    << get_special_field_name(i) << "\n";
+	}
+	out << "\n";
+}
+
+
+
+/// Get read/write pointer to special data field of given kind.
+data_field *block_data::get_special_field_rw( int field )
+{
+	if( special_fields_by_index[field] != -1 ){
+		return data[ special_fields_by_index[field] ];
 	}else{
 		return nullptr;
 	}
 }
+
+/// Get read-only pointer to special data field of given kind.
+const data_field *block_data::get_special_field( int field ) const
+{
+	if( special_fields_by_index[field] != -1 ){
+		int entry = special_fields_by_index[field];
+		return data[ entry ];
+	}else{
+		return nullptr;
+	}
+}
+
+
+
+
+
 
 void swap( block_data &f, block_data &s )
 {
@@ -202,10 +262,11 @@ void swap( block_data &f, block_data &s )
 	f.tstep = s.tstep;
 	f.N = s.N;
 	f.atom_style = s.atom_style;
-	swap(f.dom, s.dom);
-	swap(f.top, s.top);
+	swap( f.dom, s.dom );
+	swap( f.top, s.top );
 	swap( f.data, s.data );
-
+	swap( f.special_fields_by_name, s.special_fields_by_name );
+	swap( f.special_fields_by_index, s.special_fields_by_index );
 }
 
 

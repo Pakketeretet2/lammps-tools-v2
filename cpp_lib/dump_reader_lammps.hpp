@@ -34,14 +34,39 @@ public:
 	/// Returns a vector containing the expected column headers.
 	const std::vector<std::string> &get_column_headers() const;
 
+	/**
+	   \brief Marks a given column header as a special field.
+	   
+	   \param header
+	   \param special_field_type
 
+	   If the header could not be found, block_data shall be unchanged.
+
+	   \returns true if the header could be found, false otherwise.
+	*/
+	bool set_column_header_as_special( const std::string &header,
+	                                   int special_field_type );
+
+
+	/**
+	   \brief Adds given vector of data fields to given block.
+	   
+	   \note This function deletes the data fields!
+
+	   \param[in/out] dfs Data fields to add. They are deleted afterwards.
+	   \param[out]    b   The block data to which the fields are added.
+	*/
+	void add_custom_data_fields( std::vector<data_field*> &dfs,
+	                             block_data &b );
+	
+protected:
+	std::map<std::string, int> header_to_special_field;
 private:
 	virtual int  get_next_block( lammps_tools::block_data &block ) = 0;
 	virtual bool check_eof()  const = 0;
 	virtual bool check_good() const = 0;
 
 	std::vector<std::string> column_headers;
-
 };
 
 

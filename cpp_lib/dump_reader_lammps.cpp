@@ -37,6 +37,43 @@ const std::vector<std::string> &dump_reader_lammps::get_column_headers() const
 	return column_headers;
 }
 
+
+bool dump_reader_lammps::set_column_header_as_special( const std::string &header,
+                                                       int special_field_type )
+{
+	my_assert( __FILE__, __LINE__,
+	           special_field_type >= block_data::ID &&
+	           special_field_type <= block_data::IZ,
+	           "Invalid special_field_type!" );
+
+	if( std::find( column_headers.begin(), column_headers.end(),
+	               header ) == column_headers.end() ){
+		std::cerr << "Could not set " << header << " to type "
+		          << special_field_type << ".\n";
+		return false;
+	}
+
+	header_to_special_field[header] = special_field_type;
+	return true;
+}
+
+
+void dump_reader_lammps::add_custom_data_fields( std::vector<data_field*> &dfs,
+                                                 block_data &b )
+{
+	for( data_field *df : dfs ){
+		int special_field_type;
+		if( header_to_special_field.count( df->name ) ){
+			int special_field_type =
+				header_to_special_field[ df->name ];
+			b.add_field( *df, special_field_type );
+		}else{
+			b.add_field( *df );
+		}
+		delete df;
+	}
+}
+
 } // namespace readers
 
 } // namespace lammps_tools

@@ -24,6 +24,10 @@ namespace lammps_tools {
 
 /**
    A class that represents information about a single time step.
+
+   \warning This class has a custom copy operator, so whenever
+            new members are added, make sure they are properly
+            included in the copy operation as well.
 */
 class block_data
 {
@@ -34,19 +38,22 @@ public:
 	};
 
 	/// enumerates "special" fields.
-	enum special_fields { UNKNOWN = -1, ///< Use as error flag
-	                      ID = 0,       ///< Atom ids
-	                      TYPE,         ///< Atom types
-	                      MOL,          ///< Molecule id
-	                      X, 	    ///< x coordinate
-	                      Y, 	    ///< y coordinate
-	                      Z, 	    ///< z coordinate
-	                      VX,	    ///< x velocity
-	                      VY,	    ///< y velocity
-	                      VZ,	    ///< z velocity
-	                      IX,	    ///< x image flag
-	                      IY,	    ///< y image flag
-	                      IZ	    ///< z image flag
+	enum special_fields { UNKNOWN = -1,     ///< Use as error flag
+	                      ID = 0,           ///< Atom ids
+	                      TYPE,             ///< Atom types
+	                      MOL,              ///< Molecule id
+	                      X, 	        ///< x coordinate
+	                      Y, 	        ///< y coordinate
+	                      Z, 	        ///< z coordinate
+	                      VX,	        ///< x velocity
+	                      VY,	        ///< y velocity
+	                      VZ,	        ///< z velocity
+	                      IX,	        ///< x image flag
+	                      IY,	        ///< y image flag
+	                      IZ,	        ///< z image flag
+	                      
+	                      /// Fake entry, counts number of special fields.
+	                      N_SPECIAL_FIELDS
 	};
 
 	bigint tstep;    ///< The current time step
@@ -185,6 +192,7 @@ public:
 	*/
 	void set_special_field( const std::string &name, int field );
 
+
 	/**
 	   Get name of given special field, or empty string if it is not set.
 
@@ -195,16 +203,23 @@ public:
 	*/
 	std::string get_special_field_name( int field ) const;
 
+	/// Get read/write pointer to special data field of given kind.
+	data_field *get_special_field_rw( int field );
+	
+	/// Get read-only pointer to special data field of given kind.
+	const data_field *get_special_field( int field ) const;
 
+	/// Prints special field data to given output stream.
+	void print_special_fields( std::ostream &out = std::cerr ) const;
 private:
 	/// A vector containing pointers to all data fields.
 	std::vector<data_field*> data;
 
 	/// Contains a mapping of "special" fields to their respective names
-	std::map<int, std::string> special_fields_by_name;
+	std::vector<std::string> special_fields_by_name;
 
 	/// Contains a mapping of "special" fields to their respective indices
-	std::map<int, int> special_fields_by_index;
+	std::vector<int> special_fields_by_index;
 };
 
 
@@ -274,6 +289,9 @@ bool  grab_field_as<int>( const block_data &b, const std::string &field,
 	vec = data_as<int>( df );
 	return true;
 }
+
+
+
 
 
 } // namespace lammps_tools

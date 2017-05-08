@@ -27,37 +27,62 @@ enum neighborize_methods {
 	CONVEX_HULL = 3  ///< Convex hull for particles on ellipsoids/spheres, using CGAL lib
 };
 
+
+
 /// A typedef for a function that can be used to filter particles.
 typedef bool( *particle_filter )( const block_data &, int );
+
 
 /// The default filter is to let everything pass:
 inline bool pass_all( const block_data &, int ) { return true; }
 
 
+/// Functor type for determining whether or not two atoms are neighbours.
+struct are_neighbours
+{
+	virtual bool operator()( const block_data &b, int i, int j ) const = 0;
+};
+
+
+/// Standard distance criterion:
+struct dist_criterion : public are_neighbours
+{
+	dist_criterion( double rc ) : rc(rc), rc2(rc*rc) {}
+	virtual bool operator()( const block_data &b, int i, int j ) const;
+	double rc, rc2;
+};
+
+
+
 /**
    \brief Calculates a neighbour list for the atoms in the block data.
-
-   \param neighs[out]  The neighbour lists, indexed per particle_index
-   \param b            block_data to neighborize.
-   \param fields       Vector containing the data field names of id, type,
-                       x, y, z, respectively.
-   \param itype        Type of particle i to consider
-   \param jtype        Type of particle j to consider
-   \param method       Distance method to use (see neighborize_methods)
-   \param dom          simulation domain
-   \param dims         dimensions of the system (2 or 3)
-   \param rc           cut-off distance
-   \param filter       Add only particles with filter(particle_index) == true
-   \param neigh_est    A guess for the number of neighbours.
+   
+   \param neighs[out]    The neighbour lists, indexed per particle_index
+   \param b              block_data to neighborize.
+   \param fields         Vector containing the data field names of id, type,
+                         x, y, z, respectively.
+   \param itype          Type of particle i to consider
+   \param jtype          Type of particle j to consider
+   \param method         Distance method to use (see neighborize_methods)
+   \param dom            simulation domain
+   \param dims           dimensions of the system (2 or 3)
+   \param rc             Consider atoms less than this apart as neighbour
+   \param include_mol    Count every atom in molecule as neighbour
+   \param include_bonds  Count every atom in molecule as neighbour
+   \param filter         Add only particles with filter(particle_index) == true
+   \param neigh_est      A guess for the number of neighbours.
 
    \returns The average number of neighbours per particle.
 */
 double make_list_dist( neigh_list &neighs,
                        const block_data &b,
                        const std::vector<std::string> &fields,
-                       int itype, int jtype, int method, int dims, double rc,
-                       particle_filter filt = pass_all, int neigh_est = 24 );
-
+                       int itype, int jtype, int method, int dims,
+                       double rc,
+                       bool include_mol = false,
+                       bool include_bonds = false,
+                       particle_filter filt = pass_all,
+                       int neigh_est = 24 );
 
 
 /**

@@ -135,6 +135,13 @@ TEST_CASE ( "LAMMPS binary dump file gets read correctly.", "[read_lammps_dump_b
 	std::string fname = "lammps_dump_file_test.dump.bin";
 	std::vector<std::string> headers = { "id", "type", "x", "y", "z", "c_pe" };
 	std::shared_ptr<dump_reader> r( make_dump_reader_lammps( fname, BIN, headers ) );
+	dump_reader_lammps *rl = static_cast<dump_reader_lammps*>(r.get());
+	rl->set_column_header_as_special( "id", block_data::ID );
+	rl->set_column_header_as_special( "type", block_data::TYPE );
+	rl->set_column_header_as_special( "x", block_data::X );
+	rl->set_column_header_as_special( "y", block_data::Y );
+	rl->set_column_header_as_special( "z", block_data::Z );
+	
 	REQUIRE( r );
 	REQUIRE( r->good() );
 

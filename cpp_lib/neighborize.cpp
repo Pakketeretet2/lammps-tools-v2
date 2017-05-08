@@ -1,5 +1,6 @@
 #include "data_field.hpp"
 #include "neighborize.hpp"
+#include "neighborize_nsq.hpp"
 #include "neighborize_bin.hpp"
 #include "my_assert.hpp"
 #include "util.hpp"
@@ -15,60 +16,6 @@ namespace lammps_tools {
 namespace neighborize {
 
 
-double neigh_dist_nsq( neigh_list &neighs,
-                       const block_data &b,
-                       const std::vector<std::string> &fields,
-                       int itype, int jtype, int dims,
-                       double rc, particle_filter filt, int neigh_est )
-{
-	std::vector<int> id, type;
-	std::vector<double> x, y, z;
-	bool success = grab_common_fields( b, fields, id, type, x, y, z );
-	my_assert( __FILE__, __LINE__, success,
-	           "Failed to assign required data from block!" );
-
-	double rc2 = rc*rc;
-	int N = id.size();
-	neighs.resize(N);
-
-	int total_neighbours = 0;
-	for( std::vector<int> &ni : neighs ){
-		ni.clear();
-		if( neigh_est > 0 ) ni.reserve( neigh_est );
-	}
-
-	for( int i = 0; i < N; ++i ){
-		if( !filt( b, i ) ) continue;
-		int idi = id[i];
-
-		double xi[3] = { x[i], y[i], z[i] };
-
-		for( int j = 0; j < N; ++j ){
-			if( !filt( b, j ) ) continue;
-
-			int idj = id[j];
-			if( idi >= idj ) continue;
-
-			if( !(type[i] == itype || itype == 0) &&
-			     (type[j] == jtype || jtype == 0) ){
-				continue;
-			}
-
-			double xj[3] = { x[j], y[j], z[j] };
-
-			double r[3];
-			double r2 = b.dom.dist_2( xi, xj, r );
-			if( r2 > rc2 ) continue;
-
-			neighs[i].push_back(j);
-			neighs[j].push_back(i);
-			total_neighbours += 2;
-		}
-	}
-	return static_cast<double>( total_neighbours ) / N;
-}
-
-
 
 double neigh_dist_bin( neigh_list &neighs,
                        const block_data &b,
@@ -76,16 +23,33 @@ double neigh_dist_bin( neigh_list &neighs,
                        int itype, int jtype, int dims,
                        double rc, particle_filter filt, int neigh_est )
 {
+	dist_criterion d( rc );
 	bin_neighborizer n( b, fields, rc, dims, itype, jtype );
-	return n.build( neighs, filt, neigh_est );
+	return n.build( neighs, d, filt, neigh_est );
+}
+
+
+double neigh_dist_nsq( neigh_list &neighs,
+                       const block_data &b,
+                       const std::vector<std::string> &fields,
+                       int itype, int jtype, int dims,
+                       double rc, particle_filter filt, int neigh_est )
+{
+	dist_criterion d( rc );
+	nsq_neighborizer n( b, fields, dims, itype, jtype );
+	return n.build( neighs, d, filt, neigh_est );
 }
 
 
 double make_list_dist( neigh_list &neighs,
                        const block_data &b,
                        const std::vector<std::string> &fields,
-                       int itype, int jtype, int method, int dims, double rc,
-                       particle_filter filt, int neigh_est )
+                       int itype, int jtype, int method, int dims,
+                       double rc,
+                       bool include_mol,
+                       bool include_bonds,
+                       particle_filter filt,
+                       int neigh_est )
 {
 	for( std::vector<int> &ni : neighs ){
 		ni.clear();
@@ -140,6 +104,39 @@ void verify_neigh_list( const neigh_list &neighs )
 }
 
 
+
+// Some functors:
+bool dist_criterion::operator()( const block_data &b, int i, int j ) const
+{
+	using dfd = data_field_double;
+	const data_field *d_x, *d_y, *d_z;
+	
+	d_x = static_cast<const dfd*>( b.get_special_field( block_data::X ) );
+	d_y = static_cast<const dfd*>( b.get_special_field( block_data::Y ) );
+	d_z = static_cast<const dfd*>( b.get_special_field( block_data::Z ) );
+
+	my_assert( __FILE__, __LINE__, d_x && d_y && d_z,
+	           "Failed to grab data for x, y and z!" );
+	
+	const std::vector<double> &x = data_as<double>( d_x );
+	const std::vector<double> &y = data_as<double>( d_y );
+	const std::vector<double> &z = data_as<double>( d_z );
+
+	if( b.atom_style == block_data::MOLECULAR ){
+		const std::vector<int> &mol = data_as<int>(
+			b.get_data( b.get_special_field_name(
+				            block_data::MOL ) ) );
+		if( mol[i] == mol[j] ) return true;
+	}
+
+	double xi[3] = { x[i], y[i], z[i] };
+	double xj[3] = { x[j], y[j], z[j] };
+	double r[3];
+	double r2 = b.dom.dist_2( xi, xj, r );
+
+	if( r2 > rc2 ) return false;
+	else           return true;
+}
 
 
 

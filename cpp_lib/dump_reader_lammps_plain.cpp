@@ -217,6 +217,7 @@ void dump_reader_lammps_plain::set_custom_data_fields(
 	}
 }
 
+
 void dump_reader_lammps_plain::append_data_to_fields(
 	block_data &block, std::vector<data_field*> &data_fields )
 {
@@ -279,7 +280,6 @@ int dump_reader_lammps_plain::next_block_body(
 			data_fields.push_back( x );
 			data_fields.push_back( y );
 			data_fields.push_back( z );
-
 		}else{
 			dump_style = CUSTOM;
 			set_custom_data_fields( block, line, headers,
@@ -290,13 +290,16 @@ int dump_reader_lammps_plain::next_block_body(
 		           "# of data fields does not match # of columns!" );
 		append_data_to_fields( block, data_fields );
 
+		if( dump_style == ATOMIC ){
+			block.add_field( *data_fields[0], block_data::ID );
+			block.add_field( *data_fields[1], block_data::TYPE );
+			block.add_field( *data_fields[2], block_data::X );
+			block.add_field( *data_fields[3], block_data::Y );
+			block.add_field( *data_fields[4], block_data::Z );
 
-
-		// std::cerr << "Block has atom_style " << block.atom_style << ".\n";
-
-		for( data_field *df : data_fields ){
-			block.add_field( *df );
-			delete df;
+			for( data_field *df : data_fields ) delete df;
+		}else{
+			add_custom_data_fields( data_fields, block );
 		}
 
 		return 0;
@@ -309,6 +312,7 @@ int dump_reader_lammps_plain::next_block_body(
 
 
 }
+
 
 bool dump_reader_lammps_plain::get_line( std::string &line )
 {

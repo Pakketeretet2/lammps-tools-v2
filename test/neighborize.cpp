@@ -21,54 +21,76 @@ TEST_CASE( "Neighbour list works as expected", "[neigh_list_dist]" ) {
 	std::unique_ptr<dump_reader_lammps> d(
 		make_dump_reader_lammps( dname, 2 ) );
 
-	block_data b;
+        
 	d->set_column_headers( headers );
+	d->set_column_header_as_special(   "id", block_data::ID );
+	d->set_column_header_as_special( "type", block_data::TYPE );
+	d->set_column_header_as_special(    "x", block_data::X );
+	d->set_column_header_as_special(    "y", block_data::Y );
+	d->set_column_header_as_special(    "z", block_data::Z );
+	
 	double rc[5] = { 1.35, 2.0, 3.0, 3.5, 5.0 };
 	double count[3][5] = { { 12.000, 18.000, 86.000, 140.000, 428.000 },
-	                       {  9.2385, 26.705, 94.452, 150.528, 441.148 },
+	                       {  9.2385, 26.706, 94.452, 150.528, 441.148 },
 	                       {  9.234, 26.738, 94.478, 150.534, 441.133 } };
 
 	int neigh_est = 0;
-	int status = d->next_block(b);
+	std::vector<block_data> blocks;
+	block_data b;
+	int frame = 0;
+	while( d->next_block(b) == 0 ){
+		if( frame % 25 == 0 ){
+			blocks.push_back(b);
+		}
+		++frame;
+	}
 	int n_rcs = 5;
+	REQUIRE( blocks.size() == 3 );
 
-	SECTION( "NSQ neighbouring" ){
-		my_timer timer( std::cerr );
-
-		for( int j = 0; j < 3; ++j ){
+	double eps = 1e-3;
+	bool nsq = true;
+	bool bin = true;
+	if( nsq ){
+		my_timer timer_inner( std::cerr );
+		timer_inner.tic();
+		int j = 0;
+		for( const block_data &b : blocks ){
 			for( int i = 0; i < n_rcs; ++i ){
+				double rrc = rc[i];
+				std::cerr << "At NSQ, rc = " << rrc << "\n";
 
 				double avg = make_list_dist( neighs, b,
 				                             atom_headers,
 				                             0, 0, DIST_NSQ,
-				                             3, rc[i] );
-				REQUIRE( avg == Approx(count[j][i]) );
+				                             3, rrc );
+				REQUIRE( avg ==
+			        	 Approx(count[j][i]).epsilon(eps) );
+				
 			}
-			for( int nframes = 0; nframes < 25; ++nframes ){
-				status = d->next_block(b);
-			}
+			++j;
 		}
-		timer.toc("NSQ neighbouring");
+		timer_inner.toc("  NSQ neighbouring");
 	}
-	SECTION( "BIN neighbouring" ){
-		my_timer timer( std::cerr );
-
-		for( int j = 0; j < 3; ++j ){
+	if( bin ){
+	        my_timer timer_inner( std::cerr );
+	        timer_inner.tic();
+	        int j = 0;
+	        for( const block_data &b : blocks ){
 			for( int i = 0; i < n_rcs; ++i ){
-
+				double rrc = rc[i];
+				std::cerr << "At BIN, rc = " << rrc << "\n";
+				timer_inner.tic();
 				double avg = make_list_dist( neighs, b,
 				                             atom_headers,
 				                             0, 0, DIST_BIN,
-				                             3, rc[i] );
-				REQUIRE( avg == Approx(count[j][i]) );
+				                             3, rrc );
+				REQUIRE( avg ==
+				         Approx(count[j][i]).epsilon(eps) );
 			}
-			for( int nframes = 0; nframes < 25; ++nframes ){
-				status = d->next_block(b);
-			}
+			++j;
 		}
-		timer.toc("BIN neighbouring");
+		timer_inner.toc("  BIN neighbouring");
 	}
-
 }
 
 TEST_CASE( "Binning neighbour list works as expected", "[neigh_list_dist_bin]" ) {
@@ -117,11 +139,11 @@ TEST_CASE( "Binning neighbour list works as expected", "[neigh_list_dist_bin]" )
 		type[i] = 1;
 	}
 
-	b.add_field(id);
-	b.add_field(type);
-	b.add_field(x);
-	b.add_field(y);
-	b.add_field(z);
+	b.add_field( id, block_data::ID );
+	b.add_field( type, block_data::TYPE );
+	b.add_field( x, block_data::X );
+	b.add_field( y, block_data::Y );
+	b.add_field( z, block_data::Z );
 
 	std::vector<std::string> atom_headers = { "id", "type", "x", "y", "z" };
 	std::vector<std::vector<int> > neighs;

@@ -227,10 +227,7 @@ int dump_reader_lammps_bin::next_block_body( block_data &block,
 	}
 
 	// Copy all data fields into the block data.
-	for( data_field *df : data_fields ){
-		block.add_field(*df);
-		delete df;
-	}
+	add_custom_data_fields( data_fields, block );
 
 	if( buf ) delete [] buf;
 

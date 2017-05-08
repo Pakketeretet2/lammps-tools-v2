@@ -58,7 +58,9 @@ public:
 
 	bool quiet;
 
-	double build( neigh_list &neighs, particle_filter filt = pass_all,
+	double build( neigh_list &neighs,
+	              const are_neighbours &criterion,
+	              particle_filter filt = pass_all,
 	              int neigh_count_estimate = 100 );
 
 private:
@@ -89,7 +91,6 @@ private:
 	int natoms, n_neighs;
 	int Nx, Ny, Nz, Nbins;
 	double bin_size;
-
 };
 
 } //namespace neighborize
