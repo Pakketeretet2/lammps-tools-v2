@@ -11,42 +11,28 @@
 #include "my_assert.hpp"
 #include "neighborize.hpp"
 
+/**
+   \file neighborize_nsq.hpp
+*/
+
+
 namespace lammps_tools {
 
 namespace neighborize {
 
-class nsq_neighborizer
+class neighborizer_nsq : public neighborizer
 {
 public:
-	nsq_neighborizer( const block_data &b,
-	                  const std::vector<std::string> &fields,
-	                  int dims, int itype, int jtype )
-		: dims(dims), itype(itype), jtype(jtype), b(b),  quiet(true)
+	neighborizer_nsq( const block_data &b, const std::list<int> &s1,
+	                  const std::list<int> &s2, int dims )
+		: neighborizer( b, s1, s2, dims )
+	{}
 
-	{
-		if( !grab_common_fields( b, fields, id, type, x, y, z ) ){
-			my_logic_error( __FILE__, __LINE__,
-			                "Failed to grab necessary fields!" );
-		}
-	}
-	
-	int dims;
-	int itype, jtype;
-	
-	const block_data &b;
-	
-	std::vector<int> id;
-	std::vector<int> type;
-	std::vector<double> x;
-	std::vector<double> y;
-	std::vector<double> z;
+	~neighborizer_nsq(){}
 
-	bool quiet;
-
-	double build( neigh_list &neighs,
-	              const are_neighbours &criterion,
-	              particle_filter filt = pass_all,
-	              int neigh_count_estimate = 100 );
+private:
+	virtual int build( neigh_list &neighs,
+	                   const are_neighbours &criterion );
 };
 
 } // namespace neighborize

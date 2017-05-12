@@ -42,25 +42,35 @@ public:
 	  \returns     The difference between tic-time and
 	               current time in milliseconds.
 	*/
-	double toc( const char *msg = nullptr, const char *post = nullptr )
+	double toc( const std::string &msg, const std::string &post )
 	{
 		gettimeofday(&t_toc, nullptr);
 		double diff_msec = (t_toc.tv_usec - t_tic.tv_usec)*1e-3 +
 			(t_toc.tv_sec  - t_tic.tv_sec)*1000.0;
 		double diff_sec  = diff_msec*1e-3;
 		if( out ){
-			if( msg ){
+			if( !msg.empty() ){
 				*out << msg << ": ";
 			}
 			*out << diff_msec << " ms elapsed ("
 			     << diff_sec << " s).";
-			if( post ){
+			if( !post.empty() ){
 				*out << " " << post;
 			}
 			*out << "\n";
 		}
 		return diff_msec;
 	}
+
+	double toc( const std::string &msg )
+	{
+		return toc( msg, "" );
+	}
+	double toc( )
+	{
+		return toc( "", "" );
+	}
+
 
 	/// Enables output stream and sets it to o.
 	void enable_output( std::ostream* o )

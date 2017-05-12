@@ -264,6 +264,70 @@ inline bool is_unique( const container &c, const val &v )
 	return std::count( c.begin(), c.end(), v ) == 1;
 }
 
+/**
+   Code to generate a permutation that will sort given vector according to comp.
+
+   Code taking from Timothy Shields at "http://stackoverflow.com/questions/
+   	17074324/how-can-i-sort-two-vectors-in-the-same-way-with-
+	criteria-that-uses-only-one-of"
+
+   \param vec  The vector to generate the sorting permutation for.
+   \param comp The comparator to use.
+
+   \returns a permutation vector p with the sorting permutation, such that
+            for( std::size_t i : p ) vec[ i ] is sorted.
+*/
+template <typename T, typename comparator>
+std::vector<std::size_t> sort_permutation( const std::vector<T> &vec,
+                                           const comparator &comp )
+{
+	std::vector<std::size_t> p(vec.size(), 0);
+	std::iota(p.begin(), p.end(), 0);
+	auto apply_comp = [&](std::size_t i, std::size_t j)
+		{ return comp( vec[i], vec[j] ); };
+	std::sort( p.begin(), p.end(), apply_comp );
+	return p;
+}
+
+
+/**
+   Code to apply a permutation in place to a given vector.
+
+   Code taking from Timothy Shields at "http://stackoverflow.com/questions/
+   	17074324/how-can-i-sort-two-vectors-in-the-same-way-with-
+	criteria-that-uses-only-one-of"
+
+   \param vec  The vector to sort according to permutation p
+   \param p    The permutation to use.
+*/
+template <typename T>
+void apply_permutation( std::vector<T>& vec, const std::vector<std::size_t>& p )
+{
+	std::vector<bool> done(vec.size());
+	for (std::size_t i = 0; i < vec.size(); ++i) {
+		if (done[i]) continue;
+
+		done[i] = true;
+		std::size_t prev_j = i;
+		std::size_t j = p[i];
+
+		while( i != j ){
+			std::swap(vec[prev_j], vec[j]);
+			done[j] = true;
+			prev_j = j;
+			j = p[j];
+		}
+	}
+}
+
+template <typename container>
+void remove_doubles( container &c )
+{
+	std::sort( c.begin(), c.end() );
+	c.erase( std::unique( c.begin(), c.end() ), c.end() );
+}
+
+
 } // namespace util
 
 } // namespace lammps_tools

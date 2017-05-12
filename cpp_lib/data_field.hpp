@@ -3,7 +3,7 @@
 
 /**
    \file data_field.hpp
-   
+
    Definition of data_field and associated functions.
 */
 
@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "my_assert.hpp"
+#include "util.hpp"
 
 namespace lammps_tools {
 
@@ -64,7 +65,7 @@ struct data_field_der : public data_field
 {
 	/**
 	   Constructor that takes a name.
-	   
+
 	   Sets up name only.
 	*/
 	explicit data_field_der( const std::string &n )
@@ -73,7 +74,7 @@ struct data_field_der : public data_field
 
 	/**
 	   Constructor that takes a name and a size.
-	   
+
 	   Sets up name and size of data.
 	*/
 	data_field_der( const std::string &n, std::size_t size )
@@ -84,7 +85,7 @@ struct data_field_der : public data_field
 
 	/**
 	   Copy constructor from pointer.
-	   
+
 	   Sets up name and complete data.
 	*/
 	explicit data_field_der( const data_field_der<T, TYPE> *other )
@@ -95,7 +96,7 @@ struct data_field_der : public data_field
 
 	/**
 	   Copy constructor from reference.
-	   
+
 	   Sets up name and complete data.
 	*/
 	explicit data_field_der( const data_field_der<T, TYPE> &other )
@@ -104,7 +105,7 @@ struct data_field_der : public data_field
 		construct_from_other( other );
 	}
 
-	
+
 	/**
 	   \brief Helper to ease construction from other, either ref or pointer
 	*/
@@ -112,7 +113,7 @@ struct data_field_der : public data_field
 	{
 		my_assert( __FILE__, __LINE__, other.type() == TYPE,
 		           "Type mismatch in constructor!" );
-		
+
 		data.resize( other.size() );
 		const std::vector<T> &d_o = other.get_data();
 		for( std::size_t i = 0; i < size(); ++i ){
@@ -128,7 +129,7 @@ struct data_field_der : public data_field
 		swap( *this, other );
 		return *this;
 	}
-	
+
 	/**
 	   Empty destructor.
 	*/
@@ -154,7 +155,7 @@ struct data_field_der : public data_field
 	   \param N New size data should have.
 	*/
 	virtual void resize( std::size_t N ){ data.resize( N ); }
-	
+
 	/**
 	   Provides mutable access to underlying data vector.
 	*/
@@ -164,7 +165,7 @@ struct data_field_der : public data_field
 	   Provides copy from data vector.
 	*/
 	const T& operator[]( std::size_t idx ) const { return data[idx]; }
-	
+
 
 	/**
 	   Provides immutable access to underlying data vector.
@@ -188,7 +189,7 @@ struct data_field_der : public data_field
 		swap( f.data, s.data );
 	}
 
-	
+
 private:
 	std::vector<T> data; ///< The data vector.
 };
@@ -207,7 +208,7 @@ typedef data_field_der<int,    data_field::INT>    data_field_int;
    Creates a copy of d, properly respecting its derived type.
 
    \param d The data to copy.
-   
+
    \returns A pointer to a heap-allocated data_field.
 */
 inline data_field *copy( const data_field *d )
@@ -215,8 +216,8 @@ inline data_field *copy( const data_field *d )
 	int type = d->type();
 	switch( type ){
 		default:{
-			my_logic_error( "Unkown data field type encountered!",
-			                __FILE__, __LINE__ );
+			my_logic_error( __FILE__, __LINE__,
+			                "Unkown data field type encountered!" );
 			return nullptr;
 		}
 		case data_field::INT:{
@@ -271,7 +272,7 @@ std::vector<int> &data_as_rw<int>( data_field *df )
 	return df_c->get_data_rw();
 }
 
-		
+
 template <> inline
 const std::vector<double> &data_as<double>( const data_field *df )
 {
@@ -294,6 +295,39 @@ const std::vector<int> &data_as<int>( const data_field *df )
 
 	const dfi *df_c = static_cast<const dfi*>( df );
 	return df_c->get_data();
+}
+
+
+/**
+   \brief Creates a permutation that sorts the given data.
+
+   \param df    The data field to generate the permutation for.
+   \param comp  Comparison functor/function pointer/std::function
+
+   \returns a vector containing the sorting permutation.
+*/
+template<typename T, typename comparator> inline
+std::vector<std::size_t> get_data_permutation( const data_field *df,
+                                               comparator comp )
+{
+	const std::vector<T> &vec = data_as<T>( df );
+	return util::sort_permutation( vec, comp );
+}
+
+
+
+/**
+   \brief Sorts the given data field according to given permutation vector.
+
+   \param df  The data field to sort
+   \param p   The permutation to sort along.
+*/
+template<typename T> inline
+void sort_data_with_permutation( data_field *df,
+                                 const std::vector<std::size_t> &p )
+{
+	std::vector<T> &vec = data_as_rw<T>( df );
+	util::apply_permutation( vec, p );
 }
 
 

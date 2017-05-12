@@ -9,7 +9,7 @@ block_data::block_data()
 	: tstep( 0 ), N( 0 ), N_types( 1 ), atom_style( ATOMIC ),
 	  special_fields_by_name ( N_SPECIAL_FIELDS, "" ),
 	  special_fields_by_index( N_SPECIAL_FIELDS, -1 )
-{}
+{ }
 
 block_data::block_data( std::size_t n_atoms )
 	: tstep( 0 ), N( n_atoms ), N_types( 1 ), atom_style( ATOMIC ),
@@ -22,27 +22,27 @@ block_data::block_data( const block_data &o )
 	  N( o.N ),
 	  N_types( o.N_types ),
 	  atom_style( o.atom_style ),
-	  data( o.n_data_fields() ),
 	  dom( o.dom ),
 	  top( o.top ),
+	  data( o.n_data_fields() ),
 	  special_fields_by_name ( N_SPECIAL_FIELDS, "" ),
 	  special_fields_by_index( N_SPECIAL_FIELDS, -1 )
 {
 	my_assert( __FILE__, __LINE__, data.size() == o.n_data_fields(),
 	           "Data size mismatch after copy!" );
-	
+
 	const std::vector<std::string> &names = o.get_data_names();
-	for( std::size_t i = 0; i < o.n_data_fields(); ++i ){
-		const std::string &name = names[i];
-		data[i] = copy( o.get_data(name) );
+	int i = 0;
+	for( const std::string &name : names ){
+		data[i++] = copy( o.get_data(name) );
 	}
 
 	for( int i = block_data::ID; i < block_data::N_SPECIAL_FIELDS; ++i ){
 		const data_field *df = o.get_special_field(i);
 		if( !df ) continue;
-		
+
 		special_fields_by_name[i] = df->name;
-		
+
 		for( int idx = 0; idx < data.size(); ++idx ){
 			const data_field *df = data[idx];
 			if( df->name == special_fields_by_name[i] ){
@@ -50,7 +50,6 @@ block_data::block_data( const block_data &o )
 			}
 		}
 	}
-
 }
 
 block_data::~block_data()
@@ -113,21 +112,23 @@ void block_data::add_field( const data_field &data_f, int special_field )
 	if( special_field < ID || special_field > IZ ){
 		return;
 	}
-	
+
 	my_assert( __FILE__, __LINE__,
 	           special_fields_by_index[special_field] == -1,
 	           "Special field already set!" );
-	
+
 	special_fields_by_name[special_field]  = data_f.name;
-	special_fields_by_index[special_field] = index;	
+	special_fields_by_index[special_field] = index;
 }
 
 
 block_data &block_data::operator=( block_data o )
 {
-	using std::swap;
-	block_data n(o);
-	swap( *this, n );
+	if( this != &o ){
+		using std::swap;
+		block_data n(o);
+		swap( *this, n );
+	}
 	return *this;
 }
 
@@ -153,8 +154,27 @@ void block_data::copy_meta( const block_data &o )
 {
 	tstep = o.tstep;
 	N = o.N;
+	N_types = o.N_types;
 	atom_style = o.atom_style;
 	dom = o.dom;
+	top = o.top;
+
+	std::vector<std::string> field_names = o.get_data_names();
+
+	for( int spec_field = block_data::ID;
+	     spec_field < N_SPECIAL_FIELDS; ++spec_field ){
+		const data_field *df = o.get_special_field( spec_field );
+		if( !df ) continue;
+
+		for( int i = 0; i < field_names.size(); ++i ){
+			if( field_names[i] == df->name ){
+				special_fields_by_name[spec_field]  = df->name;
+				special_fields_by_index[spec_field] = i;
+				break;
+			}
+		}
+	}
+
 }
 
 void block_data::set_natoms( std::size_t new_size )
@@ -202,7 +222,7 @@ data_field *block_data::remove_field( const std::string &name,
 	// Delete the ptr from all vectors and maps.
 	data.erase( std::find(data.begin(), data.end(), df) );
 	bool found = false;
-	
+
 	for( std::size_t i = 0; i < special_fields_by_name.size(); ++i ){
 		if( special_fields_by_name[i] == name ){
 			special_field = i;
@@ -252,9 +272,7 @@ const data_field *block_data::get_special_field( int field ) const
 
 
 
-
-
-
+// ******************   Non-member functions:    ************************
 void swap( block_data &f, block_data &s )
 {
 	using std::swap;

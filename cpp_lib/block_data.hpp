@@ -22,6 +22,7 @@
 
 namespace lammps_tools {
 
+
 /**
    A class that represents information about a single time step.
 
@@ -51,11 +52,12 @@ public:
 	                      IX,	        ///< x image flag
 	                      IY,	        ///< y image flag
 	                      IZ,	        ///< z image flag
-	                      
+
 	                      /// Fake entry, counts number of special fields.
 	                      N_SPECIAL_FIELDS
 	};
 
+	// Public members:
 	bigint tstep;    ///< The current time step
 	bigint N;        ///< The number of atoms
 	int    N_types;  ///< The number of atom types
@@ -205,12 +207,31 @@ public:
 
 	/// Get read/write pointer to special data field of given kind.
 	data_field *get_special_field_rw( int field );
-	
+
 	/// Get read-only pointer to special data field of given kind.
 	const data_field *get_special_field( int field ) const;
 
 	/// Prints special field data to given output stream.
 	void print_special_fields( std::ostream &out = std::cerr ) const;
+
+	/// Sorts the data along given header with given comparator.
+	template <typename comparator>
+	void sort_along( const std::string &header, const comparator &comp );
+
+	/// Sorts the data along given header with standard '<' comparator.
+	void sort_along( const std::string &header );
+
+	/**
+	   Creates a filtered copy of this block_data.
+
+	   \param f  This copies only field entries i with f(*this, i) == true.
+
+	   \returns a filtered copy of the current block_data.
+	*/
+	template <typename filter>
+	block_data copy_filter( const filter &f ) const;
+
+
 private:
 	/// A vector containing pointers to all data fields.
 	std::vector<data_field*> data;
@@ -221,6 +242,101 @@ private:
 	/// Contains a mapping of "special" fields to their respective indices
 	std::vector<int> special_fields_by_index;
 };
+
+
+
+
+inline
+void block_data::sort_along( const std::string &header )
+{
+	auto comp = []( double x, double y ) { return x < y; };
+	sort_along( header, comp );
+}
+
+template <typename comparator> inline
+void block_data::sort_along( const std::string &header, const comparator &comp )
+{
+	// First find the sorting permutation, then apply it to all fields.
+	const data_field *df = get_data( header );
+	my_assert( __FILE__, __LINE__, df,
+	           "Data field for sort does not exist!" );
+
+	std::vector<std::size_t> p;
+	if( df->type() == data_field::DOUBLE ){
+		p = get_data_permutation<double>( df, comp );
+	}else if( df->type() == data_field::INT ){
+		p = get_data_permutation<int>( df, comp );
+	}else{
+		my_logic_error( __FILE__, __LINE__,
+		                "Unkown data type in block_data::sort_along!" );
+	}
+
+	for( data_field *df : data ){
+		if( df->type() == data_field::DOUBLE ){
+			sort_data_with_permutation<double>( df, p );
+		}else if( df->type() == data_field::INT ){
+			sort_data_with_permutation<int>( df, p );
+		}
+	}
+}
+
+
+template <typename filter> inline
+block_data block_data::copy_filter( const filter &f ) const
+{
+	using dfd = data_field_double;
+	using dfi = data_field_int;
+
+	using cdfd = const dfd;
+	using cdfi = const dfi;
+
+	block_data n;
+	std::vector<data_field*> n_data;
+	for( int i = 0; i < data.size(); ++i ){
+		const data_field *df = data[i];
+		if( df->type() == data_field::INT ){
+			n_data.push_back( new data_field_int( df->name ) );
+		}else if( df->type() == data_field::DOUBLE ){
+			n_data.push_back( new data_field_double( df->name ) );
+		}
+	}
+
+	std::size_t c = 0;
+	for( int i = 0; i < N; ++i ){
+		if( f( *this, i ) ){
+			for( int j = 0; j < data.size(); ++j ){
+				const data_field *df = data[j];
+				data_field *d = n_data[j];
+
+				if( df->type() == data_field::INT ){
+					cdfi* d_in = static_cast<cdfi*>( df );
+					std::vector<int> &v = data_as_rw<int>(d);
+					v.push_back( (*d_in)[j] );
+				}else if( df->type() == data_field::DOUBLE ){
+					cdfd* d_in = static_cast<cdfd*>( df );
+					std::vector<double> &v = data_as_rw<double>(d);
+					v.push_back( (*d_in)[j] );
+				}
+			}
+			++c;
+		}
+	}
+	std::cerr << "Filtered from " << N << " to " << c << " atoms.\n";
+	n.set_natoms( c );
+	for( int i = 0; i < n_data.size(); ++i ){
+		n.add_field( *n_data[i] );
+
+		delete n_data[i];
+	}
+	n.copy_meta( *this );
+	return n;
+}
+
+
+
+
+// ******************* non-member functions:  *******************************
+
 
 
 
@@ -260,6 +376,7 @@ bool grab_field_as( const block_data &b, const std::string &field,
 {
 	my_logic_error( __FILE__, __LINE__,
 	                "grab_field_as only supports int and double!" );
+	return false;
 }
 
 /// Specialisation of grab_field_as for double

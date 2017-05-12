@@ -9,12 +9,12 @@ namespace neighborize {
 
 
 
-int bin_neighborizer::xyz_index_to_bin_index( int ix, int iy, int iz )
+int neighborizer_bin::xyz_index_to_bin_index( int ix, int iy, int iz )
 {
 	return ix + Nx*iy + Nx*Ny*iz;
 }
 
-void bin_neighborizer::bin_index_to_xyz_index( int bin, int &ix,
+void neighborizer_bin::bin_index_to_xyz_index( int bin, int &ix,
                                                int &iy, int &iz )
 {
 	ix = bin % Nx;
@@ -22,7 +22,7 @@ void bin_neighborizer::bin_index_to_xyz_index( int bin, int &ix,
 	iz = (bin - ix - iy*Nx) / (Nx*Ny);
 }
 
-void bin_neighborizer::position_to_xyz_index( double x, double y, double z,
+void neighborizer_bin::position_to_xyz_index( double x, double y, double z,
                                               int &ix, int &iy, int &iz )
 {
 	ix = ( x - xlo[0] ) / bin_size;
@@ -49,7 +49,7 @@ void bin_neighborizer::position_to_xyz_index( double x, double y, double z,
 	}
 }
 
-int bin_neighborizer::position_to_bin_index( double x, double y, double z )
+int neighborizer_bin::position_to_bin_index( double x, double y, double z )
 {
 	int ix, iy, iz;
 	position_to_xyz_index( x, y, z, ix, iy, iz );
@@ -57,7 +57,7 @@ int bin_neighborizer::position_to_bin_index( double x, double y, double z )
 }
 
 
-int bin_neighborizer::shift_bin_index( int bin, int xinc, int yinc, int zinc )
+int neighborizer_bin::shift_bin_index( int bin, int xinc, int yinc, int zinc )
 {
 	int ix = bin % Nx;
 	int iy = ( (bin - ix) % (Nx*Ny) ) / Nx;
@@ -86,12 +86,13 @@ int bin_neighborizer::shift_bin_index( int bin, int xinc, int yinc, int zinc )
 	return xyz_index_to_bin_index( ix, iy, iz );
 }
 
-void bin_neighborizer::setup_bins()
+void neighborizer_bin::setup_bins()
 {
 	if( atom_to_bin.size() > 0 ){
 		atom_to_bin.clear();
 	}
-	atom_to_bin.resize( natoms );
+	atom_to_bin.resize( b.N );
+
 	double pad = 0.1*rc;
 	bin_size = rc + pad;
 
@@ -114,14 +115,9 @@ void bin_neighborizer::setup_bins()
 	double bin_size_x = (xhi[0] - xlo[0]) / Nx;
 	double bin_size_y = (xhi[1] - xlo[1]) / Ny;
 	double bin_size_z = (xhi[2] - xlo[2]) / Nz;
-	double tol = 1e-8;
-	my_assert( __FILE__, __LINE__, (bin_size_x - bin_size_y) < tol,
-	           "Incorrect bin dimensions for x!" );
-	my_assert( __FILE__, __LINE__, (bin_size_x - bin_size_z) < tol,
-	           "Incorrect bin dimensions for y!" );
-	my_assert( __FILE__, __LINE__, (bin_size_y - bin_size_z) < tol,
-	           "Incorrect bin dimensions for z!" );
-	bin_size = bin_size_x;
+
+	bin_size = ( bin_size_x > bin_size_y ) ? bin_size_x : bin_size_y;
+	bin_size = ( bin_size_z > bin_size ) ? bin_size_z : bin_size;
 
 	if( !quiet ) std::cerr << "  ....Making " << Nbins << " bins...\n";
 	try {
@@ -133,64 +129,64 @@ void bin_neighborizer::setup_bins()
 	}
 }
 
-void bin_neighborizer::bin_atoms( particle_filter filt )
+void neighborizer_bin::bin_atoms(  )
 {
-	if( !quiet ) std::cerr << "  ....Binning atoms...\n";
-	for( std::size_t i = 0; i < id.size(); ++i ){
-		if( !filt( b, i ) ) continue;
+	if( !quiet ) std::cerr << "  ....Binning "
+	                       << s2.size() << " atoms...\n";
 
-		int bin = position_to_bin_index( x[i], y[i], z[i] );
-		bins[bin].push_back(i);
-		atom_to_bin[i] = bin;
-		if( !quiet ) std::cerr << "    ....Atom " << i
-		                       << " in bin " << bin << "\n";
+	const std::vector<double> &x = data_as<double>(
+		b.get_special_field( block_data::X ) );
+	const std::vector<double> &y = data_as<double>(
+		b.get_special_field( block_data::Y ) );
+	const std::vector<double> &z = data_as<double>(
+		b.get_special_field( block_data::Z ) );
+
+	// Bin only the atoms in the second group. This way, you can
+	//    later loop over the first group, get their bin on-the-fly,
+	//    and automatically you only compare against atoms from the
+	//    second group. If they are both all, it reduces to the
+	//    standard approach anyway.
+	for( int j : s2 ){
+		int bin = position_to_bin_index( x[j], y[j], z[j] );
+		bins[bin].push_back( j );
+		atom_to_bin[j] = bin;
 	}
+
 }
 
 // Adds to the neighbour list of i the atoms in bin that are in range.
-void bin_neighborizer::add_bin_neighs( int i, const std::list<int> &bin,
-                                       neigh_list &neighs )
+void neighborizer_bin::add_bin_neighs( int i, const std::list<int> &bin,
+                                       neigh_list &neighs,
+                                       const are_neighbours &criterion )
 {
-	double xi[3];
-	xi[0] = x[i];
-	xi[1] = y[i];
-	xi[2] = z[i];
+	const std::vector<int> &id = data_as<int>(
+		b.get_special_field( block_data::ID ) );
+
 
 	for( int j : bin ){
-		if( id[i] >= id[j] ) continue;
-
-		if( !(type[i] == itype || itype == 0) &&
-		     (type[j] == jtype || jtype == 0) ){
-			continue;
-		}
+		if( id[i] == id[j] ) continue;
 
 		// Don't know if you have to check if i is already in j's
 		// bin or not...
-
-		double xj[3];
-		double r[3];
-		xj[0] = x[j];
-		xj[1] = y[j];
-		xj[2] = z[j];
-
-		double r2 = b.dom.dist_2( xi, xj, r );
-		if( r2 > rc2 ) continue;
+		if( !criterion( b, i, j ) ) continue;
 
 		if( !quiet ) std::cerr << "    ....atoms " << i << " and "
 		                       << j << " in bins " << atom_to_bin[i]
-		                       << " and " << atom_to_bin[j]
 		                       << " are neighbours!\n";
 
-		neighs[i].push_back(j);
-		neighs[j].push_back(i);
+		neighs[i].push_back( j );
+		neighs[j].push_back( i );
 		n_neighs += 2;
 	}
 }
 
-void bin_neighborizer::add_neighs_from_bin_2d( int i, neigh_list &neighs )
+void neighborizer_bin::add_neighs_from_bin_2d( int i, neigh_list &neighs,
+                                               const are_neighbours &criterion )
 {
 	int loop_idx[9];
 	loop_idx[0] = atom_to_bin[i];
+
+
 	loop_idx[ 1] = shift_bin_index(loop_idx[0],  1,  0, 0 );
 	loop_idx[ 2] = shift_bin_index(loop_idx[0], -1,  0, 0 );
 	loop_idx[ 3] = shift_bin_index(loop_idx[0],  1,  1, 0 );
@@ -211,22 +207,24 @@ void bin_neighborizer::add_neighs_from_bin_2d( int i, neigh_list &neighs )
 			}
 		}
 		const std::list<int> &bin = bins[bin_index];
-		add_bin_neighs( i, bin, neighs );
+		add_bin_neighs( i, bin, neighs, criterion );
 	}
 }
 
-void bin_neighborizer::add_neighs_from_bin_3d( int i, neigh_list &neighs )
+void neighborizer_bin::add_neighs_from_bin_3d( int i, neigh_list &neighs,
+                                               const are_neighbours &criterion )
 {
 	int loop_idx[27];
 	loop_idx[0] = atom_to_bin[i];
-	loop_idx[ 1] = shift_bin_index(loop_idx[0],  1,  0, 0 );
-	loop_idx[ 2] = shift_bin_index(loop_idx[0], -1,  0, 0 );
-	loop_idx[ 3] = shift_bin_index(loop_idx[0],  1,  1, 0 );
-	loop_idx[ 4] = shift_bin_index(loop_idx[0], -1,  1, 0 );
-	loop_idx[ 5] = shift_bin_index(loop_idx[0],  0,  1, 0 );
-	loop_idx[ 6] = shift_bin_index(loop_idx[0],  0, -1, 0 );
-	loop_idx[ 7] = shift_bin_index(loop_idx[0],  1, -1, 0 );
-	loop_idx[ 8] = shift_bin_index(loop_idx[0], -1, -1, 0 );
+
+	loop_idx[ 1] = shift_bin_index(loop_idx[0],  1,  0,  0 );
+	loop_idx[ 2] = shift_bin_index(loop_idx[0], -1,  0,  0 );
+	loop_idx[ 3] = shift_bin_index(loop_idx[0],  1,  1,  0 );
+	loop_idx[ 4] = shift_bin_index(loop_idx[0], -1,  1,  0 );
+	loop_idx[ 5] = shift_bin_index(loop_idx[0],  0,  1,  0 );
+	loop_idx[ 6] = shift_bin_index(loop_idx[0],  0, -1,  0 );
+	loop_idx[ 7] = shift_bin_index(loop_idx[0],  1, -1,  0 );
+	loop_idx[ 8] = shift_bin_index(loop_idx[0], -1, -1,  0 );
 
 	loop_idx[ 9] = shift_bin_index(loop_idx[0],  0,  0,  1 );
 	loop_idx[10] = shift_bin_index(loop_idx[0],  1,  0,  1 );
@@ -259,69 +257,60 @@ void bin_neighborizer::add_neighs_from_bin_3d( int i, neigh_list &neighs )
 			}
 		}
 		const std::list<int> &bin = bins[bin_index];
-		add_bin_neighs( i, bin, neighs );
+		add_bin_neighs( i, bin, neighs, criterion );
 	}
 }
 
 
-void bin_neighborizer::neigh_bin_atom( int i, neigh_list &neighs )
+void neighborizer_bin::neigh_bin_atom( int i, neigh_list &neighs,
+                                       const are_neighbours &criterion )
 {
 	if( dims == 2 ){
-		add_neighs_from_bin_2d( i, neighs );
+		add_neighs_from_bin_2d( i, neighs, criterion );
 	}else{
-		add_neighs_from_bin_3d( i, neighs );
+		add_neighs_from_bin_3d( i, neighs, criterion );
 	}
 }
 
 
 
 
-double bin_neighborizer::build( neigh_list &neighs,
-                                const are_neighbours &criterion,
-                                particle_filter filt,
-                                int neigh_count_estimate )
+int neighborizer_bin::build( neigh_list &neighs,
+                             const are_neighbours &criterion )
 {
-	my_timer m;
-	m.tic();
-	if( !quiet ) std::cerr << "Building neigh list for "
-	                       << id.size() << " particles.\n";
-	neighs.resize( id.size() );
+	my_timer m(std::cerr);
+	if( !quiet ) m.tic();
+
 	for( std::vector<int> &ni : neighs ){
 		ni.clear();
-		if( neigh_count_estimate > 0 )
-			ni.reserve( neigh_count_estimate );
 	}
 	n_neighs = 0;
-	m.toc("Clearing neigh list");
+	if( !quiet ) m.toc("Clearing neigh list");
 
 	// 0. Allocates bins and atom_to_bin containers,
 	//    sets number of bins and bin size
-	m.tic();
+	if( !quiet ) m.tic();
 	setup_bins();
-	m.toc("Setting up bins");
+	if( !quiet ) m.toc("Setting up bins");
 
 	// 1. Put each atom that is not filtered in a bin.
-	m.tic();
-	bin_atoms( filt );
-	m.toc("Binning atoms");
+	if( !quiet ) m.tic();
+	bin_atoms();
+	if( !quiet ) m.toc("Binning atoms");
 
-	// 2. Loop over all atoms ids, and add all atoms in their bin
-	//    or adjacent bins to their neighbour list, if within rc.
-	m.tic();
-	for( std::size_t i = 0; i < id.size(); ++i ){
-		// Skip i here too since it's not indexed in atom_to_bin:
-		if( !filt( b, i ) ) continue;
-
-		neigh_bin_atom( i, neighs );
+	// 2. Loop over atoms in first group, get their bin on-the-fly,
+	//    and neighbourize the atoms in that and adjacent bins, which
+	//    are only those of group 2. :D
+	if( !quiet ) std::cerr << "  ....Looping over "
+	                       << s1.size() << " atoms...\n";
+	if( !quiet ) m.tic();
+	for( int i : s1 ){
+		neigh_bin_atom( i, neighs, criterion );
 	}
-	m.toc("Neighborizing");
+	if( !quiet ) m.toc("Neighborizing");
 
 
-	if( !quiet ){
-		std::cerr << "Done! Counted " << n_neighs << " neighbours.\n";
-	}
-
-	return static_cast<double>( n_neighs ) / natoms;
+	return n_neighs;
 }
 
 

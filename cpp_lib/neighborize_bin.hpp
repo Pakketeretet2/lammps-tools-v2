@@ -20,50 +20,24 @@ namespace lammps_tools {
 namespace neighborize {
 
 // For binning it is more convenient to use a class...
-class bin_neighborizer
+class neighborizer_bin : public neighborizer
 {
 public:
 
-	bin_neighborizer( const block_data &b,
-	                  const std::vector<std::string> &fields,
-	                  double rc, int dims, int itype, int jtype )
-		: rc(rc), rc2(rc*rc), dims(dims), itype(itype), jtype(jtype),
-		  periodic(b.dom.periodic),  b(b),
-		  xlo({b.dom.xlo[0], b.dom.xlo[1], b.dom.xlo[2]}),
-		  xhi({b.dom.xhi[0], b.dom.xhi[1], b.dom.xhi[2]}),
-		  quiet(true), natoms(b.N), n_neighs(0),
-		  Nx(0), Ny(0), Nz(0), Nbins(0), bin_size(0.0)
+	neighborizer_bin( const block_data &b, const std::list<int> &s1,
+	                  const std::list<int> &s2, int dims, double rc )
+		: neighborizer( b, s1, s2, dims ),
+		  rc(rc), rc2(rc*rc),
+		  n_neighs(0), Nx(0), Ny(0), Nz(0), Nbins(0), bin_size(0.0)
+	{}
 
-	{
-		if( !grab_common_fields( b, fields, id, type, x, y, z ) ){
-			my_logic_error( __FILE__, __LINE__,
-			                "Failed to grab necessary fields!" );
-		}
-	}
+	~neighborizer_bin(){}
 
-	double rc, rc2;
-	int dims;
-	int itype, jtype;
-	int periodic;
-
-	const block_data &b;
-	double xlo[3];
-	double xhi[3];
-
-	std::vector<int> id;
-	std::vector<int> type;
-	std::vector<double> x;
-	std::vector<double> y;
-	std::vector<double> z;
-
-	bool quiet;
-
-	double build( neigh_list &neighs,
-	              const are_neighbours &criterion,
-	              particle_filter filt = pass_all,
-	              int neigh_count_estimate = 100 );
 
 private:
+	virtual int build( neigh_list &neighs,
+	                   const are_neighbours &criterion );
+
 	// Some helper functions:
 	int  xyz_index_to_bin_index( int ix, int iy, int iz );
 	int  position_to_bin_index( double x, double y, double z );
@@ -75,20 +49,31 @@ private:
 	int  shift_bin_index( int bin, int xinc, int yinc, int zinc );
 
 	// These do the actual work:
-	void setup_bins();
-	void bin_atoms( particle_filter filt );
-	void add_bin_neighs( int i, const std::list<int> &bin,
-	                     neigh_list &neighs );
-	void neigh_bin_atom( int i, neigh_list &neighs );
 
-	void add_neighs_from_bin_2d( int i, neigh_list &neighs );
-	void add_neighs_from_bin_3d( int i, neigh_list &neighs );
+	void setup_bins();
+	void bin_atoms();
+
+	void add_bin_neighs( int i, const std::list<int> &bin,
+	                     neigh_list &neighs,
+	                     const are_neighbours &criterion );
+
+	void neigh_bin_atom( int i, neigh_list &neighs,
+	                     const are_neighbours &criterion );
+
+	void add_neighs_from_bin_2d( int i, neigh_list &neighs,
+	                             const are_neighbours &criterion );
+
+	void add_neighs_from_bin_3d( int i, neigh_list &neighs,
+	                             const are_neighbours &criterion );
 
 	// members:
 	std::vector<int> atom_to_bin;
 	std::vector<std::list<int> > bins;
 
-	int natoms, n_neighs;
+
+	double rc, rc2;
+
+	int n_neighs;
 	int Nx, Ny, Nz, Nbins;
 	double bin_size;
 };

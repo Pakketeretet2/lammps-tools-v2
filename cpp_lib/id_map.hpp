@@ -3,7 +3,7 @@
 
 /**
    \file id_map.hpp
-   
+
    Declarations for a mapping of atom ids to atom indices.
 */
 
@@ -19,6 +19,13 @@ namespace lammps_tools {
 */
 class id_map {
 public:
+
+	/// Empty constructor.
+	id_map(){}
+
+	/// Empty destructor.
+	~id_map(){}
+
 	/**
 	   Constructor based on given atom ids
 
@@ -26,6 +33,19 @@ public:
 	*/
 	template <typename int_type> explicit
 	id_map( const std::vector<int_type> &ids )
+	{
+		build<int_type>( ids );
+	}
+
+	/// Size of underlying vector.
+	std::size_t size() const
+	{ return m.size(); }
+
+	/**
+	   Construct the id map.
+	*/
+	template <typename int_type>
+	void build( const std::vector<int_type> &ids )
 	{
 		auto max_id_p = std::max_element( ids.begin(), ids.end() );
 		my_assert( __FILE__, __LINE__, max_id_p != ids.end(),
@@ -35,15 +55,15 @@ public:
 		for( int i = 0; i < ids.size(); ++i ){
 			m[ids[i]] = i;
 		}
-
 	}
+
 
 	/// Returns the index in ids (and other arrays) of given id
 	int operator[]( std::size_t id ) const
 	{
 		return m[id];
 	}
-	
+
 private:
 	std::vector<int> m; ///< std::map the mapping is stored in
 };

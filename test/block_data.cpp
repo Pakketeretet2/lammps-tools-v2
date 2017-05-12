@@ -1,5 +1,6 @@
 #include "block_data.hpp"
 #include "data_field.hpp"
+#include "dump_reader_lammps.hpp"
 
 #include <catch.hpp>
 
@@ -44,7 +45,7 @@ TEST_CASE ( "block_data copy constructor works correctly.", "[block_data_copy_co
 	REQUIRE( b2.n_data_fields() == b1.n_data_fields() );
 	REQUIRE( b1.get_special_field( block_data::ID) );
 	REQUIRE( b2.get_special_field( block_data::ID) );
-	
+
 	const std::vector<std::string> &names = b1.get_data_names();
 	for( const std::string &n : names ){
 		REQUIRE( b1.get_data( n ) != nullptr );
@@ -61,7 +62,7 @@ TEST_CASE ( "block_data copy constructor works correctly.", "[block_data_copy_co
 			for( std::size_t i = 0; i < df1.size(); ++i ){
 				REQUIRE( df1[i] == df2[i] );
 			}
-			
+
 		}else{
 			const data_field_int &df1 =
 				dynamic_cast<const data_field_int&>( *b1.get_data( n ) );
@@ -71,9 +72,9 @@ TEST_CASE ( "block_data copy constructor works correctly.", "[block_data_copy_co
 			for( std::size_t i = 0; i < df1.size(); ++i ){
 				REQUIRE( df1[i] == df2[i] );
 			}
-			
+
 		}
-		
+
 	}
 }
 
@@ -204,4 +205,26 @@ TEST_CASE ( "block_data remove_field works correctly.", "[block_data_add_remove]
 	REQUIRE( names[0] == "data" );
 	REQUIRE( names[1] == "data_2" );
 	REQUIRE( names[2] == "x" );
+}
+
+
+
+
+TEST_CASE ( "block_data copy_filter works.", "[block_data_copy_filter]" ) {
+
+	using namespace lammps_tools;
+
+	std::string dname = "lammps_dump_file_test.dump.bin";
+	std::vector<std::string> h = { "id", "type", "x", "y", "z", "c_pe" };
+	std::unique_ptr<readers::dump_reader_lammps> d(
+		readers::make_dump_reader_lammps( dname, 2 ) );
+	d->set_column_headers( h );
+	block_data b;
+	int status = d->next_block( b );
+	REQUIRE( status == 0 );
+
+	auto filter = []( const block_data &b, int i )
+		{ return (i%2) == 0; };
+	block_data bf = b.copy_filter( filter );
+
 }

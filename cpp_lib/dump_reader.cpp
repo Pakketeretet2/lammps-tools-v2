@@ -68,7 +68,7 @@ dump_reader *make_dump_reader( const std::string &fname,
 }
 
 dump_reader *make_dump_reader( std::istream &input,
-                                             int dformat, int fformat )
+                               int dformat, int fformat )
 {
 	dump_reader *reader = nullptr;
 
