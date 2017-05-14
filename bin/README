@@ -1,0 +1,3 @@
+This dir contains some small binaries based on lammps-tools
+that are more suited to be a stand-alone binary instead of
+part of the library.
