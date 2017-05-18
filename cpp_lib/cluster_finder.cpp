@@ -4,6 +4,8 @@
 
 namespace lammps_tools {
 
+namespace neighborize {
+
 void add_conns_to_network( neigh_list &conns,
                            std::list<std::list<int> > &networks )
 {
@@ -64,5 +66,6 @@ void find_molecular_networks ( const block_data &b, const neigh_list &neighs,
 	add_conns_to_network( conns, networks );
 }
 
+} // namespace neighborize
 
 } // namespace lammps_tools

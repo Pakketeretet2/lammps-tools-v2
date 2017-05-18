@@ -25,9 +25,11 @@ void swap( data_field &f, data_field &s )
 		case data_field::DOUBLE: {
 			data_field_double &d_f = dynamic_cast<data_field_double&>(f);
 			data_field_double &d_s = dynamic_cast<data_field_double&>(s);
-			swap( d_f, d_s );			
+			swap( d_f, d_s );
 		}
 	}
 }
+
+
 
 } // namespace lammps_tools

@@ -12,8 +12,7 @@
 
 namespace lammps_tools {
 
-using neighborize::neigh_list;
-
+namespace neighborize {
 
 
 /**
@@ -29,12 +28,12 @@ using neighborize::neigh_list;
    \param networks Contains a list of lists with networks, that is, all
                    molecule ids that are directly or indirectly connected.
 */
-void find_molecular_networks ( const block_data &b, const neigh_list &neighs,
-                               neigh_list &conns,
-                               std::list<std::list<int> > &networks );
+void find_molecular_networks( const block_data &b, const neigh_list &neighs,
+                              neigh_list &conns,
+                              std::list<std::list<int> > &networks );
 
 
-
+} // namespace neighborize
 
 } // namespace lammps_tools
 

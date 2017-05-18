@@ -14,6 +14,14 @@ HAVE_LIB_GSD = 1
 # For reading in gzipped dump files.
 HAVE_BOOST_GZIP = 1
 
+# Some routines are parallelised with OpenMP for speed.
+# This enables those:
+USE_OMP = 0
+
+# Makes the code that does assertions and error checking
+# use exceptions rather than terminate:
+USE_EXCEPTIONS = 1
+
 
 include Makefile.common
 

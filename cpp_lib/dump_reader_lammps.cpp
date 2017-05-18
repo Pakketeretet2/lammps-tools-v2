@@ -62,7 +62,6 @@ void dump_reader_lammps::add_custom_data_fields( std::vector<data_field*> &dfs,
                                                  block_data &b )
 {
 	for( data_field *df : dfs ){
-		int special_field_type;
 		if( header_to_special_field.count( df->name ) ){
 			int special_field_type =
 				header_to_special_field[ df->name ];

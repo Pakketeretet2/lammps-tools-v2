@@ -105,6 +105,27 @@ struct data_field_der : public data_field
 		construct_from_other( other );
 	}
 
+	/**
+	   Explicitly set the data from given vector.
+	*/
+	explicit data_field_der( const std::string &n,
+	                         const std::vector<T> &vec )
+		: data_field(n), data(vec)
+	{
+		std::cerr << "Called copy-from-vector constructor.\n";
+	}
+
+	/**
+	   Move vector.
+	*/
+	explicit data_field_der( const std::string &n,
+	                         std::vector<T> &&vec )
+		: data_field(n), data(vec)
+	{
+		std::cerr << "Called move-from-vector constructor.\n";
+	}
+
+
 
 	/**
 	   \brief Helper to ease construction from other, either ref or pointer
@@ -129,6 +150,8 @@ struct data_field_der : public data_field
 		swap( *this, other );
 		return *this;
 	}
+
+
 
 	/**
 	   Empty destructor.

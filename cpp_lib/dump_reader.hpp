@@ -22,16 +22,16 @@ class dump_reader_lammps;
 
 /// Specifies various file formats
 enum FILE_FORMATS {
-	PLAIN   = 0,
-	GZIP    = 1,
-	BIN     = 2
+	PLAIN   = 0,  ///< Plain text
+	GZIP    = 1,  ///< Gzipped plain text
+	BIN     = 2   ///< Binary
 };
 
 /// Specifies various dump formats
 enum DUMP_FORMATS {
-	LAMMPS  = 0,
-	HOOMD   = 1,
-	NAMD    = 2
+	LAMMPS  = 0,   ///< LAMMPS format
+	HOOMD   = 1,   ///< HOOMD GSD format
+	NAMD    = 2    ///< NAMD DCD format
 };
 
 

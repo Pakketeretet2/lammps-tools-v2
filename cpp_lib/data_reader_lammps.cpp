@@ -31,8 +31,6 @@ int get_header_info( std::istream &in, block_data &b,
 
 	while( in ){
 		std::getline(in,line);
-		std::stringstream ss(line);
-		bool line_handled = false;
 
 		if( line.empty() ) continue;
 
@@ -71,15 +69,22 @@ int get_header_info( std::istream &in, block_data &b,
 }
 
 
-int read_data_atoms_atomic( std::istream &in, block_data &b, bool quiet )
+int read_data_atoms( std::istream &in, block_data &b, bool quiet )
 {
 	std::string line;
 	std::getline(in,line);
 	std::vector<std::string> words = util::split(line);
 	// Check size.
 	std::size_t n_cols = words.size();
-	my_assert( __FILE__, __LINE__, n_cols == 5 || n_cols == 8,
+	int n_col_target = 5;
+
+	if( b.atom_style == block_data::MOLECULAR ){
+		n_col_target = 6;
+	}
+	my_assert( __FILE__, __LINE__,
+	           n_cols == n_col_target || n_cols == n_col_target + 3,
 	           "Incorrect column count for atomic!" );
+
 	if( !quiet ) std::cerr << "    ....Allocating storage for "
 	                       << b.N << " worth of atoms.\n";
 
@@ -94,28 +99,46 @@ int read_data_atoms_atomic( std::istream &in, block_data &b, bool quiet )
 	data_field_int iy( "iy" );
 	data_field_int iz( "iz" );
 
-	std::cerr << "n_cols == " << n_cols << ".\n";
-	bool has_image_flags = false;
-	if( n_cols == 8 ){
-		has_image_flags = true;
+	bool has_image_flags = (n_cols == n_col_target + 3);
+
+	if( has_image_flags ){
 		ix.resize(b.N);
 		iy.resize(b.N);
 		iz.resize(b.N);
 	}
-
-	for( std::size_t i = 0; i < b.N; ++i ){
-		std::stringstream ss(line);
-		ss >> id[i] >> type[i] >> x[i] >> y[i] >> z[i];
-
-		if( has_image_flags ){
-			ss >> ix[i] >> iy[i] >> iz[i];
-		}
-
-		std::getline(in,line);
+	if( b.atom_style == block_data::MOLECULAR ){
+		mol.resize(b.N);
 	}
 
+	if( b.atom_style == block_data::ATOMIC ){
+		for( std::size_t i = 0; i < b.N; ++i ){
+			std::stringstream ss(line);
+			ss >> id[i] >> type[i] >> x[i] >> y[i] >> z[i];
+
+			if( has_image_flags ){
+				ss >> ix[i] >> iy[i] >> iz[i];
+			}
+
+			std::getline(in,line);
+		}
+	}else if( b.atom_style == block_data::MOLECULAR ){
+		for( std::size_t i = 0; i < b.N; ++i ){
+			std::stringstream ss(line);
+			ss >> id[i] >> mol[i] >> type[i] >> x[i] >> y[i] >> z[i];
+
+			if( has_image_flags ){
+				ss >> ix[i] >> iy[i] >> iz[i];
+			}
+
+			std::getline(in,line);
+		}
+	}
+	if( !quiet ) std::cerr << "    ....Adding fields.\n";
 
 	b.add_field(   id, block_data::ID );
+	if( b.atom_style == block_data::MOLECULAR ){
+		b.add_field( mol, block_data::MOL );
+	}
 	b.add_field( type, block_data::TYPE );
 	b.add_field(    x, block_data::X );
 	b.add_field(    y, block_data::Y );
@@ -127,11 +150,6 @@ int read_data_atoms_atomic( std::istream &in, block_data &b, bool quiet )
 		b.add_field( iz, block_data::IZ );
 	}
 
-	return 0;
-}
-
-int read_data_atoms_molecular( std::istream &in, block_data &b, bool quiet )
-{
 	return 0;
 }
 
@@ -203,19 +221,22 @@ int get_data_body( std::istream &in, block_data &b,
 				std::getline(in,line);
 			}
 			std::getline(in,line);
+
 		}else if( keyword == "Atoms" ){
 			if( !quiet ) std::cerr << "    ....Reading atoms...\n";
 			std::getline(in,line);
 			if( words[2] == "atomic" ){
 				b.atom_style = block_data::ATOMIC;
-				status = read_data_atoms_atomic( in, b, quiet );
 			}else if( words[2] == "molecular" ){
 				b.atom_style = block_data::MOLECULAR;
-				status = read_data_atoms_molecular( in, b, quiet );
 			}
+			status = read_data_atoms( in, b, quiet );
 			my_assert( __FILE__, __LINE__, status == 0,
 			           "Error reading in positions!" );
+			if( !quiet ) std::cerr << "    ....Read in " << b.N
+			                       << " atoms.\n";
 			std::getline(in,line);
+
 		}else if( keyword == "Velocities" ){
 			if( !quiet ) std::cerr << "    ....Reading velocities...\n";
 			std::getline(in,line);
@@ -237,7 +258,6 @@ int get_data_body( std::istream &in, block_data &b,
 			std::getline(in,line);
 			for( std::size_t i = 0; i < b.N_types; ++i ){
 				std::stringstream ss(line);
-				int type;
 				// Determine the number of coeffs.
 				int ncoeffs = util::split(line).size() - 1;
 				std::vector<double> coeffs(ncoeffs);
@@ -250,7 +270,10 @@ int get_data_body( std::istream &in, block_data &b,
 		}else if( keyword == "PairIJ" ){
 
 		}else{
-
+			std::cerr << "I don't know how to handle \""
+			          << line << "\"!\n";
+			my_runtime_error( __FILE__, __LINE__,
+			                  "Unrecognized line encountered!" );
 		}
 
 
@@ -262,34 +285,33 @@ int get_data_body( std::istream &in, block_data &b,
 			}
 			std::cerr << "\n";
 		}
-
 	}
+	my_assert( __FILE__, __LINE__, b.n_data_fields() > 0,
+	           "Data file had no data fields?" );
 	return 0;
 }
 
+block_data block_data_from_lammps_data( const std::string &fname, int &status,
+                                        bool quiet )
+{
+	std::ifstream in( fname );
+	return block_data_from_lammps_data( in, status, quiet );
+}
 
-/**
-   Reads in a block_data from a LAMMPS data file.
-   It assumes the file is correctly formatted!
 
-   \param in      Input stream to read from.
-   \param status  Will contain 0 on success, non-zero integer otherwise.
-
-   \returns A new block_data containing the info from the given data file.
-*/
 block_data block_data_from_lammps_data( std::istream &in, int &status,
                                         bool quiet )
 {
 	if( !quiet ) std::cerr << "Reading LAMMPS data....\n";
 	block_data b;
 	std::string line;
-	// Ignore first two lines.
-	std::getline(in,line);
+	// Ignore first line, get_header_info skips blanks so no worries.
 	std::getline(in,line);
 
 	while( in ){
 		std::string last_line = "";
 		status = get_header_info( in, b, last_line, quiet );
+
 		my_assert( __FILE__, __LINE__, status == 0,
 		           "Failure in reading data file!" );
 		if( !quiet ) std::cerr << "  ....Attempting to read body, starting from "

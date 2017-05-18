@@ -91,9 +91,13 @@ int dump_reader_lammps_bin::next_block_meta( block_data &block,
 
 	while( true ){
 		fread( &ntimestep, sizeof(bigint), 1, in );
-		if( !in ) return -1;
+		if( !in ){
+			std::cerr << "Error opening binary file!\n";
+			return -1;
+		}
 
 		if( feof(in) ){
+			std::cerr << "EOF encountered in binary file!\n";
 			return 1;
 		}
 

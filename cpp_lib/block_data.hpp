@@ -408,9 +408,75 @@ bool  grab_field_as<int>( const block_data &b, const std::string &field,
 }
 
 
+// Convenience functions:
+inline const std::vector<double> &get_x( const block_data &b )
+{
+	return data_as<double>( b.get_special_field( block_data::X ) );
+}
+
+inline const std::vector<double> &get_y( const block_data &b )
+{
+	return data_as<double>( b.get_special_field( block_data::Y ) );
+}
+
+inline const std::vector<double> &get_z( const block_data &b )
+{
+	return data_as<double>( b.get_special_field( block_data::Z ) );
+}
+
+inline const std::vector<int> &get_id( const block_data &b )
+{
+	return data_as<int>( b.get_special_field( block_data::ID ) );
+}
+
+inline const std::vector<int> &get_type( const block_data &b )
+{
+	return data_as<int>( b.get_special_field( block_data::TYPE ) );
+}
+
+inline const std::vector<int> &get_mol( const block_data &b )
+{
+	return data_as<int>( b.get_special_field( block_data::MOL ) );
+}
+
+
+
+
+inline std::vector<double> &get_x_rw(  block_data &b )
+{
+	return data_as_rw<double>( b.get_special_field_rw( block_data::X ) );
+}
+
+inline std::vector<double> &get_y_rw(  block_data &b )
+{
+	return data_as_rw<double>( b.get_special_field_rw( block_data::Y ) );
+}
+
+inline std::vector<double> &get_z_rw(  block_data &b )
+{
+	return data_as_rw<double>( b.get_special_field_rw( block_data::Z ) );
+}
+
+inline std::vector<int> &get_id_rw(  block_data &b )
+{
+	return data_as_rw<int>( b.get_special_field_rw( block_data::ID ) );
+}
+
+inline std::vector<int> &get_type_rw(  block_data &b )
+{
+	return data_as_rw<int>( b.get_special_field_rw( block_data::TYPE ) );
+}
+
+inline std::vector<int> &get_mol_rw(  block_data &b )
+{
+	return data_as_rw<int>( b.get_special_field_rw( block_data::MOL ) );
+}
+
+
 
 
 
 } // namespace lammps_tools
+
 
 #endif // BLOCK_DATA_HPP

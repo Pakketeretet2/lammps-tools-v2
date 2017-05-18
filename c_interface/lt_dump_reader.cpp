@@ -28,11 +28,14 @@ void lt_delete_dump_reader( lt_dump_reader_handle drh )
 int lt_dump_reader_status( lt_dump_reader_handle drh )
 {
 	lammps_tools::readers::dump_reader *dr = drh.dr;
-	if( dr == nullptr ) return POINTER_NULL;
+	if( dr == nullptr ){
+		return POINTER_NULL;
+	}
 
-	if     ( dr->good() ) return IS_GOOD;
-	else if( dr->eof()  ) return AT_EOF;
-	else                  return IS_BAD;
+	if( dr->eof() )  return AT_EOF;
+	if( dr->good() ) return IS_GOOD;
+	else             return IS_BAD;
+
 }
 
 int lt_get_next_block( lt_dump_reader_handle drh, lt_block_data_handle *bdh )
@@ -60,6 +63,21 @@ void lt_set_col_header( lt_dump_reader_handle drh, int n, const char *header )
 
 	dump_reader_lammps *drl = static_cast<dump_reader_lammps*>( drh.dr );
 	drl->set_column_header( n, header );
+}
+
+bool lt_set_column_header_as_special( lt_dump_reader_handle drh,
+                                      const std::string &header,
+                                      int special_field_type )
+{
+	using lammps_tools::readers::dump_reader_lammps;
+	if( drh.dformat != lammps_tools::readers::LAMMPS ){
+		std::cerr << "Ignoring column headers for non-LAMMPS dump...\n";
+		return false;
+	}
+
+	dump_reader_lammps *drl = static_cast<dump_reader_lammps*>( drh.dr );
+
+	return drl->set_column_header_as_special( header, special_field_type );
 }
 
 } // extern "C"

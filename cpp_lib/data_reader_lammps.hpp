@@ -28,6 +28,18 @@ namespace readers {
 block_data block_data_from_lammps_data( std::istream &in, int &status,
                                         bool quiet = true );
 
+/**
+   \brief Reads block from named data file.
+
+   \param fname   Data file name.
+   \param status  Set to 0 on success, non-negative otherwise.
+
+   \returns       A new block_data object.
+*/
+block_data block_data_from_lammps_data( const std::string &fname, int &status,
+                                        bool quiet = true );
+
+
 } // namespace readers
 
 } // namespace lammps_tools

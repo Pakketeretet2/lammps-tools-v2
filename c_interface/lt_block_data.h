@@ -7,7 +7,7 @@
 
 /**
    \file lt_block_data.h
-   
+
    Exposes a block_data object through the C interface.
 */
 
@@ -37,17 +37,15 @@ struct lt_block_data_handle
 		swap( *this, new_block );
 		return *this;
 	}
-	
+
 	~lt_block_data_handle()
 	{
-		std::cerr << "Calling delete on contained block_data at "
-		          << bd << ".\n";
 		if( bd ) delete bd;
 	}
 
 	lammps_tools::bigint time_step() const
 	{ return bd->tstep; }
-	
+
 	lammps_tools::bigint n_atoms() const
 	{ return bd->N; }
 
@@ -63,7 +61,7 @@ struct lt_block_data_handle
 
 /**
    \brief returns a pointer to named data field.
-   
+
    \param[in]  bdh  The block data to read from.
    \param[in]  name The name of the data to read.
    \param[out] size Will contain the data field size on success.
@@ -77,51 +75,11 @@ lammps_tools::data_field *lt_get_data( lt_block_data_handle *bdh,
                                        const char *name,
                                        size_t *size, int *type );
 
-/**
-   \brief returns a pointer to named data field, interpreted as double.
-   
-   \param[in]  bdh  The block data to read from.
-   \param[in]  name The name of the data to read.
-   \param[out] size Will contain the data field size on success.
-   \param[out] type Will contain the data type on success.
+const std::vector<double> &lt_special_field_double( lt_block_data_handle *bdh,
+                                                    int special_field );
 
-   On failure to find data, size, type and data shall be unchanged.
-
-   \returns true on success, false otherwise.
-*/
-bool lt_data_as_double( lt_block_data_handle *bdh, const char *name,
-                        size_t *size, int *type, std::vector<double> &data );
-
-/*
-bool lt_data_as_double( lt_block_data_handle *bdh, const char *name,
-                        size_t *size, int *type, double **data )
-*/
-
-/**
-   \brief returns a pointer to named data field, interpreted as int.
-   
-   \param[in]  bdh  The block data to read from.
-   \param[in]  name The name of the data to read.
-   \param[out] size Will contain the data field size on success.
-   \param[out] type Will contain the data type on success.
-
-   On failure to find data, size and type shall be unchanged.
-
-   \returns a pointer to named data field or nullptr if it could not be found.
-*/
-/*
-lammps_tools::data_field_int *lt_data_as_int( lt_block_data_handle *bdh,
-                                              const char *name,
-                                              size_t *size, int *type );
-*/
-
-
-/**
-   \brief returns an empty block_data_handle.
-
-   \returns an empty block_data_handle.
-*/
-lt_block_data_handle lt_empty_block_data_handle();
+const std::vector<int> &lt_special_field_int( lt_block_data_handle *bdh,
+                                              int special_field );
 
 } // extern "C"
 

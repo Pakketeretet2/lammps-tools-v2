@@ -106,6 +106,19 @@ int lt_number_of_blocks( lt_dump_reader_handle drh );
 void lt_set_col_header( lt_dump_reader_handle drh, int n, const char *header );
 
 
+/**
+   \brief Specifies that a certain column header is special.
+
+   \param drh                  Handle to the dump reader.
+   \param header               The header that is special.
+   \param special_field_type   The ID of the special field type the header is.
+*/
+bool lt_set_column_header_as_special( lt_dump_reader_handle drh,
+                                      const std::string &header,
+                                      int special_field_type );
+
+
+
 } // extern "C"
 
 #endif // LT_DUMP_READER_H

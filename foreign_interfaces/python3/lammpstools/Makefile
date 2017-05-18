@@ -1,17 +1,18 @@
 CC = g++
+# INC = -I../../../cpp_lib/
 INC = -I../../../c_interface/
 LNK = -llammpstools
-FLAGS = -O3 -std=c++11 -shared -fPIC -llammpstools `python-config --cflags --ldflags`
+FLAGS = -O0 -std=c++11 -shared -fPIC -llammpstools `python-config --cflags --ldflags`
 FLAGS += $(INC)
 FLAGS += $(LNK)
 
-OBJS = dumpreader.so block_data.so
+OBJS = block_data_.so dump_reader_.so
 
 .PHONY = clean all
 
 all: $(OBJS) $(LIB)
 
-%.so: %_python.cpp
+%_.so: %_python.cpp
 	$(CC) $(FLAGS) $^ -o $@
 
 clean:

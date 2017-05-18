@@ -9,8 +9,77 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
+#include <exception>
 
 namespace lammps_tools {
+
+#ifdef NDEBUG
+constexpr const bool no_debug = true;
+#else
+constexpr const bool no_debug = false;
+#endif // NDEBUG
+
+
+#ifdef USE_EXCEPTIONS
+constexpr const bool use_exceptions = true;
+#else
+constexpr const bool use_exceptions = false;
+#endif // USE_EXCEPTIONS
+
+
+// Implementation of assertions and the like in terms of std::terminate:
+inline void my_assert_terminate( const std::string &file, int line, bool test,
+                                 const std::string &msg )
+{
+	if( !(test) ){
+		std::cerr << file << " ( " << line << " ): Assertion failed: "
+		          << msg << "\n";
+		std::terminate();
+	}
+}
+
+inline void my_logic_error_terminate( const std::string &file, int line,
+                                      const std::string &msg )
+{
+	std::cerr << file << " ( " << line << " ): Logic error: "
+	          << msg << "\n";
+	std::terminate();
+}
+inline void my_runtime_error_terminate( const std::string &file, int line,
+                                        const std::string &msg )
+{
+	std::cerr << file << " ( " << line << " ): Runtime error: "
+	          << msg << "\n";
+	std::terminate();
+}
+
+// Implementation of assertions and the like that throw an exception:
+inline void my_assert_except( const std::string &file, int line, bool test,
+                              const std::string &msg )
+{
+	if( !test ){
+		std::stringstream ss;
+		ss << file << " ( " << line << " ): " << msg;
+		throw std::runtime_error( ss.str() );
+	}
+}
+inline void my_logic_error_except( const std::string &file, int line,
+                                   const std::string &msg )
+{
+	std::stringstream ss;
+	ss << file << " ( " << line << " ): " << msg;
+	throw std::logic_error( ss.str() );
+}
+
+inline void my_runtime_error_except( const std::string &file, int line,
+                                     const std::string &msg )
+{
+	std::stringstream ss;
+	ss << file << " ( " << line << " ): " << msg;
+	throw std::runtime_error( ss.str() );
+}
+
 
 /**
    \brief asserts that test is true, and if not, terminates.
@@ -24,13 +93,13 @@ namespace lammps_tools {
 inline void my_assert( const std::string &file, int line, bool test,
                        const std::string &msg )
 {
-#ifndef NDEBUG
-	if( !(test) ){
-		std::cerr << file << " ( " << line << " ): Assertion failed: "
-		          << msg << "\n";
-		std::terminate();
+	if( !no_debug ){
+		if( use_exceptions ){
+			my_assert_except( file, line, test, msg );
+		}else{
+			my_assert_terminate( file, line, test, msg );
+		}
 	}
-#endif
 }
 
 
@@ -44,9 +113,13 @@ inline void my_assert( const std::string &file, int line, bool test,
 inline void my_logic_error( const std::string &file, int line,
                             const std::string &msg )
 {
-	std::cerr << file << " ( " << line << " ): Logic error: "
-	          << msg << "\n";
-	std::terminate();
+	if( !no_debug ){
+		if( use_exceptions ){
+			my_logic_error_except( file, line, msg );
+		}else{
+			my_logic_error_terminate( file, line, msg );
+		}
+	}
 }
 
 /**
@@ -59,9 +132,13 @@ inline void my_logic_error( const std::string &file, int line,
 inline void my_runtime_error( const std::string &file, int line,
                               const std::string &msg )
 {
-	std::cerr << file << " ( " << line << " ): Runtime error: "
-	          << msg << "\n";
-	std::terminate();
+	if( !no_debug ){
+		if( use_exceptions ){
+			my_runtime_error_except( file, line, msg );
+		}else{
+			my_runtime_error_terminate( file, line, msg );
+		}
+	}
 }
 
 /**

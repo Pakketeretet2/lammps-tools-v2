@@ -1,7 +1,7 @@
 SHELL = /bin/sh
 
 CC = g++
-FLAGS = -std=c++11 -g -pedantic -frounding-math -shared -fPIC \
+FLAGS = -std=c++11 -g -O0 -pedantic -frounding-math -shared -fPIC \
 	-Werror=int-conversion -Werror=implicit -L/usr/lib/openmpi/  \
 	-Werror=return-type -Werror=uninitialized -Wall
 
@@ -19,6 +19,15 @@ SRC  = $(wildcard cpp_lib/*.$(EXT))
 SRC += $(wildcard c_interface/*.$(EXT))
 
 # Conditional flags:
+
+ifeq ($(USE_OMP), 1)
+	FLAGS += -DUSE_OPENMP -fopenmp
+endif
+
+ifeq ($(USE_EXCEPTIONS), 1)
+	FLAGS += -DUSE_EXCEPTIONS
+endif
+
 ifeq ($(HAVE_LIB_CGAL), 1)
 	LNK   += -lCGAL -lgmp
 	FLAGS += -DHAVE_LIB_CGAL -frounding-math
