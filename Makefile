@@ -18,6 +18,8 @@ HAVE_BOOST_GZIP = 1
 # This enables those:
 USE_OMP = 0
 
+# Stuff
+
 # Makes the code that does assertions and error checking
 # use exceptions rather than terminate:
 USE_EXCEPTIONS = 1
