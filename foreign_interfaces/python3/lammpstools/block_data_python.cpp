@@ -14,6 +14,8 @@ PYBIND11_PLUGIN(block_data_) {
 		.def("n_atoms", &lt_block_data_handle::n_atoms);
 
 	// m.def("get_data", &lt_get_data, "Get block data from dump reader handle" );
+	m.def("has_special_field", &lt_has_special_field,
+	      "Checks if block has special field" );
 	m.def("special_field_double", &lt_special_field_double,
 	      "Get special field interpreted as double" );
 	m.def("special_field_int",    &lt_special_field_int,

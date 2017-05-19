@@ -66,7 +66,8 @@ class block_data:
         x = block_data_.special_field_double( handle, 3 )
         y = block_data_.special_field_double( handle, 4 )
         z = block_data_.special_field_double( handle, 5 )
-        X = np.empty( [N, 3], dtype = float )
+        N = handle.n_atoms()
+        X = np.empty( [ N, 3], dtype = float )
         X[:,0] = x
         X[:,1] = y
         X[:,2] = z
@@ -74,7 +75,7 @@ class block_data:
         #ids   = np.zeros( meta.N, dtype = int )
         #types = np.zeros( meta.N, dtype = int )
         #x     = np.zeros( [ meta.N, 3 ], dtype = float )
-        #mol   = None
+        mol   = None
         # TODO: ids
         # TODO: types
         # TODO: ids

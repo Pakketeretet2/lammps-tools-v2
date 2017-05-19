@@ -44,11 +44,19 @@ class dump_reader:
     def next_block(self):
         """ Returns the next block_data. """
         bh = block_data_.block_data_handle()
-        dump_reader_.get_next_block(self.handle, bh)
-        b = block_data.block_data.init_from_handle( bh )
-        return b
+        status = dump_reader_.get_next_block(self.handle, bh)
+        if status == 0:
+            b = block_data.block_data.init_from_handle( bh )
+            return b
+        else:
+            return None
 
     def set_column_headers(self, headers):
         """ Sets the column headers for the dump file. """
         for i, h in zip( range(0,len(headers)), headers):
             dump_reader_.set_column_header( self.handle, i, h )
+
+
+    def set_special_column(self, header, special_field):
+        """ Sets the given column header as special field. """
+        dump_reader_.set_special_column( self.handle, header, special_field )

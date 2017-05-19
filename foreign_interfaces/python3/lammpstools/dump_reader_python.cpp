@@ -18,6 +18,7 @@ PYBIND11_PLUGIN(dump_reader_) {
 	m.def("get_next_block", &lt_get_next_block);
 	m.def("number_of_blocks", &lt_number_of_blocks);
 	m.def("set_column_header", &lt_set_col_header);
+	m.def("set_special_column", &lt_set_column_header_as_special);
 
 	pybind11::enum_<LT_DUMP_READER_STATUS>(m, "DUMP_READER_STATUS")
 		.value("IS_GOOD", LT_DUMP_READER_STATUS::IS_GOOD)
