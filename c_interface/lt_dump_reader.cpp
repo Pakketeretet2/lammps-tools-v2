@@ -76,7 +76,10 @@ bool lt_set_column_header_as_special( lt_dump_reader_handle drh,
 	}
 
 	dump_reader_lammps *drl = static_cast<dump_reader_lammps*>( drh.dr );
-
+	if( !drl ){
+		std::cerr << "Error casting to LAMMPS dumpreader!\n";
+		return false;
+	}
 	return drl->set_column_header_as_special( header, special_field_type );
 }
 

@@ -2,6 +2,8 @@ import dump_reader_
 import block_data_
 import block_data
 
+import sys
+
 class dump_reader:
     """
     Interface to the C++ dump reader. This is the preferred method of
@@ -15,6 +17,11 @@ class dump_reader:
         """ Initialises dump reader. """
         print("Called dump_reader.__init__")
         self.handle = dump_reader_.new_dump_reader( fname, fformat, dformat )
+        status = dump_reader_.dump_reader_status(self.handle)
+        if status !=  dump_reader_.DUMP_READER_STATUS.IS_GOOD:
+            print("Error opening dump file ", fname, " for file format ",
+                  fformat, " and dump format ", dformat, "!")
+            sys.exit(-1)
 
     def __del__(self):
         """ Deletes the dump reader handle. """
@@ -55,6 +62,32 @@ class dump_reader:
         """ Sets the column headers for the dump file. """
         for i, h in zip( range(0,len(headers)), headers):
             dump_reader_.set_column_header( self.handle, i, h )
+
+        header_set = [ False ]*6
+
+        # Pretty names for the special columns:
+        pretty_names = [ "ID", "MOL", "TYPE", "X", "Y", "Z" ]
+
+        for h in headers:
+            # Assume some defaults:
+            if h == "id":     i = 0;
+            elif h == "mol":  i = 1
+            elif h == "type": i = 2
+            elif h == "x":    i = 3
+            elif h == "y":    i = 4
+            elif h == "z":    i = 5
+
+            name = pretty_names[i]
+
+            if( header_set[i]  ):
+                print( "Warning: Overwriting", name, "header.",
+                       file = sys.stderr )
+            else:
+                print( "Guessing header", h, "\tis for", name,
+                       file = sys.stderr )
+            self.set_special_column( h, i )
+            header_set[i] = True
+
 
 
     def set_special_column(self, header, special_field):

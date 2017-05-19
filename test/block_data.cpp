@@ -228,3 +228,45 @@ TEST_CASE ( "block_data copy_filter works.", "[block_data_copy_filter]" ) {
 	block_data bf = b.copy_filter( filter );
 
 }
+
+
+TEST_CASE ( "Convenience accessors work.", "[block_data_convenience]" ) {
+	using namespace lammps_tools;
+	using dfd = data_field_double;
+
+	block_data b;
+	dfd d1( "data", 3 );
+	dfd d2( "data_2", 3 );
+	dfd  x( "x", 3 );
+	dfd  y( "y", 3 );
+
+	b.set_natoms( d1.size() );
+	d1[0] = 1.337;
+	d1[1] = d1[0]*2;
+	d1[2] = d1[1]*2;
+	d2[0] = -12;
+	d2[1] = -18;
+	d2[2] =   4;
+	x[0] = 0.1;
+	x[1] = 1.1;
+	x[2] = 2.1;
+	y[0] = y[1] = y[2] = 3;
+
+	b.add_field(d1);
+	b.add_field(d2);
+	b.add_field( x, block_data::X );
+	b.add_field( y, block_data::Y );
+
+	std::vector<double>       &x_rw = get_x_rw( b );
+	const std::vector<double> &y_ro = get_y( b );
+
+	REQUIRE( x_rw[0] == Approx(x[0]) );
+	REQUIRE( x_rw[1] == Approx(x[1]) );
+	REQUIRE( x_rw[2] == Approx(x[2]) );
+	REQUIRE( x_rw[3] == Approx(x[3]) );
+	REQUIRE( y_ro[0] == Approx(y[0]) );
+	REQUIRE( y_ro[1] == Approx(y[1]) );
+	REQUIRE( y_ro[2] == Approx(y[2]) );
+	REQUIRE( y_ro[3] == Approx(y[3]) );
+
+}

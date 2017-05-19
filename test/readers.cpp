@@ -15,7 +15,7 @@ TEST_CASE ( "LAMMPS data file gets read correctly.", "[read_lammps_data]" )
 	REQUIRE( in );
 	int status = -1;
 
-	block_data b = readers::block_data_from_lammps_data( in, status );
+	block_data b = readers::block_data_from_lammps_data( in, status, false );
 	REQUIRE( b.get_data_names().size() == 11 );
 	// These entries should _not_ be found:
 	REQUIRE( b.get_data( "xlo" ) == nullptr );
@@ -141,7 +141,7 @@ TEST_CASE ( "LAMMPS binary dump file gets read correctly.", "[read_lammps_dump_b
 	rl->set_column_header_as_special( "x", block_data::X );
 	rl->set_column_header_as_special( "y", block_data::Y );
 	rl->set_column_header_as_special( "z", block_data::Z );
-	
+
 	REQUIRE( r );
 	REQUIRE( r->good() );
 

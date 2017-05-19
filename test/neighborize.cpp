@@ -320,8 +320,8 @@ using namespace lammps_tools;
 
 	are_neighs[i][5][3] = true;
 
-	//int method = DIST_BIN;
-	int method = DIST_NSQ;
+	int method = DIST_BIN;
+	// int method = DIST_NSQ;
 	double avg = 0.0;
 	for( int k = 0; k < 5; ++k ){
 		int itype = types[k][0];
@@ -382,7 +382,7 @@ TEST_CASE( "Neighbour list can work with in-molecule connections", "[neigh_list_
 		neigh_list neighs;
 		double avg_neighs = make_list_dist( neighs, b, 2, 3, DIST_BIN,
 		                                    dims, rc, mol_policy,
-		                                    bond_policy, 0 );
+		                                    bond_policy, true );
 		data_field_int ncs( "ncs", b.N );
 		for( std::size_t i = 0; i < neighs.size(); ++i ){
 			ncs[i] = neighs[i].size();

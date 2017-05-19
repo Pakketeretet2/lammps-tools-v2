@@ -5,6 +5,7 @@
 #include "dump_reader_lammps.hpp"
 #include "my_timer.hpp"
 #include "neighborize.hpp"
+#include "readers.hpp"
 #include "util.hpp"
 #include "writers.hpp"
 
@@ -13,12 +14,61 @@
 #include <vector>
 
 
+
+TEST_CASE( "Cluster analysis on triangles (smaller set)", "[cluster_triangles_smaller]" ) {
+	using namespace lammps_tools;
+	using namespace lammps_tools::readers;
+	using namespace lammps_tools::neighborize;
+
+	std::string dname = "triangle_neighs_test.data";
+	int status;
+	block_data b = block_data_from_lammps_data( dname, status );
+
+	REQUIRE( status == 0 );
+
+	neigh_list neighs;
+
+	const std::vector<int> &id = data_as<int>(
+		b.get_special_field( block_data::ID ) );
+	const std::vector<int> &type = data_as<int>(
+		b.get_special_field( block_data::TYPE ) );
+	const std::vector<int> &mol = data_as<int>(
+		b.get_special_field( block_data::MOL ) );
+
+	const std::vector<double> &x = data_as<double>(
+		b.get_special_field( block_data::X ) );
+	const std::vector<double> &y = data_as<double>(
+		b.get_special_field( block_data::Y ) );
+	const std::vector<double> &z = data_as<double>(
+		b.get_special_field( block_data::Z ) );
+
+
+	double rc = 2.0;
+	int dims = 3;
+	int mol_policy = neighborizer::IGNORE;
+	int bond_policy = neighborizer::IGNORE;
+
+	double avg_neighs = make_list_dist( neighs, b,
+	                                    2, 3, DIST_BIN, dims, rc,
+	                                    mol_policy, bond_policy );
+	id_map im( id );
+	std::vector<int> patches = { 52094, 52083, 52077,
+	                             52117, 52111, 52100 };
+	for( int idi : patches ){
+		int i = im[idi];
+		REQUIRE( (type[i] == 2 || type[i] == 3) );
+		REQUIRE( neighs[i].size() == 1 );
+	}
+}
+
+
+
 TEST_CASE( "Cluster analysis on triangles", "[cluster_triangles]" ) {
 	using namespace lammps_tools;
 	using namespace lammps_tools::readers;
 	using namespace lammps_tools::neighborize;
 
-	std::string dname = "icosahedron_0.dump.bin";
+	std::string dname = "icosahedron_0_first_last.dump.bin";
 
 	std::vector<std::string> common_headers = { "id", "type",
 	                                            "x", "y", "z" };
@@ -27,7 +77,7 @@ TEST_CASE( "Cluster analysis on triangles", "[cluster_triangles]" ) {
 	                                         "x", "y", "z" };
 
 	std::unique_ptr<dump_reader_lammps> d(
-		make_dump_reader_lammps( dname, 2 ) );
+		make_dump_reader_lammps( dname, BIN ) );
 
 	d->set_column_headers( all_headers );
 
@@ -40,25 +90,10 @@ TEST_CASE( "Cluster analysis on triangles", "[cluster_triangles]" ) {
 
 	std::vector<block_data> blocks;
 	block_data tmp;
-	int c = 0;
-	my_timer t(std::cerr);
-	t.tic();
 	// int n_blocks = 20;
 	bigint last_time = 0;
 	while( d->next_block(tmp) == 0 ){
 		blocks.push_back(tmp);
-		++c;
-		int n_skip = 25;
-		if( c % n_skip == 0 ){
-			std::string msg = "Read ";
-			msg += std::to_string(n_skip);
-			msg += " blocks of ";
-			msg += std::to_string( tmp.N );
-			msg += " atoms each";
-			t.toc(msg);
-			t.tic();
-			std::cerr << "At " << c << " blocks...\n";
-		}
 		last_time = tmp.tstep;
 	}
 
@@ -68,12 +103,11 @@ TEST_CASE( "Cluster analysis on triangles", "[cluster_triangles]" ) {
 	int bond_policy = neighborizer::IGNORE;
 	int n_block = 0;
 
-	std::ofstream net_out( "networks.dat" );
-	std::ofstream out( "icosahedron_0_colours.dump.bin", std::ios::binary );
 	for( block_data &b : blocks ){
-		t.tic();
 		++n_block;
 
+		const std::vector<int> &id = data_as<int>(
+			b.get_special_field( block_data::ID ) );
 		const std::vector<int> &type = data_as<int>(
 			b.get_special_field( block_data::TYPE ) );
 		const std::vector<int> &mol = data_as<int>(
@@ -83,18 +117,13 @@ TEST_CASE( "Cluster analysis on triangles", "[cluster_triangles]" ) {
 		double avg_neighs = make_list_dist( neighs, b,
 		                                    2, 3, DIST_BIN, dims, rc,
 		                                    mol_policy, bond_policy );
-		t.toc("Neighbourising");
-
-		t.tic();
 		neigh_list conns;
 		std::list<std::list<int> > networks;
 
 		find_molecular_networks ( b, neighs, conns, networks );
-		t.toc("Finding networks");
+		if( b.tstep == 0 ){
+			for( int i = 0; i < b.N; ++i ){
 
-		for( int i = 0; i < b.N; ++i ){
-
-			if( b.tstep == 0 ){
 				// 153 in a molecule so 152 neighbours.
 				if( type[i] == 1 ){
 					REQUIRE( neighs[i].size() == 152 );
@@ -106,46 +135,34 @@ TEST_CASE( "Cluster analysis on triangles", "[cluster_triangles]" ) {
 					REQUIRE( neighs[i].size() == 152 );
 				}
 			}
-		}
-
-
-		t.tic();
-		std::vector<int> id_to_color( b.N );
-		data_field_int colour( "cluster_size", b.N );
-
-		for( int i = 0; i < b.N; ++i ){
-			colour[i] = 0;
-			for( const std::list<int> &n : networks ){
-				if( util::contains( n, mol[i] ) ){
-					colour[i] = n.size();
-					break;
-				}
+		}else{
+			// Only two blocks, so.
+			int target_mol = 341;
+			const auto &mol_conns = conns[target_mol];
+			std::cerr << target_mol << " connects to ";
+			for( int mol_id : mol_conns ){
+				std::cerr << " " << mol_id;
 			}
+			std::cerr << "\n";
+			id_map im( id );
+			std::vector<int> patches = { 52094, 52083, 52077,
+			                             52117, 52111, 52100 };
+			for( int i : patches ){
+				int idx = im[ i ];
+				const std::vector<int> &ni = neighs[idx];
+				std::cerr << "Particle " << i << " (index = "
+				          << idx << ") has neighs:";
+				for( int j : ni ){
+					std::cerr << " " << id[j];
+				}
+				std::cerr << "\n";
+			}
+
+
+			REQUIRE( util::contains( mol_conns, 15 ) );
+			REQUIRE( util::contains( mol_conns, 260 ) );
+			REQUIRE( util::contains( mol_conns, 325 ) );
 		}
-		b.add_field( colour );
-		t.toc("Colouring");
-
-		t.tic();
-		std::vector<int> histogram( 30 );
-		for( const std::list<int> &n : networks ){
-			int s = n.size();
-			if( s > 29 ) continue;
-
-			histogram[s]++;
-		}
-		int s = 0;
-		for( int c : histogram ){
-			net_out << b.tstep << " " << s << " " << c
-			        << " " << c*s << "\n";
-			++s;
-		}
-		net_out << "\n";
-		t.toc("Dumping to histogram");
-
-		t.tic();
-		writers::block_to_lammps_dump_bin( out, b );
-		t.toc("Write to file");
-
 	}
 
 }
