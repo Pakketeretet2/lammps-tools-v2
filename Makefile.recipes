@@ -19,7 +19,7 @@ test :
 	@cd test; ./test_cpp_lib
 
 $(EXE) : $(OBJ)
-	$(LINK) -o $@ $(OBJ) -Wl,-z,defs
+	$(LINK) -o $@ $(OBJ)
 
 $(OBJ_DIR)$(S)%.o : %.$(EXT)
 	$(call MAKE_DIR,$(dir $@))
