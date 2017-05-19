@@ -3,16 +3,15 @@ SHELL = /bin/sh
 CC = g++
 FLAGS = -std=c++11 -g -O3 -pedantic -frounding-math -shared -fPIC \
 	-Werror=int-conversion -Werror=implicit -L/usr/lib/openmpi/  \
-	-Werror=return-type -Werror=uninitialized -Wall -Werror
+	-Werror=return-type -Werror=uninitialized -Wall
 
 PY_DIR     = "/usr/include/python3.6m/"
 LAMMPS_DIR = "/home/stefan/projects/lammps-mine/src/"
 TIMER_DIR  = "$(HOME)/projects/my_timer/lib/"
 GSD_DIR    = "/usr/local/lib/"
 
-LNK = -L./ -L$(TIMER_DIR) -lm
-INC = -I./ -I$(PY_DIR) -I$(TIMER_DIR)
-
+LNK = -L./ -lm
+INC = -I./ -I$(PY_DIR)
 
 EXT  = cpp
 SRC  = $(wildcard cpp_lib/*.$(EXT))
