@@ -2,6 +2,7 @@
 #include "triangulate.hpp"
 #include "neighborize.hpp"
 #include <cmath>
+#include <array>
 
 namespace lammps_tools {
 
