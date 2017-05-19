@@ -1,7 +1,7 @@
 SHELL = /bin/sh
 
 CC = g++
-FLAGS = -std=c++11 -g -O0 -pedantic -frounding-math -shared -fPIC \
+FLAGS = -std=c++11 -g -O3 -pedantic -frounding-math -shared -fPIC \
 	-Werror=int-conversion -Werror=implicit -L/usr/lib/openmpi/  \
 	-Werror=return-type -Werror=uninitialized -Wall
 
