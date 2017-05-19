@@ -68,6 +68,8 @@ struct lt_block_data_handle
 */
 bool lt_has_special_field( lt_block_data_handle *bdh, int special_field );
 
+} // extern "C"
+
 /**
    \brief Returns special field as vector<double>
 
@@ -87,7 +89,6 @@ const std::vector<double> &lt_special_field_double( lt_block_data_handle *bdh,
 const std::vector<int> &lt_special_field_int( lt_block_data_handle *bdh,
                                               int special_field );
 
-} // extern "C"
 
 
 
