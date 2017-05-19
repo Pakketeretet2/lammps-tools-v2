@@ -2,7 +2,7 @@ CC = g++
 # INC = -I../../../cpp_lib/
 INC = -I../../../c_interface/
 LNK = -llammpstools
-FLAGS = -O0 -std=c++11 -shared -fPIC -llammpstools `python-config --cflags --ldflags`
+FLAGS = -O3 -std=c++11 -shared -fPIC `python-config --cflags --ldflags`
 FLAGS += $(INC)
 FLAGS += $(LNK)
 
