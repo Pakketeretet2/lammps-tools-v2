@@ -19,10 +19,13 @@ namespace readers {
 class dump_reader_lammps_plain : public dump_reader_lammps
 {
 public:
+
 	/// Initialises dump reader from file.
-	dump_reader_lammps_plain( const std::string &fname );
+	dump_reader_lammps_plain( const std::string &fname,
+	                          int dump_style = dump_reader_lammps::CUSTOM );
 	/// Initialises dump reader from input stream.
-	dump_reader_lammps_plain( std::istream &istream );
+	dump_reader_lammps_plain( std::istream &istream,
+	                          int dump_style = dump_reader_lammps::CUSTOM );
 	/// Cleanup:
 	virtual ~dump_reader_lammps_plain();
 
@@ -41,6 +44,14 @@ private:
 	                             const std::string &line,
 	                             std::vector<std::string> &headers,
 	                             std::vector<data_field*> &data_fields );
+
+	// Set custom fields for dump local.
+	void set_local_data_fields( block_data &block,
+	                            const std::string &line,
+	                            std::vector<std::string> &headers,
+	                            std::vector<data_field*> &data_fields );
+
+
 
 	// Reads the info of the current block into block_data from file.
 	void append_data_to_fields( block_data &block,

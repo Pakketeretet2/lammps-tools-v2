@@ -29,16 +29,18 @@ namespace lammps_tools {
 
 namespace readers {
 
-dump_reader_lammps_bin::dump_reader_lammps_bin( const std::string &fname )
-	: in( nullptr )
+dump_reader_lammps_bin::dump_reader_lammps_bin( const std::string &fname,
+                                                int dump_style )
+	: dump_reader_lammps( dump_style ), in( nullptr )
 {
 	in = fopen( fname.c_str(), "rb" );
 	my_assert( __FILE__, __LINE__, in, "Failed to open dump file!" );
 }
 
 dump_reader_lammps_bin::dump_reader_lammps_bin( const std::string &fname,
-                                                std::vector<std::string> h )
-	: in( nullptr )
+                                                std::vector<std::string> h,
+                                                int dump_style )
+	: dump_reader_lammps( dump_style ), in( nullptr )
 {
 	in = fopen( fname.c_str(), "rb" );
 	my_assert( __FILE__, __LINE__, in, "Failed to open dump file!" );

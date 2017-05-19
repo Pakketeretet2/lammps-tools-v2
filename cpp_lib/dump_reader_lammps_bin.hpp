@@ -30,7 +30,8 @@ public:
 
 	   If no headers are provided, it assumes a standard atomic format.
 	*/
-	dump_reader_lammps_bin( const std::string &fname );
+	dump_reader_lammps_bin( const std::string &fname,
+	                        int dump_style = dump_reader_lammps::CUSTOM );
 
 	/**
 	   Initialises dump reader from file.
@@ -39,7 +40,8 @@ public:
 	   \param h     Vector containing the columns contained in the file.
 	*/
 	dump_reader_lammps_bin( const std::string &fname,
-	                        std::vector<std::string> h );
+	                        std::vector<std::string> h,
+	                        int dump_style = dump_reader_lammps::CUSTOM );
 
 
 	/// Cleanup:

@@ -24,7 +24,8 @@ class dump_reader_lammps_gzip : public dump_reader_lammps_plain
 {
 public:
 	/// Initialises dump reader from file.
-	dump_reader_lammps_gzip( const std::string &fname );
+	dump_reader_lammps_gzip( const std::string &fname,
+	                         int dump_style = dump_reader_lammps::CUSTOM );
 
 	/// Cleanup:
 	virtual ~dump_reader_lammps_gzip();

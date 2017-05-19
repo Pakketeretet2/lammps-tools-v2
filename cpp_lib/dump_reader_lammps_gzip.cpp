@@ -13,8 +13,8 @@ namespace lammps_tools {
 namespace readers {
 
 #ifdef HAVE_BOOST_GZIP
-dump_reader_lammps_gzip::dump_reader_lammps_gzip( const std::string &fname )
-	: dump_reader_lammps_plain( fname ),
+dump_reader_lammps_gzip::dump_reader_lammps_gzip( const std::string &fname, int dump_style )
+	: dump_reader_lammps_plain( fname, dump_style ),
 	  infile( fname, std::ios_base::in |std::ios_base::binary )
 {
 	in.push( boost::iostreams::gzip_decompressor() );
@@ -22,8 +22,8 @@ dump_reader_lammps_gzip::dump_reader_lammps_gzip( const std::string &fname )
 
 }
 #else
-dump_reader_lammps_gzip::dump_reader_lammps_gzip( const std::string &fname )
-	: dump_reader_lammps_plain( fname ),
+dump_reader_lammps_gzip::dump_reader_lammps_gzip( const std::string &fname, int dump_style )
+	: dump_reader_lammps_plain( fname, dump_style ),
 	  infile( fname, std::ios_base::in |std::ios_base::binary ), in(fname)
 {
 	my_logic_error( __FILE__, __LINE__, "Gzipped files are not supported "

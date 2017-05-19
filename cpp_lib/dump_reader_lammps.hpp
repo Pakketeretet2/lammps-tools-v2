@@ -18,11 +18,17 @@ class dump_reader_lammps : public dump_reader
 {
 public:
 	enum dump_styles { ATOMIC,
-	                   CUSTOM };
+	                   CUSTOM,
+	                   LOCAL };
 
 	/// Empty constructor
-	dump_reader_lammps(){}
+	dump_reader_lammps( int dump_style ) : dump_style(dump_style)
+	{
+		std::cerr << "Initiated dump_reader_lammps with "
+		          << "dump_style " << dump_style << ".\n";
+	}
 
+	const int dump_style;
 
 	/// Empty destructor
 	virtual ~dump_reader_lammps() {}
@@ -36,7 +42,7 @@ public:
 
 	/**
 	   \brief Marks a given column header as a special field.
-	   
+
 	   \param header
 	   \param special_field_type
 
@@ -50,7 +56,7 @@ public:
 
 	/**
 	   \brief Adds given vector of data fields to given block.
-	   
+
 	   \note This function deletes the data fields!
 
 	   \param[in/out] dfs Data fields to add. They are deleted afterwards.
@@ -58,7 +64,19 @@ public:
 	*/
 	void add_custom_data_fields( std::vector<data_field*> &dfs,
 	                             block_data &b );
-	
+
+
+	/**
+	   \brief Adds given vector of data fields to given block.
+
+	   \note This function deletes the data fields!
+
+	   \param[in/out] dfs Data fields to add. They are deleted afterwards.
+	   \param[out]    b   The block data to which the fields are added.
+	*/
+	void add_local_data_fields( std::vector<data_field*> &dfs,
+	                            block_data &b );
+
 protected:
 	std::map<std::string, int> header_to_special_field;
 private:

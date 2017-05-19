@@ -19,8 +19,9 @@ namespace lammps_tools {
 
 namespace readers {
 
-dump_reader_lammps_plain::dump_reader_lammps_plain( const std::string &fname )
-	: in_file( nullptr ), in( nullptr )
+dump_reader_lammps_plain::dump_reader_lammps_plain( const std::string &fname,
+                                                    int dump_style )
+	: dump_reader_lammps( dump_style ), in_file( nullptr ), in( nullptr )
 {
 	in_file = new std::ifstream( fname );
 	my_assert( __FILE__, __LINE__, in_file,
@@ -28,8 +29,9 @@ dump_reader_lammps_plain::dump_reader_lammps_plain( const std::string &fname )
 	in = in_file;
 }
 
-dump_reader_lammps_plain::dump_reader_lammps_plain( std::istream &istream )
-	: in_file( nullptr ), in( nullptr )
+dump_reader_lammps_plain::dump_reader_lammps_plain( std::istream &istream,
+                                                    int dump_style )
+	: dump_reader_lammps( dump_style ), in_file( nullptr ), in( nullptr )
 {
 	in = &istream;
 	my_assert( __FILE__, __LINE__, in,
@@ -88,12 +90,22 @@ int dump_reader_lammps_plain::next_block_meta( block_data &block,
 	double xhi[3] = {0,0,0};
 	tstep = N = 0;
 
+	bool setup_box_and_get_body = false;
+
 	while( get_line( line ) ){
 		if( line == "ITEM: TIMESTEP" ){
 			get_line( line );
 			tstep = std::stoul( line );
 			if( !quiet ) std::cerr << "    ....t = " << tstep << "\n";
+		}else if( line == "ITEM: NUMBER OF ENTRIES" ){
+			my_assert( __FILE__, __LINE__, dump_style == LOCAL,
+			           "Got NUMBER OF ENTRIES in dump_style atom!" );
+			get_line( line );
+			N = std::stoul( line );
+			if( !quiet ) std::cerr << "    ....N = " << N << "\n";
 		}else if( line == "ITEM: NUMBER OF ATOMS" ){
+			my_assert( __FILE__, __LINE__, dump_style != LOCAL,
+			           "Got NUMBER OF ATOMS in dump_style local!" );
 			get_line( line );
 			N = std::stoul( line );
 			if( !quiet ) std::cerr << "    ....N = " << N << "\n";
@@ -118,9 +130,29 @@ int dump_reader_lammps_plain::next_block_meta( block_data &block,
 				          << xlo[1] << ", " << xhi[1]
 				          << " ] x [ " << xlo[2] << ", "
 				          << xhi[2] << " ].\n";
+
 		}else if( starts_with( line, "ITEM: ATOMS" ) ){
+			my_assert( __FILE__, __LINE__, dump_style != LOCAL,
+			           "Got ITEM: ATOMS in dump_style local!" );
+
 			// Stop there.
 			last_line = line;
+			setup_box_and_get_body = true;
+		}else if( starts_with( line, "ITEM: ENTRIES" ) ){
+			my_assert( __FILE__, __LINE__, dump_style == LOCAL,
+			           "Got NUMBER OF ENTRIES in dump_style atom!" );
+			std::cerr << "Got number of entries!\n";
+
+			// Stop there.
+			last_line = line;
+			setup_box_and_get_body = true;
+		}else{
+			std::cerr << "!! Encountered line '" << line
+			          << "' and have no clue what to do !!\n";
+			return -1;
+		}
+
+		if( setup_box_and_get_body ){
 			if( check_good() ){
 
 				block.tstep = tstep;
@@ -152,14 +184,11 @@ int dump_reader_lammps_plain::next_block_meta( block_data &block,
 				return 0;
 			}else{
 				std::cerr << "!! File no longer good after "
-				          << "encountering ATOMS !!";
+				          << "Atom or Entry section! !!\n";
 				return -1;
 			}
-		}else{
-			std::cerr << "!! Encountered line '" << line
-			          << "' and have no clue what to do !!\n";
-			return -1;
 		}
+
 	}
 	if( check_eof() ){
 		return 1;
@@ -176,9 +205,16 @@ void dump_reader_lammps_plain::set_custom_data_fields(
 	using dfi = data_field_int;
 	using dfd = data_field_double;
 
-	my_assert( __FILE__, __LINE__,
-	           util::starts_with( line, "ITEM: ATOMS" ),
-	           "Wrong line passed to set_custom_data_fields!" );
+	if( dump_style == CUSTOM ){
+		my_assert( __FILE__, __LINE__,
+		           util::starts_with( line, "ITEM: ATOMS" ),
+		           "Wrong line passed to set_custom_data_fields!" );
+	}else if( dump_style == LOCAL ){
+		my_assert( __FILE__, __LINE__,
+		           util::starts_with( line, "ITEM: ENTRIES" ),
+		           "Wrong line passed to set_custom_data_fields!" );
+
+	}
 	std::vector<std::string> words = split(line);
 
 	const std::vector<std::string> &col_headers = get_column_headers();
@@ -208,7 +244,7 @@ void dump_reader_lammps_plain::set_custom_data_fields(
 			dfd *new_field = new dfd( w, block.N );
 			data_fields.push_back( new_field );
 		}
-
+		// TODO: FIX THIS
 		if( w == "mol" ){
 			// Assume atom_style is molecular.
 			block.atom_style = block_data::MOLECULAR;
@@ -241,6 +277,8 @@ void dump_reader_lammps_plain::append_data_to_fields(
 	}
 }
 
+
+
 int dump_reader_lammps_plain::next_block_body(
 	block_data &block, const std::string &last_line )
 {
@@ -250,10 +288,11 @@ int dump_reader_lammps_plain::next_block_body(
 	std::string line = last_line;
 
 	block.set_natoms( block.N );
-	int dump_style = ATOMIC;
 
-	if( starts_with( line, "ITEM: ATOMS" ) ){
-		if( !quiet ) std::cerr << "    ....Reading atoms....\n";
+	if( starts_with( line, "ITEM: ATOMS" ) ||
+	    starts_with( line, "ITEM: ENTRIES" ) ){
+
+
 		// Figure out which column maps which.
 		// Read out the next block.N lines.
 		std::vector<std::string> headers;
@@ -261,7 +300,11 @@ int dump_reader_lammps_plain::next_block_body(
 
 
 		if( line == "ITEM: ATOMS" ){
-			dump_style = ATOMIC;
+			if( !quiet ) std::cerr << "    ....Reading atoms....\n";
+			my_assert( __FILE__, __LINE__,
+			           dump_style == ATOMIC,
+			           "Inconsistent dump style for atomic dump!" );
+
 			headers.push_back("id");
 			headers.push_back("type");
 			headers.push_back("x");
@@ -279,15 +322,30 @@ int dump_reader_lammps_plain::next_block_body(
 			data_fields.push_back( x );
 			data_fields.push_back( y );
 			data_fields.push_back( z );
-		}else{
-			dump_style = CUSTOM;
+		}else if( util::starts_with( line, "ITEM: ATOMS " ) ){
+			my_assert( __FILE__, __LINE__,
+			           dump_style == CUSTOM,
+			           "Inconsistent dump style for custom dump!" );
+			if( !quiet ) std::cerr << "    ....Reading atoms....\n";
+			set_custom_data_fields( block, line, headers,
+			                        data_fields );
+		}else if( util::starts_with( line, "ITEM: ENTRIES" ) ){
+
+			my_assert( __FILE__, __LINE__,
+			           dump_style == LOCAL,
+			           "Inconsistent dump style for local dump!" );
+
+			if( !quiet ) std::cerr << "    ....Reading entries....\n";
 			set_custom_data_fields( block, line, headers,
 			                        data_fields );
 		}
+
+
 		std::size_t n_cols = headers.size();
 		my_assert( __FILE__, __LINE__, n_cols == data_fields.size(),
 		           "# of data fields does not match # of columns!" );
 		append_data_to_fields( block, data_fields );
+
 
 		if( dump_style == ATOMIC ){
 			block.add_field( *data_fields[0], block_data::ID );

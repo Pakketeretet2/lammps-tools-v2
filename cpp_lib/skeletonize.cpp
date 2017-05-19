@@ -41,8 +41,8 @@ void mean_and_var( const container &c, double &m, double &v )
 }
 
 
-double sphere_dist( const std::array<double,3> &xi, const std::array<double,3> &xj,
-                    double R )
+double sphere_dist( const std::array<double,3> &xi,
+                    const std::array<double,3> &xj, double R )
 {
 	double R2 = R * R;
 	double dot = xi[0]*xj[0] + xi[1]*xj[1] + xi[2]*xj[2];
