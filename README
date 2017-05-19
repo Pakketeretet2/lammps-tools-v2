@@ -19,6 +19,6 @@ Here are some examples of functionality in the three domains:
 
     C++ backend      |     C interface       |    Scripting languages
  --------------------+-----------------------+-------------------------
-    neighborize      |  lt_neighborize(...)  |  cdll.LoadLibrary(....so)
-                     |                       |
+    neighborize      |  lt_neighborize(...)  |  Created by pybind11,
+                     |                       |  cffi, whatever.
 
