@@ -60,24 +60,30 @@ struct lt_block_data_handle
 
 
 /**
-   \brief returns a pointer to named data field.
+   \brief Checks if special_field is set.
 
-   \param[in]  bdh  The block data to read from.
-   \param[in]  name The name of the data to read.
-   \param[out] size Will contain the data field size on success.
-   \param[out] type Will contain the data type on success.
+   \param special_field   The special field to check for.
 
-   On failure to find data, size and type shall be unchanged.
-
-   \returns a pointer to named data field or nullptr if it could not be found.
+   \returns true if the field is contained in block_data, false otherwise.
 */
-lammps_tools::data_field *lt_get_data( lt_block_data_handle *bdh,
-                                       const char *name,
-                                       size_t *size, int *type );
+bool lt_has_special_field( lt_block_data_handle *bdh, int special_field );
 
+/**
+   \brief Returns special field as vector<double>
+
+   \param bdh            Pointer to lt_block_data_handle
+   \param special_field  The special_field to get.
+*/
 const std::vector<double> &lt_special_field_double( lt_block_data_handle *bdh,
                                                     int special_field );
 
+
+/**
+   \brief Returns special field as vector<double>
+
+   \param bdh            Pointer to lt_block_data_handle
+   \param special_field  The special_field to get.
+*/
 const std::vector<int> &lt_special_field_int( lt_block_data_handle *bdh,
                                               int special_field );
 
