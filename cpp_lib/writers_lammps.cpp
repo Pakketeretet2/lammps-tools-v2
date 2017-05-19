@@ -3,8 +3,10 @@
 
 #include <fstream>
 
+#ifdef HAVE_BOOST_GZIP
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
+#endif // HAVE_BOOST_GZIP
 
 #include <cstdio>
 #include <cstring>
@@ -136,6 +138,7 @@ void block_to_lammps_dump( const std::string &fname,
 			break;
 		}
 		case lammps_tools::readers::GZIP:{
+#ifdef HAVE_BOOST_GZIP
 			using namespace boost::iostreams;
 
 			std::ofstream in(fname);
@@ -144,6 +147,11 @@ void block_to_lammps_dump( const std::string &fname,
 			out.push(in);
 			block_to_lammps_dump_text( out, b );
 			break;
+#else
+			my_runtime_error( __FILE__, __LINE__,
+			                  "Not compiled with boost support! "
+			                  "Cannot write to GZIP!" );
+#endif
 		}
 	}
 }
