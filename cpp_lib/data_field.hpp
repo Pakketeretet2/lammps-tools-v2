@@ -201,6 +201,12 @@ struct data_field_der : public data_field
 	virtual std::vector<T> &get_data_rw() { return data; }
 
 	/**
+	   Provides immutable access to underlying data array
+	*/
+	virtual const T* get_data_ptr() const { return data.data(); }
+
+
+	/**
 	   Actual implementation of swap for each type.
 	*/
 	// template<typename TT, int TTYPE>
@@ -358,7 +364,7 @@ void sort_data_with_permutation( data_field *df,
 void swap( data_field_double &f, data_field_double &s );
 void swap( data_field_int &f, data_field_int &s );
 
-}
+} // namespace lammps_tools
 
 
 #endif // DATA_FIELD_HPP

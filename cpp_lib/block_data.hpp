@@ -11,6 +11,7 @@
 #include "atom_type_info.hpp"
 #include "domain.hpp"
 #include "data_field.hpp"
+#include "enums.hpp"
 #include "topology.hpp"
 #include "types.hpp"
 
@@ -33,11 +34,6 @@ namespace lammps_tools {
 class block_data
 {
 public:
-	/// Possible atom styles
-	enum atom_styles { ATOMIC = 0, ///< Atomic data only
-	                   MOLECULAR   ///< Data on molecules too
-	};
-
 	/// enumerates "special" fields.
 	enum special_fields { UNKNOWN = -1,     ///< Use as error flag
 	                      ID = 0,           ///< Atom ids
@@ -231,6 +227,12 @@ public:
 	template <typename filter>
 	block_data copy_filter( const filter &f ) const;
 
+
+	/// Grab fields by index:
+	const data_field &operator[]( int i ) const;
+
+	/// Grab fields by index:
+	data_field &operator[]( int i );
 
 private:
 	/// A vector containing pointers to all data fields.

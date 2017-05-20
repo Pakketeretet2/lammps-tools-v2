@@ -1,6 +1,9 @@
 #include "lt_dump_reader.h"
 
+#include "../cpp_lib/enums.hpp"
 #include "../cpp_lib/dump_reader_lammps.hpp"
+
+
 
 extern "C" {
 
@@ -8,8 +11,7 @@ lt_dump_reader_handle lt_new_dump_reader( const char *fname,
                                           int fformat, int dformat )
 {
 	lt_dump_reader_handle drh;
-	drh.dr = lammps_tools::readers::make_dump_reader( fname,
-	                                                  dformat, fformat );
+	drh.dr = lammps_tools::readers::make_dump_reader( fname, fformat, dformat );
 	drh.fformat = fformat;
 	drh.dformat = dformat;
 	std::cerr << "Created new dump_reader at " << drh.dr
@@ -17,6 +19,30 @@ lt_dump_reader_handle lt_new_dump_reader( const char *fname,
 	          << dformat << ".\n";
 	return drh;
 }
+
+
+
+lt_dump_reader_handle lt_new_dump_reader_local( const char *fname,
+                                                int fformat, int dformat )
+{
+	lt_dump_reader_handle drh;
+	int dstyle = lammps_tools::readers::dump_reader_lammps::LOCAL;
+
+	if( fformat != lammps_tools::FILE_FORMAT_PLAIN ){
+		drh.dr = nullptr;
+		return drh;
+	}
+
+	drh.dr = lammps_tools::readers::make_dump_reader_lammps( fname, fformat,
+	                                                         dstyle );
+	drh.fformat = fformat;
+	drh.dformat = dformat;
+	std::cerr << "Created new dump_reader_lammps at " << drh.dr
+	          << " for fformat = " << fformat << " and dformat = "
+	          << dformat << ".\n";
+	return drh;
+}
+
 
 void lt_delete_dump_reader( lt_dump_reader_handle drh )
 {
@@ -56,7 +82,7 @@ int lt_number_of_blocks( lt_dump_reader_handle drh )
 void lt_set_col_header( lt_dump_reader_handle drh, int n, const char *header )
 {
 	using lammps_tools::readers::dump_reader_lammps;
-	if( drh.dformat != lammps_tools::readers::LAMMPS ){
+	if( drh.dformat != lammps_tools::DUMP_FORMAT_LAMMPS ){
 		std::cerr << "Ignoring column headers for non-LAMMPS dump...\n";
 		return;
 	}
@@ -70,7 +96,7 @@ bool lt_set_column_header_as_special( lt_dump_reader_handle drh,
                                       int special_field_type )
 {
 	using lammps_tools::readers::dump_reader_lammps;
-	if( drh.dformat != lammps_tools::readers::LAMMPS ){
+	if( drh.dformat != lammps_tools::DUMP_FORMAT_LAMMPS ){
 		std::cerr << "Ignoring column headers for non-LAMMPS dump...\n";
 		return false;
 	}

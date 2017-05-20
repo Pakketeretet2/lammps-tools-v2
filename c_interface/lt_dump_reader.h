@@ -23,6 +23,8 @@ enum LT_DUMP_READER_STATUS {
 	POINTER_NULL = -2
 };
 
+
+
 /**
    \brief contains a pointer to an instantiated dump reader.
 */
@@ -50,6 +52,23 @@ struct lt_dump_reader_handle
 */
 lt_dump_reader_handle lt_new_dump_reader( const char *fname,
                                           int fformat, int dformat );
+
+/**
+   \brief Creates a new dump_reader for dump local and returns the handle.
+
+   For the recognised file and dump fomats, see FILE_FORMATS and
+   DUMP_FORMATS in cpp_lib/dump_reader.hpp. Only supports PLAIN
+   text for now.
+
+   \param fname    Dump file name to open. Use "-" for stdin.
+   \param fformat  Specifies the file format.
+   \param dformat  Specifies the dump format.
+
+   \returns a handle to a new dump reader handle. The internal
+            dump_reader pointer can be nullptr. Use
+*/
+lt_dump_reader_handle lt_new_dump_reader_local( const char *fname,
+                                                int fformat, int dformat );
 
 /**
    \brief Cleans up and releases given dump reader handle.

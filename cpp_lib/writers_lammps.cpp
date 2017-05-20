@@ -1,3 +1,4 @@
+#include "enums.hpp"
 #include "util.hpp"
 #include "writers_lammps.hpp"
 
@@ -72,7 +73,7 @@ void block_to_lammps_data( std::ostream &out, const block_data &b )
 	success &= grab_field_as<double>( b, names[3], y );
 	success &= grab_field_as<double>( b, names[4], z );
 
-	if( b.atom_style == block_data::MOLECULAR ){
+	if( b.atom_style == ATOM_STYLE_MOLECULAR ){
 		success &= grab_field_as<int>( b, names[5], mol );
 	}
 
@@ -98,13 +99,13 @@ void block_to_lammps_data( std::ostream &out, const block_data &b )
 	out << "\n";
 
 	std::string atom_style = "atomic";
-	if( b.atom_style == block_data::MOLECULAR ) atom_style = "molecular";
+	if( b.atom_style == ATOM_STYLE_MOLECULAR ) atom_style = "molecular";
 	out << "Atoms # " << atom_style << "\n\n";
 
 
 	for( int i = 0; i < b.N; ++i ){
 		out << id[i];
-		if( b.atom_style == block_data::MOLECULAR ){
+		if( b.atom_style == ATOM_STYLE_MOLECULAR ){
 			out << " " << mol[i];
 		}
 		out << " " << type[i] << " " << x[i]
@@ -127,17 +128,17 @@ void block_to_lammps_dump( const std::string &fname,
 		default:
 			my_runtime_error(__FILE__, __LINE__,
 			                 "Unknown file format!" );
-		case lammps_tools::readers::PLAIN: {
+		case FILE_FORMAT_PLAIN: {
 			std::ofstream out( fname );
 			block_to_lammps_dump_text( out, b );
 			break;
 		}
-		case lammps_tools::readers::BIN:{
+		case FILE_FORMAT_BIN:{
 			std::ofstream out( fname, std::ios::binary );
 			block_to_lammps_dump_bin( out, b );
 			break;
 		}
-		case lammps_tools::readers::GZIP:{
+		case FILE_FORMAT_GZIP:{
 #ifdef HAVE_BOOST_GZIP
 			using namespace boost::iostreams;
 
@@ -163,15 +164,15 @@ void block_to_lammps_dump( std::ostream &out,
 		default:
 			my_runtime_error(__FILE__, __LINE__,
 			                 "Unknown file format!" );
-		case lammps_tools::readers::PLAIN:{
+		case FILE_FORMAT_PLAIN:{
 			block_to_lammps_dump_text( out, b );
 			break;
 		}
-		case lammps_tools::readers::BIN:{
+		case FILE_FORMAT_BIN:{
 			block_to_lammps_dump_bin( out, b );
 			break;
 		}
-		case lammps_tools::readers::GZIP:{
+		case FILE_FORMAT_GZIP:{
 			block_to_lammps_dump_text( out, b );
 			break;
 		}
@@ -184,7 +185,7 @@ std::vector<std::string> sort_names( const block_data &b )
 	std::vector<std::string> data_names = b.get_data_names();
 	int current = 0;
 	headers[current++] = b.get_special_field_name( block_data::ID );
-	if( b.atom_style == block_data::MOLECULAR ){
+	if( b.atom_style == ATOM_STYLE_MOLECULAR ){
 		headers[current++] = b.get_special_field_name( block_data::MOL );
 	}
 	headers[current++] = b.get_special_field_name( block_data::TYPE );

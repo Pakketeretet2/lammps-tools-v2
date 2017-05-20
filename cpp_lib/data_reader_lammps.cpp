@@ -1,3 +1,4 @@
+#include "enums.hpp"
 #include "id_map.hpp"
 #include "readers.hpp"
 #include "util.hpp"
@@ -78,7 +79,7 @@ int read_data_atoms( std::istream &in, block_data &b, bool quiet )
 	std::size_t n_cols = words.size();
 	int n_col_target = 5;
 
-	if( b.atom_style == block_data::MOLECULAR ){
+	if( b.atom_style == ATOM_STYLE_MOLECULAR ){
 		n_col_target = 6;
 	}
 	my_assert( __FILE__, __LINE__,
@@ -106,11 +107,11 @@ int read_data_atoms( std::istream &in, block_data &b, bool quiet )
 		iy.resize(b.N);
 		iz.resize(b.N);
 	}
-	if( b.atom_style == block_data::MOLECULAR ){
+	if( b.atom_style == ATOM_STYLE_MOLECULAR ){
 		mol.resize(b.N);
 	}
 
-	if( b.atom_style == block_data::ATOMIC ){
+	if( b.atom_style == ATOM_STYLE_ATOMIC ){
 		for( std::size_t i = 0; i < b.N; ++i ){
 			std::stringstream ss(line);
 			ss >> id[i] >> type[i] >> x[i] >> y[i] >> z[i];
@@ -121,7 +122,7 @@ int read_data_atoms( std::istream &in, block_data &b, bool quiet )
 
 			std::getline(in,line);
 		}
-	}else if( b.atom_style == block_data::MOLECULAR ){
+	}else if( b.atom_style == ATOM_STYLE_MOLECULAR ){
 		for( std::size_t i = 0; i < b.N; ++i ){
 			std::stringstream ss(line);
 			ss >> id[i] >> mol[i] >> type[i] >> x[i] >> y[i] >> z[i];
@@ -136,7 +137,7 @@ int read_data_atoms( std::istream &in, block_data &b, bool quiet )
 	if( !quiet ) std::cerr << "    ....Adding fields.\n";
 
 	b.add_field(   id, block_data::ID );
-	if( b.atom_style == block_data::MOLECULAR ){
+	if( b.atom_style == ATOM_STYLE_MOLECULAR ){
 		b.add_field( mol, block_data::MOL );
 	}
 	b.add_field( type, block_data::TYPE );
@@ -226,9 +227,9 @@ int get_data_body( std::istream &in, block_data &b,
 			if( !quiet ) std::cerr << "    ....Reading atoms...\n";
 			std::getline(in,line);
 			if( words[2] == "atomic" ){
-				b.atom_style = block_data::ATOMIC;
+				b.atom_style = ATOM_STYLE_ATOMIC;
 			}else if( words[2] == "molecular" ){
-				b.atom_style = block_data::MOLECULAR;
+				b.atom_style = ATOM_STYLE_MOLECULAR;
 			}
 			status = read_data_atoms( in, b, quiet );
 			my_assert( __FILE__, __LINE__, status == 0,

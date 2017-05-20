@@ -8,6 +8,7 @@
 */
 
 #include "block_data.hpp"
+#include "enums.hpp"
 
 #include <iosfwd>
 #include <memory>
@@ -18,21 +19,6 @@ namespace lammps_tools {
 /// Contains functions and classes that are related to reading dump files.
 namespace readers {
 
-class dump_reader_lammps;
-
-/// Specifies various file formats
-enum FILE_FORMATS {
-	PLAIN   = 0,  ///< Plain text
-	GZIP    = 1,  ///< Gzipped plain text
-	BIN     = 2   ///< Binary
-};
-
-/// Specifies various dump formats
-enum DUMP_FORMATS {
-	LAMMPS  = 0,   ///< LAMMPS format
-	HOOMD   = 1,   ///< HOOMD GSD format
-	NAMD    = 2    ///< NAMD DCD format
-};
 
 
 /// A generic class for reading in dump files.
@@ -98,8 +84,8 @@ const char *dformat_to_str( int dformat );
    \brief Constructs correct dump_reader for file of given file and dump format.
 
    \param fname    Name of the dump file.
-   \param dformat  Dump format (see \p DUMP_FORMATS).
    \param fformat  File format (see \p FILE_FORMATS).
+   \param dformat  Dump format (see \p DUMP_FORMATS).
 
    \returns a pointer to the open dump_reader object, or nullptr on failure.
 
@@ -108,15 +94,15 @@ const char *dformat_to_str( int dformat );
 
 */
 dump_reader* make_dump_reader( const std::string &fname,
-                               int dformat, int fformat );
+                               int fformat, int dformat );
 
 
 /**
    \brief Constructs correct dump_reader for input stream of given dump format.
 
    \param fname    Name of the dump file.
-   \param dformat  Dump format (see \p DUMP_FORMATS).
    \param fformat  File format (see \p FILE_FORMATS).
+   \param dformat  Dump format (see \p DUMP_FORMATS).
 
    \returns a pointer to the open dump_reader object, or nullptr on failure.
 
@@ -124,59 +110,8 @@ dump_reader* make_dump_reader( const std::string &fname,
             or wrap it in a smart pointer.
 */
 dump_reader* make_dump_reader( std::istream &input,
-                               int dformat, int fformat );
+                               int fformat, int dformat );
 
-
-/**
-   \brief Constructs a LAMMPS dump reader from file name.
-
-   \param fname    Name of the dump file.
-   \param fformat  File format (see \p FILE_FORMATS).
-   \param header   Optionally you can pass the expected headers.
-                   If the file is binary these are assumed to be
-                   the column headers. For other file formats these
-                   _have_ to match the column headers in the file
-                   and are used for verification.
-
-  \returns a pointer to the open dump_reader object, or nullptr on failure.
-
-  \warning The dump_reader object is heap-allocated. Be sure to delete it
-           or wrap it in a smart pointer.
-*/
-dump_reader_lammps *make_dump_reader_lammps( const std::string &fname, int fformat,
-                                             std::vector<std::string> headers );
-
-/**
-   \brief Constructs a LAMMPS dump reader from input file stream.
-
-   \param fname    Name of the dump file.
-   \param header   Optionally you can pass the expected headers.
-                   If the file is binary these are assumed to be
-                   the column headers. For other file formats these
-                   _have_ to match the column headers in the file
-                   and are used for verification.
-
-  \returns a pointer to the open dump_reader object, or nullptr on failure.
-
-  \warning The dump_reader object is heap-allocated. Be sure to delete it
-           or wrap it in a smart pointer.
-*/
-dump_reader_lammps *make_dump_reader_lammps( std::istream &input,
-                                             std::vector<std::string> headers );
-
-
-/**
-   \brief Constructs a LAMMPS dump reader from file name.
-   \overloads make_dump_reader_lammps
-*/
-dump_reader_lammps *make_dump_reader_lammps( const std::string &fname, int fformat );
-
-
-/**
-   \brief Constructs a LAMMPS dump reader from input file stream.
-   \overloads make_dump_reader_lammps
-*/
-dump_reader_lammps *make_dump_reader_lammps( std::istream &input );
 
 
 /**

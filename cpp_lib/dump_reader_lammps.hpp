@@ -14,6 +14,13 @@ class block_data;
 
 namespace readers {
 
+
+// forward decl of implemented dump_reader_lammpses.
+class dump_reader_lammps_plain;
+class dump_reader_lammps_gzip;
+class dump_reader_lammps_bin;
+
+
 class dump_reader_lammps : public dump_reader
 {
 public:
@@ -90,6 +97,69 @@ private:
 
 /// Checks if given column header corresponds to an integer quantity.
 bool is_int_data_field( const std::string &header );
+
+
+
+
+
+/**
+   \brief Constructs a LAMMPS dump reader from file name.
+
+   \param fname    Name of the dump file.
+   \param fformat  File format (see \p FILE_FORMATS).
+   \param header   Optionally you can pass the expected headers.
+                   If the file is binary these are assumed to be
+                   the column headers. For other file formats these
+                   _have_ to match the column headers in the file
+                   and are used for verification.
+
+  \returns a pointer to the open dump_reader object, or nullptr on failure.
+
+  \warning The dump_reader object is heap-allocated. Be sure to delete it
+           or wrap it in a smart pointer.
+*/
+dump_reader_lammps *make_dump_reader_lammps( const std::string &fname, int fformat,
+                                             std::vector<std::string> headers,
+                                             int dump_style = dump_reader_lammps::CUSTOM );
+
+/**
+   \brief Constructs a LAMMPS dump reader from input file stream.
+
+   \param fname    Name of the dump file.
+   \param header   Optionally you can pass the expected headers.
+                   If the file is binary these are assumed to be
+                   the column headers. For other file formats these
+                   _have_ to match the column headers in the file
+                   and are used for verification.
+
+  \returns a pointer to the open dump_reader object, or nullptr on failure.
+
+  \warning The dump_reader object is heap-allocated. Be sure to delete it
+           or wrap it in a smart pointer.
+*/
+dump_reader_lammps *make_dump_reader_lammps( std::istream &input,
+                                             std::vector<std::string> headers,
+                                             int dump_style = dump_reader_lammps::CUSTOM );
+
+
+/**
+   \brief Constructs a LAMMPS dump reader from file name.
+   \overloads make_dump_reader_lammps
+*/
+dump_reader_lammps *make_dump_reader_lammps( const std::string &fname, int fformat,
+                                             int dump_style = dump_reader_lammps::CUSTOM );
+
+
+/**
+   \brief Constructs a LAMMPS dump reader from input file stream.
+   \overloads make_dump_reader_lammps
+*/
+dump_reader_lammps *make_dump_reader_lammps( std::istream &input,
+                                             int dump_style = dump_reader_lammps::CUSTOM  );
+
+
+
+
 
 } // namespace readers
 

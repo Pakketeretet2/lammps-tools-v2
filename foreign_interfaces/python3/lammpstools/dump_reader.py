@@ -11,13 +11,54 @@ class dump_reader:
     flexibility.
 
     It wraps the C handle in an __init__/__del__ pair and add some features.
+
+    Initialise with a dump name, a file format and a dump format.
+    Recognized file formats are: "PLAIN", "GZIP" and "BIN"
+    Recognized dump formats are: "LAMMPS"
+
+    If the dump format is "LAMMPS", you can pass an optional arg to indicate
+    the dump file comes from a dump local instead.
+
+    Examples:
+    d = dump_reader.dump_reader( "dump_file.dump.bin", file_format = "BIN",
+                                 dump_format = "LAMMPS" )
+
     """
 
-    def __init__(self, fname, fformat, dformat):
+    def __init__(self, fname, file_format, dump_format, is_local = False):
         """ Initialises dump reader. """
-        print("Called dump_reader.__init__")
-        self.handle = dump_reader_.new_dump_reader( fname, fformat, dformat )
-        status = dump_reader_.dump_reader_status(self.handle)
+        self.local  = is_local
+        self.handle = None
+
+        fformat = dump_reader_.FILE_FORMATS.UNSET
+        dformat = dump_reader_.DUMP_FORMATS.UNSET
+
+
+        if file_format == "PLAIN":
+            fformat = dump_reader_.FILE_FORMATS.PLAIN
+        elif file_format == "GZIP":
+            fformat = dump_reader_.FILE_FORMATS.GZIP
+        elif file_format == "BIN":
+            fformat = dump_reader_.FILE_FORMATS.BIN
+
+        if dump_format == "LAMMPS":
+            dformat = dump_reader_.DUMP_FORMATS.LAMMPS
+
+        if (fformat == dump_reader_.FILE_FORMATS.UNSET or
+            dformat == dump_reader_.FILE_FORMATS.UNSET):
+            raise RuntimeError("Dump or file format not recognised!")
+
+        if is_local:
+            if fformat != dump_reader_.FILE_FORMATS.PLAIN:
+                raise RuntimeError("Dump style local only works for " +
+                                   "plain text format!")
+
+        if self.local:
+            self.handle = dump_reader_.new_local( fname, fformat, dformat )
+        else:
+            self.handle = dump_reader_.new( fname, fformat, dformat )
+
+        status = dump_reader_.status(self.handle)
         if status !=  dump_reader_.DUMP_READER_STATUS.IS_GOOD:
             print("Error opening dump file ", fname, " for file format ",
                   fformat, " and dump format ", dformat, "!")
@@ -25,7 +66,8 @@ class dump_reader:
 
     def __del__(self):
         """ Deletes the dump reader handle. """
-        dump_reader_.delete_dump_reader( self.handle )
+        if self.handle != None:
+            dump_reader_.delete( self.handle )
 
     def __iter__(self):
         """ Makes an iterator: """
@@ -40,7 +82,7 @@ class dump_reader:
 
     def status(self):
         """ Returns the status of the internal dump reader. """
-        status = dump_reader_.dump_reader_status( self.handle )
+        status = dump_reader_.status( self.handle )
         return status
 
     def at_eof(self):
@@ -53,7 +95,10 @@ class dump_reader:
         bh = block_data_.block_data_handle()
         status = dump_reader_.get_next_block(self.handle, bh)
         if status == 0:
-            b = block_data.block_data.init_from_handle( bh )
+            if self.local:
+                b = block_data.block_data_local( bh )
+            else:
+                b = block_data.block_data.init_from_handle( bh )
             return b
         else:
             return None

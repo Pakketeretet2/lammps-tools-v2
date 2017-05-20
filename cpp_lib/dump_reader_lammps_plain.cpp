@@ -141,7 +141,7 @@ int dump_reader_lammps_plain::next_block_meta( block_data &block,
 		}else if( starts_with( line, "ITEM: ENTRIES" ) ){
 			my_assert( __FILE__, __LINE__, dump_style == LOCAL,
 			           "Got NUMBER OF ENTRIES in dump_style atom!" );
-			std::cerr << "Got number of entries!\n";
+			if( !quiet ) std::cerr << "Got number of entries!\n";
 
 			// Stop there.
 			last_line = line;
@@ -247,7 +247,7 @@ void dump_reader_lammps_plain::set_custom_data_fields(
 		// TODO: FIX THIS
 		if( w == "mol" ){
 			// Assume atom_style is molecular.
-			block.atom_style = block_data::MOLECULAR;
+			block.atom_style = ATOM_STYLE_MOLECULAR;
 		}
 	}
 }

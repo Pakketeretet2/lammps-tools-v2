@@ -1,5 +1,10 @@
 #include "dump_reader_lammps.hpp"
 
+#include "dump_reader_lammps_plain.hpp"
+#include "dump_reader_lammps_gzip.hpp"
+#include "dump_reader_lammps_bin.hpp"
+
+
 using namespace lammps_tools;
 // using namespace readers;
 
@@ -72,6 +77,51 @@ void dump_reader_lammps::add_custom_data_fields( std::vector<data_field*> &dfs,
 		delete df;
 	}
 }
+
+
+
+dump_reader_lammps *make_dump_reader_lammps( const std::string &fname,
+                                             int fformat,
+                                             std::vector<std::string> headers,
+                                             int dump_style )
+{
+	dump_reader_lammps *reader = nullptr;
+	if( fformat == FILE_FORMAT_PLAIN ){
+		reader = new dump_reader_lammps_plain( fname, dump_style );
+	}else if( fformat == FILE_FORMAT_BIN ){
+		reader = new dump_reader_lammps_bin( fname, dump_style );
+	}else if( fformat == FILE_FORMAT_GZIP ){
+		reader = new dump_reader_lammps_gzip( fname, dump_style );
+	}
+	if( reader ) reader->set_column_headers( headers );
+	return reader;
+}
+
+dump_reader_lammps *make_dump_reader_lammps( std::istream &input,
+                                             std::vector<std::string> headers,
+                                             int dump_style  )
+{
+	dump_reader_lammps *reader = nullptr;
+	reader = new dump_reader_lammps_plain( input, dump_style );
+	if( reader ) reader->set_column_headers( headers );
+	return reader;
+
+}
+
+dump_reader_lammps *make_dump_reader_lammps( std::istream &input,
+                                             int dump_style  )
+{
+	std::vector<std::string> empty;
+	return make_dump_reader_lammps( input, empty, dump_style );
+}
+
+dump_reader_lammps *make_dump_reader_lammps( const std::string &fname, int fformat,
+                                             int dump_style  )
+{
+	std::vector<std::string> empty;
+	return make_dump_reader_lammps( fname, fformat, empty, dump_style );
+}
+
 
 } // namespace readers
 

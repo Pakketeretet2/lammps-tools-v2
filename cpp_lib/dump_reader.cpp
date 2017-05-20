@@ -15,11 +15,11 @@ const char *fformat_to_str( int file_format )
 	switch( file_format ){
 		default:
 			return "UNKNOWN!";
-		case PLAIN:
+		case FILE_FORMAT_PLAIN:
 			return "PLAIN TEXT";
-		case GZIP:
+		case FILE_FORMAT_GZIP:
 			return "GZIPPED TEXT";
-		case BIN:
+		case FILE_FORMAT_BIN:
 			return "BINARY";
 	}
 }
@@ -30,29 +30,29 @@ const char *dformat_to_str( int dformat )
 	switch( dformat ){
 		default:
 			return "UNKOWN!";
-		case LAMMPS:
+		case DUMP_FORMAT_LAMMPS:
 			return "LAMMPS";
-		case HOOMD:
+		case DUMP_FORMAT_HOOMD:
 			return "HOOMD";
-		case NAMD:
+		case DUMP_FORMAT_NAMD:
 			return "NAMD";
 	}
 }
 
 
 dump_reader *make_dump_reader( const std::string &fname,
-                               int dformat, int fformat )
+                               int fformat, int dformat )
 {
 	dump_reader *reader = nullptr;
 
-	if( dformat == LAMMPS ){
+	if( dformat == DUMP_FORMAT_LAMMPS ){
 		reader = make_dump_reader_lammps( fname, fformat );
-	}else if( dformat == HOOMD ){
-		if( fformat == BIN ){
+	}else if( dformat == DUMP_FORMAT_HOOMD ){
+		if( fformat == FILE_FORMAT_BIN ){
 			// reader = dump_reader_hoomd_gsd( fname );
 		}
-	}else if( dformat == NAMD ){
-		if( fformat == BIN ){
+	}else if( dformat == DUMP_FORMAT_NAMD ){
+		if( fformat == FILE_FORMAT_BIN ){
 			// reader = dump_reader_namd_dcd( fname );
 		}
 	}
@@ -68,12 +68,12 @@ dump_reader *make_dump_reader( const std::string &fname,
 }
 
 dump_reader *make_dump_reader( std::istream &input,
-                               int dformat, int fformat )
+                               int fformat, int dformat )
 {
 	dump_reader *reader = nullptr;
 
-	if( dformat == LAMMPS ){
-		if( fformat == PLAIN ){
+	if( dformat == DUMP_FORMAT_LAMMPS ){
+		if( fformat == FILE_FORMAT_PLAIN ){
 			reader = make_dump_reader_lammps( input );
 		}
 	}
@@ -90,45 +90,6 @@ dump_reader *make_dump_reader( std::istream &input,
 }
 
 
-
-
-dump_reader_lammps *make_dump_reader_lammps( const std::string &fname,
-                                             int fformat,
-                                             std::vector<std::string> headers )
-{
-	dump_reader_lammps *reader = nullptr;
-	if( fformat == PLAIN ){
-		reader = new dump_reader_lammps_plain( fname );
-	}else if( fformat == BIN ){
-		reader = new dump_reader_lammps_bin( fname );
-	}else if( fformat == GZIP ){
-		reader = new dump_reader_lammps_gzip( fname );
-	}
-	if( reader ) reader->set_column_headers( headers );
-	return reader;
-}
-
-dump_reader_lammps *make_dump_reader_lammps( std::istream &input,
-                                             std::vector<std::string> headers )
-{
-	dump_reader_lammps *reader = nullptr;
-	reader = new dump_reader_lammps_plain( input );
-	if( reader ) reader->set_column_headers( headers );
-	return reader;
-
-}
-
-dump_reader_lammps *make_dump_reader_lammps( std::istream &input )
-{
-	std::vector<std::string> empty;
-	return make_dump_reader_lammps( input, empty );
-}
-
-dump_reader_lammps *make_dump_reader_lammps( const std::string &fname, int fformat )
-{
-	std::vector<std::string> empty;
-	return make_dump_reader_lammps( fname, fformat, empty );
-}
 
 
 

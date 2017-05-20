@@ -6,13 +6,13 @@ using namespace lammps_tools;
 namespace lammps_tools {
 
 block_data::block_data()
-	: tstep( 0 ), N( 0 ), N_types( 1 ), atom_style( ATOMIC ),
+	: tstep( 0 ), N( 0 ), N_types( 1 ), atom_style( ATOM_STYLE_ATOMIC ),
 	  special_fields_by_name ( N_SPECIAL_FIELDS, "" ),
 	  special_fields_by_index( N_SPECIAL_FIELDS, -1 )
 { }
 
 block_data::block_data( std::size_t n_atoms )
-	: tstep( 0 ), N( n_atoms ), N_types( 1 ), atom_style( ATOMIC ),
+	: tstep( 0 ), N( n_atoms ), N_types( 1 ), atom_style( ATOM_STYLE_ATOMIC ),
 	  special_fields_by_name ( N_SPECIAL_FIELDS, "" ),
 	  special_fields_by_index( N_SPECIAL_FIELDS, -1 )
 { }
@@ -319,6 +319,18 @@ bool grab_common_fields( const block_data &b,
 
 	return true;
 }
+
+
+const data_field &block_data::operator[]( int i ) const
+{
+	return *data[i];
+}
+
+data_field &block_data::operator[]( int i )
+{
+	return *data[i];
+}
+
 
 
 } // namespace lammps_tools

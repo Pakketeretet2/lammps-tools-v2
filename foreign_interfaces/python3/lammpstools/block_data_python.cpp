@@ -21,6 +21,13 @@ PYBIND11_PLUGIN(block_data_) {
 	m.def("special_field_int",    &lt_special_field_int,
 	      "Get special field interpreted as int" );
 
+	m.def("n_data_fields", &lt_n_data_fields,
+	      "Get number of data fields.");
+	m.def("data_by_index", &lt_data_by_index,
+	      "Get nth data field.");
+	m.def("data_by_name", &lt_data_by_name,
+	      "Get data field by name");
+
 
 	return m.ptr();
 }

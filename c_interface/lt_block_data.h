@@ -4,6 +4,7 @@
 #include "../cpp_lib/my_assert.hpp"
 #include "../cpp_lib/types.hpp"
 
+#include "lt_data_field.h"
 
 /**
    \file lt_block_data.h
@@ -16,7 +17,7 @@
 extern "C" {
 
 /**
-   \brief contains a pointer to an instantiated dump reader.
+   \brief contains a pointer to a block_data, either empty or initialised.
 */
 struct lt_block_data_handle
 {
@@ -24,10 +25,10 @@ struct lt_block_data_handle
 	{
 		bd = new lammps_tools::block_data;
 	}
-	lt_block_data_handle( const lt_block_data_handle &o )
+	lt_block_data_handle( const lt_block_data_handle *o )
 	{
 		bd = new lammps_tools::block_data;
-		*bd = *o.bd;
+		*bd = *o->bd;
 	}
 
 	lt_block_data_handle &operator=( lt_block_data_handle o )
@@ -68,6 +69,24 @@ struct lt_block_data_handle
 */
 bool lt_has_special_field( lt_block_data_handle *bdh, int special_field );
 
+
+/**
+   \brief Returns data field specified by name, or nullptr if it doesn't exist.
+*/
+int lt_n_data_fields( lt_block_data_handle *bdh );
+
+
+/**
+   \brief Returns data field specified by name, or nullptr if it doesn't exist.
+*/
+lt_data_field_handle lt_data_by_name( lt_block_data_handle *bdh, const char *name );
+
+/**
+   \brief Returns data field by index, or nullptr if index out of range
+*/
+lt_data_field_handle lt_data_by_index( lt_block_data_handle *bdh, int i );
+
+
 } // extern "C"
 
 /**
@@ -88,7 +107,6 @@ const std::vector<double> &lt_special_field_double( lt_block_data_handle *bdh,
 */
 const std::vector<int> &lt_special_field_int( lt_block_data_handle *bdh,
                                               int special_field );
-
 
 
 
