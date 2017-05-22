@@ -2,6 +2,7 @@
 #include <catch.hpp>
 
 #include "data_field.hpp"
+#include "enums.hpp"
 #include "lammps_tools.h"
 
 
@@ -11,8 +12,8 @@ TEST_CASE ( "Tests the creation of a dump_reader and getting a block.", "[interf
 	using dfd = lammps_tools::data_field_double;
 
 	const char *dname = "lammps_dump_file_test.dump.bin";
-	int fformat = lammps_tools::readers::BIN;
-	int dformat = lammps_tools::readers::LAMMPS;
+	int fformat = lammps_tools::FILE_FORMAT_BIN;
+	int dformat = lammps_tools::DUMP_FORMAT_LAMMPS;
 
 	lt_dump_reader_handle reader = lt_new_dump_reader( dname, fformat, dformat );
 	int n_col = 6;
