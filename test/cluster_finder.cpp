@@ -77,7 +77,7 @@ TEST_CASE( "Cluster analysis on triangles", "[cluster_triangles]" ) {
 	                                         "x", "y", "z" };
 
 	std::unique_ptr<dump_reader_lammps> d(
-		make_dump_reader_lammps( dname, BIN ) );
+		make_dump_reader_lammps( dname, FILE_FORMAT_BIN ) );
 
 	d->set_column_headers( all_headers );
 

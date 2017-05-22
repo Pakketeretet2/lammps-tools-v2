@@ -1,3 +1,4 @@
+#include "enums.hpp"
 #include "readers.hpp"
 #include "dump_reader_lammps.hpp"
 #include "util.hpp"
@@ -62,7 +63,7 @@ TEST_CASE ( "LAMMPS plain text dump file gets read correctly.", "[read_lammps_du
 
 	std::string fname = "lammps_dump_file_test.dump";
 	// std::vector<std::string> headers = { "id", "type", "x", "y", "z", "c_pe" };
-	std::shared_ptr<dump_reader> r( make_dump_reader( fname, LAMMPS, PLAIN ) );
+	std::shared_ptr<dump_reader> r( make_dump_reader( fname, FILE_FORMAT_PLAIN, DUMP_FORMAT_LAMMPS ) );
 
 	REQUIRE( r );
 	REQUIRE( r->good() );
@@ -134,7 +135,7 @@ TEST_CASE ( "LAMMPS binary dump file gets read correctly.", "[read_lammps_dump_b
 
 	std::string fname = "lammps_dump_file_test.dump.bin";
 	std::vector<std::string> headers = { "id", "type", "x", "y", "z", "c_pe" };
-	std::shared_ptr<dump_reader> r( make_dump_reader_lammps( fname, BIN, headers ) );
+	std::shared_ptr<dump_reader> r( make_dump_reader_lammps( fname, FILE_FORMAT_BIN, headers ) );
 	dump_reader_lammps *rl = static_cast<dump_reader_lammps*>(r.get());
 	rl->set_column_header_as_special( "id", block_data::ID );
 	rl->set_column_header_as_special( "type", block_data::TYPE );
@@ -212,7 +213,7 @@ TEST_CASE ( "LAMMPS gzipped text dump file gets read correctly.", "[read_lammps_
 
 	std::string fname = "lammps_dump_file_test.dump.gz";
 	// std::vector<std::string> headers = { "id", "type", "x", "y", "z", "c_pe" };
-	std::shared_ptr<dump_reader> r( make_dump_reader( fname, LAMMPS, GZIP ) );
+	std::shared_ptr<dump_reader> r( make_dump_reader( fname, FILE_FORMAT_GZIP, DUMP_FORMAT_LAMMPS ) );
 
 	REQUIRE( r );
 	REQUIRE( r->good() );
@@ -281,8 +282,8 @@ TEST_CASE ( "Dump readers count correct number of blocks.", "[dump_reader_number
 	std::vector<std::string> dumps = { "lammps_dump_file_test.dump",
 	                                   "lammps_dump_file_test.dump.bin",
 	                                   "lammps_dump_file_test.dump.gz" };
-	std::vector<int> dformats   = { LAMMPS, LAMMPS, LAMMPS };
-	std::vector<int> fformats   = { PLAIN, BIN, GZIP };
+	std::vector<int> dformats   = { DUMP_FORMAT_LAMMPS, DUMP_FORMAT_LAMMPS, DUMP_FORMAT_LAMMPS };
+	std::vector<int> fformats   = { FILE_FORMAT_PLAIN, FILE_FORMAT_BIN, FILE_FORMAT_GZIP };
 	std::vector<int> dump_sizes = { 51, 51, 51 };
 	std::vector<std::string> cols = { "id", "type", "x", "y", "z", "c_pe" };
 
@@ -297,7 +298,7 @@ TEST_CASE ( "Dump readers count correct number of blocks.", "[dump_reader_number
 		int dformat = dformats[i];
 		int fformat = fformats[i];
 
-		dump_reader *d = make_dump_reader( dname, dformat, fformat );
+		dump_reader *d = make_dump_reader( dname, fformat, dformat );
 		std::cerr << "Reading file " << dname << ".\n";
 		if( util::str_contains( dname, "lammps_dump_" ) ){
 			dump_reader_lammps* ptr;

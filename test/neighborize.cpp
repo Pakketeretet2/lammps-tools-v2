@@ -108,7 +108,7 @@ TEST_CASE( "Binning neighbour list works as expected", "[neigh_list_dist_bin]" )
 	block_data b(N);
 	b.tstep = 0;
 	b.N_types = 1;
-	b.atom_style = block_data::ATOMIC;
+	b.atom_style = ATOM_STYLE_ATOMIC;
 	domain dom;
 	dom.xlo[0] = dom.xlo[1] = dom.xlo[2] = 0.0;
 	dom.xhi[0] = dom.xhi[1] = dom.xhi[2] = 9.0;
@@ -167,7 +167,7 @@ using namespace lammps_tools;
 	block_data b(N);
 	b.tstep = 0;
 	b.N_types = 1;
-	b.atom_style = block_data::ATOMIC;
+	b.atom_style = ATOM_STYLE_ATOMIC;
 	domain dom;
 	dom.xlo[0] = dom.xlo[1] = dom.xlo[2] = 0.0;
 	dom.xhi[0] = dom.xhi[1] = dom.xhi[2] = 9.0;
