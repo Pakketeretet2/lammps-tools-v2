@@ -43,9 +43,11 @@ public:
 	/// Sets up a vector containing the expected columns.
 	void set_column_headers( const std::vector<std::string> &headers );
 	void set_column_header( std::size_t idx, const std::string &header );
+	void set_column_type( const std::string &header, int type );
 
 	/// Returns a vector containing the expected column headers.
 	const std::vector<std::string> &get_column_headers() const;
+	int get_column_type( const std::string &header ) const;
 
 	/**
 	   \brief Marks a given column header as a special field.
@@ -92,6 +94,7 @@ private:
 	virtual bool check_good() const = 0;
 
 	std::vector<std::string> column_headers;
+	std::vector<int> column_header_types;
 };
 
 

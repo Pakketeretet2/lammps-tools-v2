@@ -332,5 +332,30 @@ data_field &block_data::operator[]( int i )
 }
 
 
+bool is_special_field_int( int special_field )
+{
+	switch( special_field ){
+		default:
+		case block_data::UNKNOWN:
+		case block_data::X:
+		case block_data::Y:
+		case block_data::Z:
+		case block_data::VX:
+		case block_data::VY:
+		case block_data::VZ:
+			return false;
+
+		case block_data::ID:
+		case block_data::TYPE:
+		case block_data::MOL:
+		case block_data::IX:
+		case block_data::IY:
+		case block_data::IZ:
+			return true;
+	}
+
+}
+
+
 
 } // namespace lammps_tools

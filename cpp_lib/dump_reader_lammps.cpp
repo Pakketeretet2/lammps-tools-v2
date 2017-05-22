@@ -24,6 +24,10 @@ void dump_reader_lammps::set_column_headers(
 	const std::vector<std::string> &headers )
 {
 	column_headers = headers;
+	column_header_types.resize( headers.size() );
+	for( int &ht : column_header_types ){
+		ht = data_field::DOUBLE;
+	}
 }
 
 void dump_reader_lammps::set_column_header( std::size_t idx,
@@ -35,6 +39,9 @@ void dump_reader_lammps::set_column_header( std::size_t idx,
 	my_assert( __FILE__, __LINE__, idx < column_headers.size(),
 	           "Invalid index in set_column_header!" );
 	column_headers[idx] = header;
+	if( is_int_data_field( header ) ){
+		column_header_types[idx] = data_field::INT;
+	}
 }
 
 const std::vector<std::string> &dump_reader_lammps::get_column_headers() const
@@ -59,6 +66,10 @@ bool dump_reader_lammps::set_column_header_as_special( const std::string &header
 	}
 
 	header_to_special_field[header] = special_field_type;
+	if( is_special_field_int( special_field_type ) ){
+		set_column_type( header, data_field::INT );
+	}
+
 	return true;
 }
 
@@ -121,6 +132,38 @@ dump_reader_lammps *make_dump_reader_lammps( const std::string &fname, int fform
 	std::vector<std::string> empty;
 	return make_dump_reader_lammps( fname, fformat, empty, dump_style );
 }
+
+void dump_reader_lammps::set_column_type( const std::string &header, int type )
+{
+	my_assert( __FILE__, __LINE__,
+	           (type == data_field::INT || type == data_field::DOUBLE),
+	           "Incorrect data type passed to set_column_type!");
+	for( std::size_t i = 0; i < column_headers.size(); ++i ){
+		if( column_headers[i] == header ){
+			column_header_types[i] = type;
+			return;
+		}
+	}
+
+	std::stringstream ss;
+	ss << "Header " << header << " not found!";
+	my_warning( __FILE__, __LINE__, ss.str() );
+}
+
+int dump_reader_lammps::get_column_type( const std::string &header ) const
+{
+	for( std::size_t i = 0; i < column_headers.size(); ++i ){
+		if( column_headers[i] == header ){
+			return column_header_types[i];
+		}
+	}
+
+	std::stringstream ss;
+	ss << "Header " << header << " not found!";
+	my_runtime_error( __FILE__, __LINE__, ss.str() );
+	return -1;
+}
+
 
 
 } // namespace readers

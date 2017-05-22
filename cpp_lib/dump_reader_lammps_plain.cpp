@@ -236,7 +236,8 @@ void dump_reader_lammps_plain::set_custom_data_fields(
 		                       << w << "\"....\n";
 		// Depending on the keyword, you want to take
 		// either an int or a double.
-		if( is_int_data_field( w ) ){
+		int type = get_column_type( w );
+		if( type == data_field::INT ){
 			dfi *new_field = new dfi( w, block.N );
 			data_fields.push_back( new_field );
 		}else{
@@ -244,9 +245,8 @@ void dump_reader_lammps_plain::set_custom_data_fields(
 			dfd *new_field = new dfd( w, block.N );
 			data_fields.push_back( new_field );
 		}
-		// TODO: FIX THIS
-		if( w == "mol" ){
-			// Assume atom_style is molecular.
+
+		if( header_to_special_field[w] == block_data::MOL ){
 			block.atom_style = ATOM_STYLE_MOLECULAR;
 		}
 	}

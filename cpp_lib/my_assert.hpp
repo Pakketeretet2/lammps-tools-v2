@@ -142,6 +142,21 @@ inline void my_runtime_error( const std::string &file, int line,
 }
 
 /**
+   \brief Prints a warning.
+
+   \param file   File name (use __FILE__ macro)
+   \param line   Line number (use __LINE__ macro)
+   \param msg    The warning message to print.
+   \param check  Warn if this is true.
+*/
+inline void my_warning( const std::string &file, int line, const std::string &msg )
+{
+	std::cerr << file << " ( " << line << " ): Warning: "
+	          << msg << "\n";
+}
+
+
+/**
    \brief Prints a warning if assertion is not met.
 
    \param file   File name (use __FILE__ macro)
@@ -153,10 +168,11 @@ inline void my_warning_if( const std::string &file, int line,  bool check,
                            const std::string &msg )
 {
 	if( check ){
-		std::cerr << file << " ( " << line << " ): Warning: "
-		          << msg << "\n";
+		my_warning( file, line, msg );
 	}
 }
+
+
 
 
 

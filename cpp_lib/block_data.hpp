@@ -25,6 +25,12 @@ namespace lammps_tools {
 
 
 /**
+   Returns true if the special_field should be treated as int instead of double
+*/
+bool is_special_field_int( int special_field );
+
+
+/**
    A class that represents information about a single time step.
 
    \warning This class has a custom copy operator, so whenever
