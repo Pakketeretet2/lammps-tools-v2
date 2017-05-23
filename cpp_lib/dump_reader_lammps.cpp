@@ -25,8 +25,14 @@ void dump_reader_lammps::set_column_headers(
 {
 	column_headers = headers;
 	column_header_types.resize( headers.size() );
-	for( int &ht : column_header_types ){
-		ht = data_field::DOUBLE;
+	for( std::size_t i = 0; i < column_headers.size(); ++i ){
+		// Assume that everything is a double, except for the cols
+		// with is_int_data_field( col ) == true.
+		if( is_int_data_field( column_headers[i] ) ){
+			column_header_types[i] = data_field::INT;
+		}else{
+			column_header_types[i] = data_field::DOUBLE;
+		}
 	}
 }
 
@@ -35,6 +41,7 @@ void dump_reader_lammps::set_column_header( std::size_t idx,
 {
 	if( idx >= column_headers.size() ){
 		column_headers.resize(idx+1);
+		column_header_types.resize(idx+1);
 	}
 	my_assert( __FILE__, __LINE__, idx < column_headers.size(),
 	           "Invalid index in set_column_header!" );
@@ -54,8 +61,7 @@ bool dump_reader_lammps::set_column_header_as_special( const std::string &header
                                                        int special_field_type )
 {
 	my_assert( __FILE__, __LINE__,
-	           special_field_type >= block_data::ID &&
-	           special_field_type <= block_data::IZ,
+	           is_legal_special_field( special_field_type ),
 	           "Invalid special_field_type!" );
 
 	if( std::find( column_headers.begin(), column_headers.end(),
@@ -69,6 +75,7 @@ bool dump_reader_lammps::set_column_header_as_special( const std::string &header
 	if( is_special_field_int( special_field_type ) ){
 		set_column_type( header, data_field::INT );
 	}
+
 
 	return true;
 }
@@ -138,8 +145,10 @@ void dump_reader_lammps::set_column_type( const std::string &header, int type )
 	my_assert( __FILE__, __LINE__,
 	           (type == data_field::INT || type == data_field::DOUBLE),
 	           "Incorrect data type passed to set_column_type!");
+
 	for( std::size_t i = 0; i < column_headers.size(); ++i ){
 		if( column_headers[i] == header ){
+			int old_type = column_header_types[i];
 			column_header_types[i] = type;
 			return;
 		}

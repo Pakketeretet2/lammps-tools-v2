@@ -1,3 +1,4 @@
+#include "block_data_access.hpp"
 #include "enums.hpp"
 #include "util.hpp"
 #include "writers_lammps.hpp"

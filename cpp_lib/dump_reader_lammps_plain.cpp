@@ -216,15 +216,26 @@ void dump_reader_lammps_plain::set_custom_data_fields(
 
 	}
 	std::vector<std::string> words = split(line);
+	std::vector<std::string> found_headers( words.begin()+2, words.end() );
 
 	const std::vector<std::string> &col_headers = get_column_headers();
 
+	if( col_headers.empty() ){
+		// Add word to column headers.
+		set_column_headers( found_headers );
+		for( const std::string &w : found_headers ){
+			// Assume they are doubles, unless is_int_data_field(w)
+			// is true
+			if( is_int_data_field(w) ){
+				set_column_type( w, data_field::INT );
+			}else{
+				set_column_type( w, data_field::DOUBLE );
+			}
+		}
+	}
 
-	for( int i = 2; i < words.size(); ++i ){
-		std::string w = words[i];
-		if( !col_headers.empty() &&
-		    !contains( col_headers, w ) ){
-
+	for( const std::string &w : found_headers ){
+		if( !contains( col_headers, w ) ){
 			std::cerr << "Column header " << w << " encountered "
 			          << " but was not in column headers!\n";
 			my_runtime_error(__FILE__, __LINE__,
@@ -236,7 +247,10 @@ void dump_reader_lammps_plain::set_custom_data_fields(
 		                       << w << "\"....\n";
 		// Depending on the keyword, you want to take
 		// either an int or a double.
+
+
 		int type = get_column_type( w );
+
 		if( type == data_field::INT ){
 			dfi *new_field = new dfi( w, block.N );
 			data_fields.push_back( new_field );
@@ -246,8 +260,10 @@ void dump_reader_lammps_plain::set_custom_data_fields(
 			data_fields.push_back( new_field );
 		}
 
-		if( header_to_special_field[w] == block_data::MOL ){
-			block.atom_style = ATOM_STYLE_MOLECULAR;
+		if( header_to_special_field.count(w) ){
+			if( header_to_special_field[w] == block_data::MOL ){
+				block.atom_style = ATOM_STYLE_MOLECULAR;
+			}
 		}
 	}
 }

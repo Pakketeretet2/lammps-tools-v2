@@ -136,6 +136,30 @@ bool lt_set_column_header_as_special( lt_dump_reader_handle drh,
                                       const std::string &header,
                                       int special_field_type );
 
+/**
+   \brief Sets the type of data corresponding to given column name to type.
+
+   \param drh      Handle to the dump reader.
+   \param header   The header to set.
+   \param type     The type to associate with the data (see data_field::types).
+
+   \returns true if the type was succesfully set. False otherwise.
+*/
+bool lt_set_column_type( lt_dump_reader_handle drh,
+                         const std::string &header, int type );
+
+/**
+   \brief gets the data type associated with given column name.
+
+   \param drh      Handle to the dump reader.
+   \param header   The header to set.
+   \returns the type associated with the data (see data_field::types), or -1 if
+            the header could not be found.
+*/
+int  lt_get_column_type( lt_dump_reader_handle drh,
+                         const std::string &header );
+
+
 
 
 } // extern "C"

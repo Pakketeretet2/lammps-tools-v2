@@ -89,7 +89,8 @@ int  block_data::get_field_type( const std::string &name )
 	return -1;
 }
 
-void block_data::add_field( const data_field &data_f, int special_field )
+
+void block_data::add_field( const data_field &data_f, int special_field)
 {
 	my_assert( __FILE__, __LINE__, data_f.size() == N,
 	           "Atom number mismatch on add_field! Call set_natoms first!");
@@ -109,7 +110,7 @@ void block_data::add_field( const data_field &data_f, int special_field )
 	data.push_back( cp );
 
 	// Ignore some keys that are not unique for example:
-	if( special_field < ID || special_field > IZ ){
+	if( !is_legal_special_field( special_field ) ){
 		return;
 	}
 
@@ -191,7 +192,7 @@ void block_data::set_natoms( std::size_t new_size )
 void block_data::set_special_field( const std::string &name, int field )
 {
 	int index = 0;
-	my_assert( __FILE__, __LINE__, field >= ID && field <= IZ,
+	my_assert( __FILE__, __LINE__, is_legal_special_field( field ),
 	           "Invalid field in set_special_field!" );
 	while( index < data.size() && data[index]->name != name ){
 		++index;
@@ -204,7 +205,7 @@ void block_data::set_special_field( const std::string &name, int field )
 
 std::string block_data::get_special_field_name( int field ) const
 {
-	my_assert( __FILE__, __LINE__, field >= ID && field <= IZ,
+	my_assert( __FILE__, __LINE__, is_legal_special_field( field ),
 	           "Invalid field in get_special_field_name!" );
 
 	return special_fields_by_name[field];
@@ -357,5 +358,10 @@ bool is_special_field_int( int special_field )
 }
 
 
+bool is_legal_special_field( int special_field )
+{
+	return (special_field >= block_data::ID) &&
+		(special_field < block_data::N_SPECIAL_FIELDS);
+}
 
 } // namespace lammps_tools

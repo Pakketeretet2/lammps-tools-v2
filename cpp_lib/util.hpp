@@ -15,6 +15,8 @@
 #include <fstream>
 #include <vector>
 
+#include "zip.hpp"
+
 namespace lammps_tools {
 
 
@@ -320,6 +322,11 @@ void apply_permutation( std::vector<T>& vec, const std::vector<std::size_t>& p )
 	}
 }
 
+/**
+   Removes double entries from given container in O(n log(n)) complexity.
+
+   \param c  reference to container whose elements to remove.
+*/
 template <typename container>
 void remove_doubles( container &c )
 {
@@ -327,6 +334,9 @@ void remove_doubles( container &c )
 	c.erase( std::unique( c.begin(), c.end() ), c.end() );
 }
 
+
+
+// Iterates
 
 } // namespace util
 

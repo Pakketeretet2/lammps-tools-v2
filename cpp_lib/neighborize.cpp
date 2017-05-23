@@ -113,7 +113,10 @@ int neighborizer::append_particles_in_mol( neigh_list &neighs )
 		my_assert( __FILE__, __LINE__, mol[j] - current_mol >= 0,
 		           "Molecule reordering not correct" );
 
-		while( mol[j] == current_mol ) ++j;
+		// You relied on there being garbage beyond mol[local_b.N-1]
+		// before you idiot. XD
+		// Second check makes sure you do not go beyond bounds.
+		while( mol[j] == current_mol && j < local_b.N ) ++j;
 
 		// Now the range i .. j-1 marks the current mol.
 		for( int k = i; k < j; ++k ){

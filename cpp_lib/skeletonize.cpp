@@ -1,3 +1,4 @@
+#include "block_data_access.hpp"
 #include "skeletonize.hpp"
 #include "triangulate.hpp"
 #include "neighborize.hpp"

@@ -2,6 +2,24 @@
 
 #include "../cpp_lib/enums.hpp"
 #include "../cpp_lib/dump_reader_lammps.hpp"
+#include "../cpp_lib/block_data_access.hpp"
+
+
+// ****** Helper functions:  ********
+lammps_tools::readers::dump_reader_lammps
+*attempt_lammps_dump_reader_cast( lt_dump_reader_handle drh )
+{
+	using lammps_tools::readers::dump_reader_lammps;
+	dump_reader_lammps *drl = static_cast<dump_reader_lammps*>( drh.dr );
+	if( !drl ){
+		std::cerr << "Error casting to LAMMPS dump reader!\n";
+		return nullptr;
+	}
+	return drl;
+}
+
+
+// ******  Interface implementation:  ********
 
 
 
@@ -86,9 +104,9 @@ void lt_set_col_header( lt_dump_reader_handle drh, int n, const char *header )
 		std::cerr << "Ignoring column headers for non-LAMMPS dump...\n";
 		return;
 	}
-
-	dump_reader_lammps *drl = static_cast<dump_reader_lammps*>( drh.dr );
-	drl->set_column_header( n, header );
+	if( dump_reader_lammps *drl = attempt_lammps_dump_reader_cast( drh ) ){
+		drl->set_column_header( n, header );
+	}
 }
 
 bool lt_set_column_header_as_special( lt_dump_reader_handle drh,
@@ -101,12 +119,48 @@ bool lt_set_column_header_as_special( lt_dump_reader_handle drh,
 		return false;
 	}
 
-	dump_reader_lammps *drl = static_cast<dump_reader_lammps*>( drh.dr );
-	if( !drl ){
-		std::cerr << "Error casting to LAMMPS dumpreader!\n";
+	if( dump_reader_lammps *drl = attempt_lammps_dump_reader_cast( drh ) ){
+		return drl->set_column_header_as_special( header,
+		                                          special_field_type );
+	}else{
+		std::cerr << "Error casting to LAMMPS dump reader!\n";
 		return false;
 	}
-	return drl->set_column_header_as_special( header, special_field_type );
+}
+
+bool lt_set_column_type( lt_dump_reader_handle drh,
+                         const std::string &header, int type )
+{
+	using lammps_tools::readers::dump_reader_lammps;
+	if( drh.dformat != lammps_tools::DUMP_FORMAT_LAMMPS ){
+		std::cerr << "Ignoring column headers for non-LAMMPS dump...\n";
+		return false;
+	}
+
+	if( dump_reader_lammps *drl = attempt_lammps_dump_reader_cast( drh ) ){
+		drl->set_column_type( header, type );
+		return true;
+	}else{
+		std::cerr << "Error casting to LAMMPS dump reader!\n";
+		return false;
+	}
+}
+
+int  lt_get_column_type( lt_dump_reader_handle drh,
+                         const std::string &header )
+{
+	using lammps_tools::readers::dump_reader_lammps;
+	if( drh.dformat != lammps_tools::DUMP_FORMAT_LAMMPS ){
+		std::cerr << "Ignoring column headers for non-LAMMPS dump...\n";
+		return -1;
+	}
+
+	if( dump_reader_lammps *drl = attempt_lammps_dump_reader_cast( drh ) ){
+		return drl->get_column_type( header );
+	}else{
+		std::cerr << "Error casting to LAMMPS dump reader!\n";
+		return -1;
+	}
 }
 
 } // extern "C"
