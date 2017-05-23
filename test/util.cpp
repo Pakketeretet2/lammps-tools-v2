@@ -6,6 +6,7 @@
 #include "block_data.hpp"
 #include "data_field.hpp"
 #include "util.hpp"
+#include "zip.hpp"
 
 TEST_CASE( "Sorting works", "[util_sort]" ) {
 	using namespace lammps_tools;
@@ -171,4 +172,32 @@ TEST_CASE( "Sorting block works", "[block_data_sort]" ) {
 	delete d3o;
 	delete d4o;
 
+}
+
+
+TEST_CASE( "Zip iterator works", "[util_zip]" ) {
+	using namespace lammps_tools::util;
+
+	std::vector<double> x = { 1.0, 2.1, 3.2 };
+	std::vector<int> a = { 1, 2, 5, 2 };
+	std::vector<std::string> s = { "omg", "it", "works" };
+
+
+	int c = 0;
+
+	auto f1 = [&c]( double x1, int x2 ){
+		std::cerr << ++c << ": " << x1 << ", " << x2 << "\n";
+	};
+	auto f2 = [&c]( double x1, const std::string &x2 ){
+		std::cerr << ++c << ": " << x1 << ", " << x2 << "\n";
+	};
+	auto f3 = [&c]( int x1, const std::string &x2 ){
+		std::cerr << ++c << ": " << x1 << ", " << x2 << "\n";
+	};
+
+	zip_map( x, a, f1 );
+	c = 0;
+	zip_map( x, s, f2 );
+	c = 0;
+	zip_map( a, s, f3 );
 }

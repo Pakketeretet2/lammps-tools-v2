@@ -1,4 +1,5 @@
 #include "block_data.hpp"
+#include "block_data_access.hpp"
 #include "data_field.hpp"
 #include "dump_reader_lammps.hpp"
 

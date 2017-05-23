@@ -61,7 +61,6 @@ TEST_CASE( "Neighbour list works as expected", "[neigh_list_dist]" ) {
 			for( int i = 0; i < n_rcs; ++i ){
 				double rrc = rc[i];
 				std::cerr << "At NSQ, rc = " << rrc << "\n";
-
 				double avg = make_list_dist( neighs, b,
 				                             0, 0, DIST_NSQ,
 				                             3, rrc, 0, 0, true );
@@ -81,7 +80,6 @@ TEST_CASE( "Neighbour list works as expected", "[neigh_list_dist]" ) {
 			for( int i = 0; i < n_rcs; ++i ){
 				double rrc = rc[i];
 				std::cerr << "At BIN, rc = " << rrc << "\n";
-				timer_inner.tic();
 				double avg = make_list_dist( neighs, b,
 				                             0, 0, DIST_BIN,
 				                             3, rrc, 0, 0, true );
