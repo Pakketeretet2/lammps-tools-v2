@@ -18,14 +18,15 @@ namespace lammps_tools {
 
 
 /**
-   This is basically any type of data that could be in a
+   \brief Contains any type of data that could be in a
    dump file together with some human readable identifier.
 */
 struct data_field
 {
 	/// Defines possible data types contained in data_field.
-	enum types { DOUBLE = 0,
-	             INT };
+	enum types { DOUBLE = 0, ///< data_field contains doubles
+	             INT         ///< data_field contains ints
+	};
 
 	/// Constructor that only sets the name of the data_field
 	explicit data_field( const std::string &n ) : name(n) {}
@@ -47,8 +48,15 @@ struct data_field
 	*/
 	friend void swap( data_field &f, data_field &s );
 
-	std::string name;
+	std::string name; ///< The name of the header.
 };
+
+
+const char *pretty_type( int type );
+
+
+
+
 
 
 
@@ -225,12 +233,11 @@ private:
 
 
 
-
-/// Data field containing doubles.
+/// \typedef Data field specialised for doubles
 typedef data_field_der<double, data_field::DOUBLE> data_field_double;
 
-/// Data field containing integers.
-typedef data_field_der<int,    data_field::INT>    data_field_int;
+/// \typedef Data field specialised for ints
+typedef data_field_der<int, data_field::INT>    data_field_int;
 
 
 /**

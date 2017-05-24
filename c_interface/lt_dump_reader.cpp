@@ -163,4 +163,15 @@ int  lt_get_column_type( lt_dump_reader_handle drh,
 	}
 }
 
+void lt_set_default_column_type( lt_dump_reader_handle drh, int type )
+{
+	using lammps_tools::readers::dump_reader_lammps;
+	if( dump_reader_lammps *drl = attempt_lammps_dump_reader_cast( drh ) ){
+		drl->set_default_column_type( type );
+	}else{
+		std::cerr << "Error casting to LAMMPS dump reader!\n";
+	}
+
+}
+
 } // extern "C"

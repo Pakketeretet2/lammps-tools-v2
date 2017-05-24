@@ -22,6 +22,9 @@ PYBIND11_PLUGIN(dump_reader_) {
 	m.def("number_of_blocks", &lt_number_of_blocks);
 	m.def("set_column_header", &lt_set_col_header);
 	m.def("set_special_column", &lt_set_column_header_as_special);
+	m.def("set_column_type", &lt_set_column_type);
+	m.def("get_column_type", &lt_get_column_type);
+	m.def("set_default_column_type", &lt_set_default_column_type );
 
 	using namespace lammps_tools;
 

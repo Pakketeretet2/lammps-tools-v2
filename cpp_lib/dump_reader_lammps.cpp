@@ -24,7 +24,8 @@ void dump_reader_lammps::set_column_headers(
 	const std::vector<std::string> &headers )
 {
 	column_headers = headers;
-	column_header_types.resize( headers.size() );
+	column_header_types.resize( headers.size(), default_col_type );
+
 	for( std::size_t i = 0; i < column_headers.size(); ++i ){
 		// Assume that everything is a double, except for the cols
 		// with is_int_data_field( col ) == true.
@@ -173,6 +174,18 @@ int dump_reader_lammps::get_column_type( const std::string &header ) const
 	return -1;
 }
 
+void dump_reader_lammps::set_default_column_type( int type )
+{
+	if( type < data_field::DOUBLE || type > data_field::INT ){
+		std::cerr << "Ignoring unrecognized type " << pretty_type(type)
+		          << ", default remains "
+		          << pretty_type(default_col_type) << ".\n";
+		return;
+	}
+	std::cerr << "Putting default column type to "
+	          << pretty_type(type) << ".\n";
+	default_col_type = type;
+}
 
 
 } // namespace readers

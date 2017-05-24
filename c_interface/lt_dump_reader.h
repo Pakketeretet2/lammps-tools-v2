@@ -159,6 +159,14 @@ bool lt_set_column_type( lt_dump_reader_handle drh,
 int  lt_get_column_type( lt_dump_reader_handle drh,
                          const std::string &header );
 
+/**
+   \brief sets the default data type for all columns. By default
+   lammps-tools assumes double, just like LAMMPS does.
+
+   \param drh  lt_dump_reader_handle to modify.
+   \param type the type to assume for all columns (see data_field::types).
+*/
+void lt_set_default_column_type( lt_dump_reader_handle drh, int type );
 
 
 

@@ -229,7 +229,7 @@ void dump_reader_lammps_plain::set_custom_data_fields(
 			if( is_int_data_field(w) ){
 				set_column_type( w, data_field::INT );
 			}else{
-				set_column_type( w, data_field::DOUBLE );
+				set_column_type( w, default_col_type );
 			}
 		}
 	}

@@ -18,5 +18,10 @@ PYBIND11_PLUGIN(data_field_) {
 	m.def("as_float", &lt_data_as_double_vec, "Returns the data as floats.");
 	m.def("as_int",   &lt_data_as_int_vec,    "Returns the data as ints.");
 
+	pybind11::enum_<LT_DATA_FIELD_TYPES>(m, "TYPES")
+		.value("DOUBLE", LT_DATA_FIELD_TYPES::DATA_FIELD_DOUBLE)
+		.value("INT",    LT_DATA_FIELD_TYPES::DATA_FIELD_INT);
+
+
 	return m.ptr();
 }

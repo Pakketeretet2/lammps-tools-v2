@@ -116,12 +116,18 @@ class block_data_local:
             self.data_names.append( data_field_.get_name( df ) )
             self.data_types.append( data_field_.get_type( df ) )
 
-            tmp = data_field_.as_float( block_data_.data_by_index( handle, i ) )
-            if self.data_types[i] == 0:
-                # double
-                tmp_data = np.zeros( self.meta.N, dtype = float )
+            # Grab the data as the proper underlying type:
+            type = data_field_.get_type( df )
+            if type == data_field_.TYPES.DOUBLE:
+                tmp = data_field_.as_float( block_data_.data_by_index( handle, i ) )
+            elif type == data_field_.TYPES.INT:
+                tmp = data_field_.as_int( block_data_.data_by_index( handle, i ) )
             else:
-                # int
+                    raise RuntimeError("Unknown data type encountered in block_data")
+
+            if self.data_types[i] == data_field_.TYPES.DOUBLE:
+                tmp_data = np.zeros( self.meta.N, dtype = float )
+            else: # Assume int.
                 tmp_data = np.zeros( self.meta.N, dtype = int )
 
             for j in range(0, self.meta.N):

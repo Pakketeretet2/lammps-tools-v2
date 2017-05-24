@@ -1,4 +1,5 @@
 import dump_reader_
+import data_field_
 import block_data_
 import block_data
 
@@ -138,3 +139,23 @@ class dump_reader:
     def set_special_column(self, header, special_field):
         """ Sets the given column header as special field. """
         dump_reader_.set_special_column( self.handle, header, special_field )
+
+
+    def set_column_type(self, header, type):
+        """ Sets the type of given column name. """
+        dump_reader_.set_column_type( self.handle, header, type )
+
+    def get_column_type(self, header):
+        """ Returns the type of given column name. """
+        return dump_reader_.get_column_type( self.handle, header )
+
+    def set_default_column_type(self,type):
+        """ Sets the default type for all columns in dump. """
+        if type == "int":
+            proper_type = data_field_.TYPES.INT
+        elif type == "float" or type == "double":
+            proper_type = data_field_.TYPES.DOUBLE
+        else:
+            raise RuntimeError( "Type " + type + " not recognized!" );
+
+        dump_reader_.set_default_column_type( self.handle, proper_type )

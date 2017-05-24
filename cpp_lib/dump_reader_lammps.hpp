@@ -29,7 +29,8 @@ public:
 	                   LOCAL };
 
 	/// Empty constructor
-	dump_reader_lammps( int dump_style ) : dump_style(dump_style)
+	dump_reader_lammps( int dump_style )
+		: dump_style(dump_style), default_col_type( data_field::DOUBLE )
 	{
 		std::cerr << "Initiated dump_reader_lammps with "
 		          << "dump_style " << dump_style << ".\n";
@@ -44,6 +45,7 @@ public:
 	void set_column_headers( const std::vector<std::string> &headers );
 	void set_column_header( std::size_t idx, const std::string &header );
 	void set_column_type( const std::string &header, int type );
+	void set_default_column_type( int type );
 
 	/// Returns a vector containing the expected column headers.
 	const std::vector<std::string> &get_column_headers() const;
@@ -86,6 +88,8 @@ public:
 	void add_local_data_fields( std::vector<data_field*> &dfs,
 	                            block_data &b );
 
+	int default_col_type; ///< Stores the default value assumed for columns.
+
 protected:
 	std::map<std::string, int> header_to_special_field;
 private:
@@ -95,6 +99,7 @@ private:
 
 	std::vector<std::string> column_headers;
 	std::vector<int> column_header_types;
+
 };
 
 

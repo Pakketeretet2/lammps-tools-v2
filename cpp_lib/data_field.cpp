@@ -30,6 +30,18 @@ void swap( data_field &f, data_field &s )
 	}
 }
 
+const char *pretty_type( int type )
+{
+	switch( type ){
+		default:
+			return "UNKNOWN!";
+		case data_field::DOUBLE:
+			return "double";
+		case data_field::INT:
+			return "int";
+	}
+}
+
 
 
 } // namespace lammps_tools
