@@ -47,8 +47,8 @@ TEST_CASE ( "block_data copy constructor works correctly.", "[block_data_copy_co
 	REQUIRE( b1.get_special_field( block_data::ID) );
 	REQUIRE( b2.get_special_field( block_data::ID) );
 
-	const std::vector<std::string> &names = b1.get_data_names();
-	for( const std::string &n : names ){
+	for( std::size_t i = 0; i < b1.n_data_fields(); ++i ){
+		const std::string &n = b1[i].name;
 		REQUIRE( b1.get_data( n ) != nullptr );
 		REQUIRE( b2.get_data( n ) != nullptr );
 		// Should _NOT_ point to same data:
@@ -156,11 +156,11 @@ TEST_CASE ( "block_data remove_field works correctly.", "[block_data_add_remove]
 	REQUIRE( b.get_special_field_name( block_data::Y ) == "y" );
 	REQUIRE( b.get_special_field_name( block_data::Z ) == "" );
 	REQUIRE( b.n_data_fields() == 4 );
-	std::vector<std::string> names = b.get_data_names();
-	REQUIRE( names[0] == "data" );
-	REQUIRE( names[1] == "data_2" );
-	REQUIRE( names[2] == "x" );
-	REQUIRE( names[3] == "y" );
+
+	REQUIRE( b[0].name == "data" );
+	REQUIRE( b[1].name == "data_2" );
+	REQUIRE( b[2].name == "x" );
+	REQUIRE( b[3].name == "y" );
 
 
 	int special_field;
@@ -174,10 +174,9 @@ TEST_CASE ( "block_data remove_field works correctly.", "[block_data_add_remove]
 	REQUIRE( b.get_special_field_name( block_data::X ) == "" );
 	REQUIRE( b.get_special_field_name( block_data::Y ) == "y" );
 
-	names = b.get_data_names();
-	REQUIRE( names[0] == "data" );
-	REQUIRE( names[1] == "data_2" );
-	REQUIRE( names[2] == "y" );
+	REQUIRE( b[0].name == "data" );
+	REQUIRE( b[1].name == "data_2" );
+	REQUIRE( b[2].name == "y" );
 
 	data_field *tmp_y = b.remove_field( "y", special_field );
 
@@ -189,9 +188,8 @@ TEST_CASE ( "block_data remove_field works correctly.", "[block_data_add_remove]
 	REQUIRE( b.get_special_field_name( block_data::X ) == "" );
 	REQUIRE( b.get_special_field_name( block_data::Y ) == "" );
 
-	names = b.get_data_names();
-	REQUIRE( names[0] == "data" );
-	REQUIRE( names[1] == "data_2" );
+	REQUIRE( b[0].name == "data" );
+	REQUIRE( b[1].name == "data_2" );
 
 	delete tmp_y;
 
@@ -202,33 +200,12 @@ TEST_CASE ( "block_data remove_field works correctly.", "[block_data_add_remove]
 	REQUIRE( b.get_special_field_name( block_data::X ) == "x" );
 	REQUIRE( b.get_special_field_name( block_data::Y ) == "" );
 
-	names = b.get_data_names();
-	REQUIRE( names[0] == "data" );
-	REQUIRE( names[1] == "data_2" );
-	REQUIRE( names[2] == "x" );
+	REQUIRE( b[0].name == "data" );
+	REQUIRE( b[1].name == "data_2" );
+	REQUIRE( b[2].name == "x" );
 }
 
 
-
-
-TEST_CASE ( "block_data copy_filter works.", "[block_data_copy_filter]" ) {
-
-	using namespace lammps_tools;
-
-	std::string dname = "lammps_dump_file_test.dump.bin";
-	std::vector<std::string> h = { "id", "type", "x", "y", "z", "c_pe" };
-	std::unique_ptr<readers::dump_reader_lammps> d(
-		readers::make_dump_reader_lammps( dname, 2 ) );
-	d->set_column_headers( h );
-	block_data b;
-	int status = d->next_block( b );
-	REQUIRE( status == 0 );
-
-	auto filter = []( const block_data &b, int i )
-		{ return (i%2) == 0; };
-	block_data bf = b.copy_filter( filter );
-
-}
 
 
 TEST_CASE ( "Convenience accessors work.", "[block_data_convenience]" ) {

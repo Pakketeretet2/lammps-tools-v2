@@ -18,7 +18,7 @@ TEST_CASE ( "LAMMPS data file gets read correctly.", "[read_lammps_data]" )
 	int status = -1;
 
 	block_data b = readers::block_data_from_lammps_data( in, status, false );
-	REQUIRE( b.get_data_names().size() == 11 );
+	REQUIRE( b.n_data_fields() == 11 );
 	// These entries should _not_ be found:
 	REQUIRE( b.get_data( "xlo" ) == nullptr );
 	REQUIRE( b.get_data( "xhi" ) == nullptr );

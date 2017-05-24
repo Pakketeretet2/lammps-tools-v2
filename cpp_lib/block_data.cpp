@@ -31,10 +31,8 @@ block_data::block_data( const block_data &o )
 	my_assert( __FILE__, __LINE__, data.size() == o.n_data_fields(),
 	           "Data size mismatch after copy!" );
 
-	const std::vector<std::string> &names = o.get_data_names();
-	int i = 0;
-	for( const std::string &name : names ){
-		data[i++] = copy( o.get_data(name) );
+	for( std::size_t i = 0; i < o.n_data_fields(); ++i ){
+		data[i] = copy( o.get_data( o[i].name) );
 	}
 
 	for( int i = block_data::ID; i < block_data::N_SPECIAL_FIELDS; ++i ){
@@ -81,15 +79,6 @@ const data_field *block_data::get_data( const std::string &name ) const
 }
 
 
-int  block_data::get_field_type( const std::string &name )
-{
-	if( const data_field *df = get_data(name) ){
-		return df->type();
-	}
-	return -1;
-}
-
-
 void block_data::add_field( const data_field &data_f, int special_field)
 {
 	my_assert( __FILE__, __LINE__, data_f.size() == N,
@@ -98,9 +87,11 @@ void block_data::add_field( const data_field &data_f, int special_field)
 	if( get_data( data_f.name ) != nullptr ){
 		std::cerr << "Name " << data_f.name << " was already "
 		          << "in block_data!\n";
-		for( const std::string &s : get_data_names() ){
+		for( std::size_t i = 0; i < n_data_fields(); ++i ){
+			const std::string &s = data[i]->name;
 			std::cerr << s << " ";
-		}std::cerr << "\n";
+		}
+		std::cerr << "\n";
 		my_runtime_error( __FILE__, __LINE__,
 		                  "Named data already in block_data" );
 	}
@@ -134,16 +125,6 @@ block_data &block_data::operator=( block_data o )
 }
 
 
-std::vector<std::string> block_data::get_data_names() const
-{
-	std::vector<std::string> names( data.size() );
-	std::size_t i = 0;
-	for( const data_field *d : data ){
-		names[i] = d->name;
-		++i;
-	}
-	return names;
-}
 
 std::size_t block_data::n_data_fields() const
 {
@@ -160,15 +141,14 @@ void block_data::copy_meta( const block_data &o )
 	dom = o.dom;
 	top = o.top;
 
-	std::vector<std::string> field_names = o.get_data_names();
-
 	for( int spec_field = block_data::ID;
 	     spec_field < N_SPECIAL_FIELDS; ++spec_field ){
 		const data_field *df = o.get_special_field( spec_field );
 		if( !df ) continue;
 
-		for( int i = 0; i < field_names.size(); ++i ){
-			if( field_names[i] == df->name ){
+		for( std::size_t i = 0; i < o.n_data_fields(); ++i ){
+			const std::string name = o[i].name;
+			if( name == df->name ){
 				special_fields_by_name[spec_field]  = df->name;
 				special_fields_by_index[spec_field] = i;
 				break;
@@ -237,17 +217,6 @@ data_field *block_data::remove_field( const std::string &name,
 	}
 	return df;
 }
-
-void block_data::print_special_fields( std::ostream &out ) const
-{
-	out << "Special fields are now:\n";
-	for( int i = block_data::ID; i <= block_data::IZ; ++i ){
-		out << "  " << i << " --> "
-		    << get_special_field_name(i) << "\n";
-	}
-	out << "\n";
-}
-
 
 
 /// Get read/write pointer to special data field of given kind.

@@ -281,7 +281,8 @@ int get_data_body( std::istream &in, block_data &b,
 		if( !quiet ){
 			std::cerr << "    ....Block_data now has "
 			          << b.n_data_fields() << " data fields:";
-			for( const std::string &header : b.get_data_names() ){
+			for( std::size_t i = 0; i < b.n_data_fields(); ++i ){
+				const std::string &header = b[i].name;
 				std::cerr << " " << header;
 			}
 			std::cerr << "\n";

@@ -144,16 +144,6 @@ public:
 	const data_field *get_data( const std::string &name ) const;
 
 	/**
-	   Returns a pointer to an underlying data field.
-
-	   \param name The name of the data field.
-
-	   \returns A non-negative integer that indicates the type of the
-	            named data field, or -1 if the field could not be found.
-	*/
-	int get_field_type( const std::string &name );
-
-	/**
 	   Adds a data field to the data fields.
 
 	   \note The data provided is copied into the block_data.
@@ -184,11 +174,6 @@ public:
 	void set_natoms( std::size_t N );
 
 	/**
-	   Returns the names of the data fields contained
-	*/
-	std::vector<std::string> get_data_names() const;
-
-	/**
 	   Returns the number of data fields contained.
 	*/
 	std::size_t n_data_fields() const;
@@ -197,7 +182,6 @@ public:
 	   Sets the given name as given special field.
 	*/
 	void set_special_field( const std::string &name, int field );
-
 
 	/**
 	   Get name of given special field, or empty string if it is not set.
@@ -215,26 +199,12 @@ public:
 	/// Get read-only pointer to special data field of given kind.
 	const data_field *get_special_field( int field ) const;
 
-	/// Prints special field data to given output stream.
-	void print_special_fields( std::ostream &out = std::cerr ) const;
-
 	/// Sorts the data along given header with given comparator.
 	template <typename comparator>
 	void sort_along( const std::string &header, const comparator &comp );
 
 	/// Sorts the data along given header with standard '<' comparator.
 	void sort_along( const std::string &header );
-
-	/**
-	   Creates a filtered copy of this block_data.
-
-	   \param f  This copies only field entries i with f(*this, i) == true.
-
-	   \returns a filtered copy of the current block_data.
-	*/
-	template <typename filter>
-	block_data copy_filter( const filter &f ) const;
-
 
 	/// Grab fields by index:
 	const data_field &operator[]( int i ) const;
@@ -288,58 +258,6 @@ void block_data::sort_along( const std::string &header, const comparator &comp )
 			sort_data_with_permutation<int>( df, p );
 		}
 	}
-}
-
-
-template <typename filter> inline
-block_data block_data::copy_filter( const filter &f ) const
-{
-	using dfd = data_field_double;
-	using dfi = data_field_int;
-
-	using cdfd = const dfd;
-	using cdfi = const dfi;
-
-	block_data n;
-	std::vector<data_field*> n_data;
-	for( int i = 0; i < data.size(); ++i ){
-		const data_field *df = data[i];
-		if( df->type() == data_field::INT ){
-			n_data.push_back( new data_field_int( df->name ) );
-		}else if( df->type() == data_field::DOUBLE ){
-			n_data.push_back( new data_field_double( df->name ) );
-		}
-	}
-
-	std::size_t c = 0;
-	for( int i = 0; i < N; ++i ){
-		if( f( *this, i ) ){
-			for( int j = 0; j < data.size(); ++j ){
-				const data_field *df = data[j];
-				data_field *d = n_data[j];
-
-				if( df->type() == data_field::INT ){
-					cdfi* d_in = static_cast<cdfi*>( df );
-					std::vector<int> &v = data_as_rw<int>(d);
-					v.push_back( (*d_in)[j] );
-				}else if( df->type() == data_field::DOUBLE ){
-					cdfd* d_in = static_cast<cdfd*>( df );
-					std::vector<double> &v = data_as_rw<double>(d);
-					v.push_back( (*d_in)[j] );
-				}
-			}
-			++c;
-		}
-	}
-	std::cerr << "Filtered from " << N << " to " << c << " atoms.\n";
-	n.set_natoms( c );
-	for( int i = 0; i < n_data.size(); ++i ){
-		n.add_field( *n_data[i] );
-
-		delete n_data[i];
-	}
-	n.copy_meta( *this );
-	return n;
 }
 
 

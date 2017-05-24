@@ -183,7 +183,6 @@ void block_to_lammps_dump( std::ostream &out,
 std::vector<std::string> sort_names( const block_data &b )
 {
 	std::vector<std::string> headers( b.n_data_fields() );
-	std::vector<std::string> data_names = b.get_data_names();
 	int current = 0;
 	headers[current++] = b.get_special_field_name( block_data::ID );
 	if( b.atom_style == ATOM_STYLE_MOLECULAR ){
@@ -194,9 +193,9 @@ std::vector<std::string> sort_names( const block_data &b )
 	headers[current++] = b.get_special_field_name( block_data::Y );
 	headers[current++] = b.get_special_field_name( block_data::Z );
 
-	for( const std::string &name : data_names ){
+	for( std::size_t i = 0; i < b.n_data_fields(); ++i ){
+		const std::string &name = b[i].name;
 		if( util::contains( headers, name ) ) continue;
-
 		headers[current++] = name;
 	}
 
@@ -209,14 +208,13 @@ std::vector<std::string> sort_names( const block_data &b )
 	return headers;
 }
 
-void output_atom_line( const block_data &b, std::ostream &out,
-                       const std::vector<std::string> &data_order, int i )
+void output_atom_line( const block_data &b, std::ostream &out, int i )
 {
 	using dfd = data_field_double;
 	using dfi = data_field_int;
 
-	for( const std::string &name : data_order ){
-		const data_field *df = b.get_data( name );
+	for( std::size_t j = 0; j < b.n_data_fields(); ++j ){
+		const data_field *df = b.get_data( b[j].name );
 		int type = df->type();
 		if( type == data_field::INT ){
 			const dfi *di = static_cast<const dfi*>(df);
@@ -246,17 +244,16 @@ void block_to_lammps_dump_text( std::ostream &out, const block_data &b )
 	out << b.dom.xlo[1] << " " << b.dom.xhi[1] << "\n";
 	out << b.dom.xlo[2] << " " << b.dom.xhi[2] << "\n";
 
-	//std::vector<std::string> data_order = sort_names( b );
-	std::vector<std::string> data_order = b.get_data_names();
 	std::string header_line = "ITEM: ATOMS";
-	for( const std::string &header : data_order ){
+	for( std::size_t i = 0; i < b.n_data_fields(); ++i ){
+		const std::string &header = b[i].name;
 		header_line += " " + header;
 	}
 
 	out << header_line << "\n";
 
 	for( int i = 0; i < b.N; ++i ){
-		output_atom_line( b, out, data_order, i );
+		output_atom_line( b, out, i );
 	}
 }
 
@@ -328,10 +325,10 @@ void block_to_lammps_dump_bin( std::ostream &out, const block_data &b )
 	write_bin( out, nchunk );
 	write_bin( out, data_size );
 
-	std::vector<std::string> data_names = b.get_data_names();
 	std::vector<int> data_types( size_one );
 	for( int j = 0; j < size_one; ++j ){
-		const data_field *df = b.get_data( data_names[j] );
+		const std::string data_name = b[j].name;
+		const data_field *df = b.get_data( data_name );
 		data_types[j] = df->type();
 	}
 
@@ -340,7 +337,7 @@ void block_to_lammps_dump_bin( std::ostream &out, const block_data &b )
 
 	for( int j = 0; j < b.N; ++j ){
 		for( int k = 0; k < size_one; ++k ){
-			const data_field *df = b.get_data( data_names[k] );
+			const data_field *df = b.get_data( b[k].name );
 			if( data_types[k] == data_field::INT ){
 				const dfi* di = static_cast<const dfi*>( df );
 			        double value = (*di)[j]; // Implicitly cast.
