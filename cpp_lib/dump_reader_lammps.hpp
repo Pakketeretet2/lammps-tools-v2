@@ -45,7 +45,10 @@ public:
 
 	/// Sets up a vector containing the expected columns.
 	void set_column_headers( const std::vector<std::string> &headers );
-	void set_column_header( std::size_t idx, const std::string &header );
+
+	void set_column_header( std::size_t idx, const std::string &header,
+	                        int special_field_type = block_data::UNKNOWN );
+
 	void set_column_type( const std::string &header, int type );
 	void set_default_column_type( int type );
 

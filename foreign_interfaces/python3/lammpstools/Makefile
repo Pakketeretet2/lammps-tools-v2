@@ -1,4 +1,4 @@
-CC = g++
+CC = clang++
 # INC = -I../../../cpp_lib/
 INC = -I../../../c_interface/ -I../../../internal_include/
 LNK = -llammpstools

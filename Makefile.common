@@ -1,7 +1,7 @@
 SHELL = /bin/sh
-CC=g++
+CC=clang++
 # Common flags:
-FLAGS = -std=c++11 -g -O3 -pedantic -frounding-math -fPIC \
+FLAGS = -std=c++11 -g -O3 -pedantic -fPIC \
       -Wall -Werror=int-conversion -Werror=implicit \
       -Werror=return-type -Werror=uninitialized -Weffc++
 
@@ -10,7 +10,7 @@ ifeq ($(CC),g++)
 endif
 
 ifeq ($(CC),clang++)
-	FLAGS = -Wno-missing-braces
+	FLAGS += -Wno-missing-braces
 endif
 
 PY_DIR     = "/usr/include/python3.6m/"

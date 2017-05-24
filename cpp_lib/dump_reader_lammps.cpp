@@ -38,7 +38,8 @@ void dump_reader_lammps::set_column_headers(
 }
 
 void dump_reader_lammps::set_column_header( std::size_t idx,
-                                            const std::string &header )
+                                            const std::string &header,
+                                            int special_field_type )
 {
 	if( idx >= column_headers.size() ){
 		column_headers.resize(idx+1);
@@ -46,10 +47,19 @@ void dump_reader_lammps::set_column_header( std::size_t idx,
 	}
 	my_assert( __FILE__, __LINE__, idx < column_headers.size(),
 	           "Invalid index in set_column_header!" );
+
 	column_headers[idx] = header;
 	if( is_int_data_field( header ) ){
 		column_header_types[idx] = data_field::INT;
+	}else{
+		column_header_types[idx] = data_field::DOUBLE;
 	}
+
+	if( special_field_type == block_data::UNKNOWN ){
+		return;
+	}
+
+	set_column_header_as_special( header, special_field_type );
 }
 
 const std::vector<std::string> &dump_reader_lammps::get_column_headers() const

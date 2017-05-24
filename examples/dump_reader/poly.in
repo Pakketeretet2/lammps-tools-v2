@@ -1,0 +1,44 @@
+ units		lj     # Dimensionless units
+ atom_style	bond   # Atoms now need to store their topology data,
+ 		       # hence the atom_style bond.
+ 
+ read_data	polymer.data   # Read data in from a data file. This defines
+ 		               # simulation volume, number of atom and bond
+ 			       # types, masses (if in file), etc...
+ 
+ replicate 10 10 2              # Replicate to create larger box and more atoms
+ 
+ variable	rcut equal "2.0 ^ (1.0/6.0)"  # Here F = 0 for lj/cut
+ 
+ pair_style lj/cut 3.0
+ pair_coeff 1 1 1.0 1.0 ${rcut}  # Purely repulsive interactions
+ pair_coeff 1 2 1.0 1.0 ${rcut}  # Purely repulsive interactions
+ pair_coeff 2 2 1.0 1.0          # No cut-off given, so uses the full 3.0,
+                                 # hence full attraction.
+ pair_modify shift yes
+ 
+ bond_style      harmonic       # Harmonic bonds
+ bond_coeff      1 50.0 0.5     # Bond coefficients. Spring constant 50.0,
+                                # bond length 0.5
+ 
+ neighbor	0.8 bin          # Neighbour list settings that prevent
+                                # dangerous builds
+
+ velocity all create 1.0 1234   # Initial velocity.
+ 
+ fix	step all nve             # Time integrator
+
+compute bonds all property/local batom1 batom2 btype
+dump links all local 1000 bondinfo.dump c_bonds[1] c_bonds[2] c_bonds[3]
+ 
+ variable sleft equal "cpuremain"         # Est. simulation time remaining (seconds)
+ variable hleft equal "v_sleft / 3600.0"  # Est. simulation time remaining (hours)
+
+ # Custom output to screen, now print hourst left and time in 
+ # simulation units in addition to other info
+ thermo_style custom v_hleft time step pe ke etotal epair emol press
+ thermo 5000
+ 
+ dump	traj all custom 1000 polymer.dump id mol type x y z
+ 
+ run 50000

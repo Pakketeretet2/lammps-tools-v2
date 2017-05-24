@@ -116,7 +116,7 @@ class dump_reader:
 
         for h in headers:
             # Assume some defaults:
-            if h == "id":     i = 0;
+            if   h == "id":   i = 0;
             elif h == "mol":  i = 1
             elif h == "type": i = 2
             elif h == "x":    i = 3
