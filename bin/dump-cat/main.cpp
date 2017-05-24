@@ -60,13 +60,13 @@ int main( int argc, char **argv )
 
 	std::ofstream *out_fstream = nullptr;
 	std::ostream *out = nullptr;
-	int out_fformat = readers::PLAIN;
+	int out_fformat = FILE_FORMAT_PLAIN;
 
 	if( out_file == "-" ){
 		out = &std::cout;
 	}else{
 		if( util::ends_with( out_file, ".bin") ){
-			out_fformat = readers::BIN;
+			out_fformat = FILE_FORMAT_BIN;
 			out_fstream = new std::ofstream( out_file, std::ios::binary );
 			out = out_fstream;
 		}else if( util::ends_with( out_file, ".gz" ) ){
@@ -79,7 +79,7 @@ int main( int argc, char **argv )
 
 	if( read_stdin ){
 		std::istream &in( std::cin );
-		int fformat = readers::PLAIN;
+		int fformat = FILE_FORMAT_PLAIN;
 		block_data b;
 		std::unique_ptr<readers::dump_reader_lammps> d(
 			readers::make_dump_reader_lammps( in ) );
@@ -91,11 +91,11 @@ int main( int argc, char **argv )
 
 	}else{
 		for( const std::string &dname : dumps ){
-			int fformat = readers::PLAIN;
+			int fformat = FILE_FORMAT_PLAIN;
 			if( util::ends_with( dname, ".bin" ) ){
-				fformat = lammps_tools::readers::BIN;
+				fformat = FILE_FORMAT_BIN;
 			}else if( util::ends_with( dname, ".gz" ) ){
-				fformat = readers::GZIP;
+				fformat = FILE_FORMAT_GZIP;
 			}
 			std::cerr << "Catting " << dname << ".\n";
 			block_data b;
