@@ -215,18 +215,35 @@ using namespace lammps_tools;
 	lammps_tools::writers::block_to_lammps_dump( "neighs_input.dump", b, 0 );
 
 	std::vector<std::vector<int> > neighs;
-
 	std::vector<data_field_int> ncs;
+
 	data_field_int nc1( "nc", N );
 	data_field_int nc2( "nc_12", N );
 	data_field_int nc3( "nc_11", N );
 	data_field_int nc4( "nc_21", N );
 	data_field_int nc5( "nc_22", N );
+	REQUIRE( nc1.size() == N );
+	REQUIRE( nc2.size() == N );
+	REQUIRE( nc3.size() == N );
+	REQUIRE( nc4.size() == N );
+	REQUIRE( nc5.size() == N );
+
 	ncs.push_back(nc1);
 	ncs.push_back(nc2);
 	ncs.push_back(nc3);
 	ncs.push_back(nc4);
 	ncs.push_back(nc5);
+
+	REQUIRE( ncs.size() == 5 );
+	for( std::size_t k = 0; k < 5; ++k ){
+		std::cerr << "ncs[" << k << "] = " << ncs[k].name << ".\n";
+	}
+	REQUIRE( ncs[0].size() == N );
+	REQUIRE( ncs[1].size() == N );
+	REQUIRE( ncs[2].size() == N );
+	REQUIRE( ncs[3].size() == N );
+	REQUIRE( ncs[4].size() == N );
+
 
 	std::vector<std::vector<int> > types = {{0,0},
 	                                        {1,2},
@@ -320,13 +337,14 @@ using namespace lammps_tools;
 
 	int method = DIST_BIN;
 	// int method = DIST_NSQ;
-	double avg = 0.0;
+
 	for( int k = 0; k < 5; ++k ){
 		int itype = types[k][0];
 		int jtype = types[k][1];
-
-		avg = make_list_dist( neighs, b, itype, jtype, method, 3, rc );
+		REQUIRE( ncs[k].size() == b.N );
+		double avg = make_list_dist( neighs, b, itype, jtype, method, 3, rc );
 		for( int i = 0; i < b.N; ++i ){
+			REQUIRE( b.N == N );
 			for( int j = 0; j < b.N; ++j ){
 				if( util::contains( neighs[i], j ) ){
 					REQUIRE(  are_neighs[k][i][j] );
@@ -337,6 +355,7 @@ using namespace lammps_tools;
 			ncs[k][i] = neighs[i].size();
 		}
 		b.add_field( ncs[k] );
+		std::cerr << "avg = " << avg << "\n";
 	}
 
 	lammps_tools::writers::block_to_lammps_dump( "neighs_output.dump", b, 0 );

@@ -12,7 +12,7 @@ void add_conns_to_network( neigh_list &conns,
 	int max_mol = conns.size();
 	std::vector<bool> mol_out( max_mol, false );
 
-	for( int i = 1; i < mol_out.size(); ++i ){
+	for( std::size_t i = 1; i < mol_out.size(); ++i ){
 		if( !mol_out[i] ){
 			std::list<int> network;
 			mol_out[i] = true;
@@ -47,7 +47,7 @@ void find_molecular_networks ( const block_data &b, const neigh_list &neighs,
 	int max_mol = *std::max_element( mol.begin(), mol.end() );
 	conns.resize( max_mol + 1 );
 
-	for( int i = 0; i < neighs.size(); ++i ){
+	for( std::size_t i = 0; i < neighs.size(); ++i ){
 		int mol_i = mol[i];
 		for( int j : neighs[i] ){
 			int mol_j = mol[j];

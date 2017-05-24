@@ -9,6 +9,7 @@
 
 #include "dump_reader_lammps.hpp"
 
+#include <memory>
 #include <string>
 #include <iosfwd>
 
@@ -57,8 +58,11 @@ private:
 	void append_data_to_fields( block_data &block,
 	                            std::vector<data_field*> &data_fields );
 
+	dump_reader_lammps_plain &operator=(dump_reader_lammps_plain&) = delete;
+	dump_reader_lammps_plain(dump_reader_lammps_plain&) = delete;
+
 	std::ifstream *in_file;
-	std::istream  *in;
+	std::istream *in;
 };
 
 } // namespace readers

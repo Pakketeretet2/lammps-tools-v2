@@ -77,7 +77,7 @@ struct data_field_der : public data_field
 	   Sets up name only.
 	*/
 	explicit data_field_der( const std::string &n )
-		: data_field( n )
+		: data_field( n ), data()
 	{}
 
 	/**
@@ -86,10 +86,8 @@ struct data_field_der : public data_field
 	   Sets up name and size of data.
 	*/
 	data_field_der( const std::string &n, std::size_t size )
-		: data_field( n )
-	{
-		data.resize(size);
-	}
+		: data_field( n ), data( size )
+	{ }
 
 	/**
 	   Copy constructor from pointer.
@@ -97,7 +95,7 @@ struct data_field_der : public data_field
 	   Sets up name and complete data.
 	*/
 	explicit data_field_der( const data_field_der<T, TYPE> *other )
-		: data_field( other->name )
+		: data_field( other->name ), data( other->size() )
 	{
 		construct_from_other( *other );
 	}
@@ -108,8 +106,9 @@ struct data_field_der : public data_field
 	   Sets up name and complete data.
 	*/
 	explicit data_field_der( const data_field_der<T, TYPE> &other )
-		: data_field( other.name )
+		: data_field( other.name ), data( other.size() )
 	{
+		std::cerr << "Attempting to construct through ref.\n";
 		construct_from_other( other );
 	}
 
@@ -142,12 +141,13 @@ struct data_field_der : public data_field
 	{
 		my_assert( __FILE__, __LINE__, other.type() == TYPE,
 		           "Type mismatch in constructor!" );
-
-		data.resize( other.size() );
+		/*
 		const std::vector<T> &d_o = other.get_data();
 		for( std::size_t i = 0; i < size(); ++i ){
 			data[i] = d_o[i];
 		}
+		*/
+		data = other.get_data();
 	}
 
 	/**

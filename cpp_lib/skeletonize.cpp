@@ -95,12 +95,10 @@ std::vector<double> get_insideness( const class block_data &b,
 			if( insideness[i] >= 0 ){
 				continue;
 			}
-			int idi = ids[i];
 
 			const std::vector<int> &ni = neighs[i];
 			bool has_current_val = false;
 			for( int idx : ni ){
-				int idj = ids[idx];
 				if( insideness[idx] == current_val ){
 					has_current_val = true;
 					break;
@@ -233,7 +231,7 @@ void get_stats( const std::vector<double> &values,
 	std::sort( sorted.begin(), sorted.end() );
 	min_val = sorted[0];
 	max_val = sorted[sorted.size()-1];
-	for( int i = 0; i < largest.size(); ++i ){
+	for( std::size_t i = 0; i < largest.size(); ++i ){
 		largest[i] = sorted[sorted.size()-1-i];
 	}
 }
@@ -246,27 +244,7 @@ void skeletonize_edt( const class block_data &b, std::vector<int> &skeleton,
                       const std::vector<double> &insideness, double R )
 {
 	std::vector<double> edt = euclidian_distance_transform( b, insideness, R );
-	skeletonize( b, skeleton, edt, R );
-}
-
-void skeletonize_alg2( const block_data &b, std::vector<int> &skeleton,
-                       const std::vector<double> &distance_map, double R )
-{
-	// 1. Sort the points in terms of distance_map.
-	// 2. For each point with more than one bond that is not an edge
-	//    point, delete all except two bonds. Keep the bond with the
-	//    largest EDT, and the one the most opposite to it.
-
-	std::vector<std::size_t> permutation( distance_map.size() );
-	for( int i = 0; i < permutation.size(); ++i ){
-		permutation[i] = i;
-	}
-	std::sort( permutation.begin(), permutation.end(),
-	           [&permutation,distance_map]( std::size_t a,
-	                                        std::size_t b )
-	           {
-		           return distance_map[a] < distance_map[b];
-	           } );
+	//skeletonize( b, skeleton, edt, R );
 }
 
 
@@ -280,12 +258,12 @@ void skeletonize_alg1( const block_data &b, std::vector<int> &skeleton,
 
 
 	std::vector<bool> out( distance_map.size() );
-	for( int i = 0; i < out.size(); ++i ){
+	for( std::size_t i = 0; i < out.size(); ++i ){
 		out[i] = false;
 	}
 	int i = 0;
 	double d_max = 0.0;
-	for( int j = 0; j < distance_map.size(); ++j ){
+	for( std::size_t j = 0; j < distance_map.size(); ++j ){
 		if( distance_map[j] > d_max ){
 			d_max = distance_map[j];
 			i = j;
@@ -295,7 +273,6 @@ void skeletonize_alg1( const block_data &b, std::vector<int> &skeleton,
 	out[i] = true;
 
 	std::vector<std::vector<int> > neighs;
-	const std::vector<int> &id = get_id(b);
 	const std::vector<double> &x = get_x(b);
 	const std::vector<double> &y = get_y(b);
 	const std::vector<double> &z = get_z(b);
@@ -315,7 +292,7 @@ void skeletonize_alg1( const block_data &b, std::vector<int> &skeleton,
 		// the most positive gradient in EDT.
 		for( int j : neighs[i] ){
 			double max_grad = -1000;
-			int    max_j = -1;
+			int max_j = j;
 			got_one_in = false;
 			if( !out[j] ){
 				// Compute the gradient in EDT:
@@ -340,7 +317,7 @@ void skeletonize_alg1( const block_data &b, std::vector<int> &skeleton,
 				}
 			}
 			// Select j as the new i.
-			skeleton.push_back(j);
+			skeleton.push_back(max_j);
 			out[j] = true;
 			i = j;
 		}
@@ -373,7 +350,6 @@ std::vector<double> get_ribbon_widths( const block_data &b,
 	const std::vector<double> &x = get_x(b);
 	const std::vector<double> &y = get_y(b);
 	const std::vector<double> &z = get_z(b);
-	const std::vector<int> &id = get_id(b);
 
 
 	// Get the distance to the edge.
@@ -381,7 +357,6 @@ std::vector<double> get_ribbon_widths( const block_data &b,
 		// Get the shortest distance to any edge particle:
 		double xi[3] = { x[i], y[i], z[i] };
 		double shortest_dist2 = 100000000.0;
-		int shortest_idx = -1;
 
 		for( int j : edge ){
 			double xj[3] = { x[j], y[j], z[j] };
@@ -389,7 +364,6 @@ std::vector<double> get_ribbon_widths( const block_data &b,
 			double r2 = b.dom.dist_2( xi, xj, rr );
 			if( r2 < shortest_dist2 ){
 				shortest_dist2 = r2;
-				shortest_idx = j;
 			}
 		}
 		/*

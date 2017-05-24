@@ -13,6 +13,9 @@
 */
 
 #include "../cpp_lib/block_data.hpp"
+#include "../cpp_lib/util.hpp"
+
+#include <memory>
 
 extern "C" {
 
@@ -23,26 +26,38 @@ struct lt_block_data_handle
 {
 	lt_block_data_handle() : bd(nullptr)
 	{
-		bd = new lammps_tools::block_data;
-	}
-	lt_block_data_handle( const lt_block_data_handle *o )
-	{
-		bd = new lammps_tools::block_data;
-		*bd = *o->bd;
+		using lammps_tools::util::make_unique;
+		bd = make_unique( new lammps_tools::block_data );
 	}
 
-	lt_block_data_handle &operator=( lt_block_data_handle o )
+	lt_block_data_handle( const lt_block_data_handle &o ) : bd(nullptr)
+	{
+		using lammps_tools::util::make_unique;
+		bd = make_unique( new lammps_tools::block_data );
+		// No worries, this calls the copy constructor of block_data:
+		*bd = *o.bd;
+	}
+
+	/*
+	  lt_block_data_handle( const lt_block_data_handle *o ) : bd(nullptr)
+	{
+		using lammps_tools::util::make_unique;
+		bd = make_unique( new lammps_tools::block_data );
+		*bd = *o->bd;
+		}
+	*/
+
+	lt_block_data_handle &operator=( const lt_block_data_handle &o )
 	{
 		using std::swap;
 		lt_block_data_handle new_block( o );
-		swap( *this, new_block );
+		// swap( *this, new_block );
+		bd.swap( new_block.bd );
 		return *this;
 	}
 
 	~lt_block_data_handle()
-	{
-		if( bd ) delete bd;
-	}
+	{}
 
 	lammps_tools::bigint time_step() const
 	{ return bd->tstep; }
@@ -56,7 +71,7 @@ struct lt_block_data_handle
 	int atom_style() const
 	{ return bd->atom_style; }
 
-	lammps_tools::block_data *bd;
+	std::unique_ptr<lammps_tools::block_data> bd;
 };
 
 

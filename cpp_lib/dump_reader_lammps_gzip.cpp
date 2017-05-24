@@ -15,7 +15,7 @@ namespace readers {
 #ifdef HAVE_BOOST_GZIP
 dump_reader_lammps_gzip::dump_reader_lammps_gzip( const std::string &fname, int dump_style )
 	: dump_reader_lammps_plain( fname, dump_style ),
-	  infile( fname, std::ios_base::in |std::ios_base::binary )
+	  infile( fname, std::ios_base::in |std::ios_base::binary ), in()
 {
 	in.push( boost::iostreams::gzip_decompressor() );
 	in.push( infile );

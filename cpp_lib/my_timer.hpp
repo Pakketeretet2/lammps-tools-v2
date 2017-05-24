@@ -7,7 +7,7 @@
 
 #include <sys/time.h>
 #include <iostream>
-
+#include <memory>
 
 /**
   \brief A simple timer class based on sys/time
@@ -18,12 +18,12 @@
 class my_timer {
 public:
 	/// Default constructor, no output.
-	my_timer() : out( nullptr )
+	my_timer() : out(nullptr), t_tic{0}, t_toc{0}
 	{ init_tic_toc(); }
 
 	/// Constructor that takes an std::ostream to which stuff is
 	/// occasionally printed.
-	explicit my_timer(std::ostream &out_stream ) : out( &out_stream )
+	explicit my_timer(std::ostream &out_stream) : out(&out_stream), t_tic{0}, t_toc{0}
 	{ init_tic_toc(); }
 
 	/// Empty destructor
@@ -73,8 +73,10 @@ public:
 
 
 	/// Enables output stream and sets it to o.
-	void enable_output( std::ostream* o )
-	{ out = o; }
+	void enable_output( std::ostream &o )
+	{
+		out = &o;
+	}
 
 	/**
 	  \brief Disables the output stream.
@@ -94,6 +96,10 @@ private:
 		gettimeofday(&t_tic, nullptr);
 		gettimeofday(&t_toc, nullptr);
 	}
+
+	// This class is not copy-able:
+	my_timer( const my_timer &o ) = delete;
+	my_timer &operator=( const my_timer &o ) = delete;
 };
 
 #endif // MY_TIMER_HPP

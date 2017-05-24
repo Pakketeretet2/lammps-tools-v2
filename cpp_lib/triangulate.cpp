@@ -31,7 +31,7 @@ double vec_dist( const double *x1, const double *x2 )
 int insert_triangle( const block_data &b, int i, int j, int k, int **out,
                      std::vector<triangle> &triangles, std::vector<int> &neighs )
 {
-	bool added = 0;
+	int added = 0;
 	const std::vector<double> &x = get_x(b);
 	const std::vector<double> &y = get_y(b);
 	const std::vector<double> &z = get_z(b);
@@ -67,7 +67,7 @@ void triangulate_block( const block_data &b, double rc, int periodic,
                         int dims, int method, std::vector<triangle> &triangles )
 {
 	// Make a neighbour list first:
-	std::size_t N = b.N;
+	bigint N = b.N;
 
 	const std::vector<int> &id = get_id( b );
 	std::list<int> all( id.begin(), id.end() );
@@ -85,15 +85,15 @@ void triangulate_block( const block_data &b, double rc, int periodic,
 	int **idx_out  = new int*[N];
 
 
-	for( int i = 0; i < N; ++i ){
+	for( bigint i = 0; i < N; ++i ){
 		idx_out[i] = idx_out_ + N*i;
-		for( int j = 0; j < N; ++j ){
+		for( bigint j = 0; j < N; ++j ){
 			idx_out_[i + j*N] = 0;
 		}
 	}
 
 
-	for( int ii = 0; ii < N; ++ii ){
+	for( bigint ii = 0; ii < N; ++ii ){
 		// loop over all neighs of i1:
 
 		const std::vector<int> &l = neighs[ii];

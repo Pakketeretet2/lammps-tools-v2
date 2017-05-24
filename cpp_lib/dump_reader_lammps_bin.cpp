@@ -34,7 +34,8 @@ dump_reader_lammps_bin::dump_reader_lammps_bin( const std::string &fname,
 	: dump_reader_lammps( dump_style ), in( nullptr )
 {
 	in = fopen( fname.c_str(), "rb" );
-	my_assert( __FILE__, __LINE__, in, "Failed to open dump file!" );
+	my_assert( __FILE__, __LINE__, in != nullptr,
+	           "Failed to open dump file!" );
 }
 
 dump_reader_lammps_bin::dump_reader_lammps_bin( const std::string &fname,
@@ -43,7 +44,9 @@ dump_reader_lammps_bin::dump_reader_lammps_bin( const std::string &fname,
 	: dump_reader_lammps( dump_style ), in( nullptr )
 {
 	in = fopen( fname.c_str(), "rb" );
-	my_assert( __FILE__, __LINE__, in, "Failed to open dump file!" );
+	set_column_headers( h );
+	my_assert( __FILE__, __LINE__, in != nullptr,
+	           "Failed to open dump file!" );
 }
 
 dump_reader_lammps_bin::~dump_reader_lammps_bin()
@@ -57,7 +60,7 @@ int dump_reader_lammps_bin::get_next_block( block_data &block )
 {
 	if( !in ) return -1;
 
-	if( feof(in) ){
+	if( std::feof(in) ){
 		return 1;
 	}
 	int size_one, nchunk;
@@ -87,12 +90,12 @@ int dump_reader_lammps_bin::next_block_meta( block_data &block,
 	bigint ntimestep, natoms;
 	double xlo[3], xhi[3];
 	int boundary[3][2];
-	char boundstr[9];
+
 	int triclinic;
 	int xy,xz,yz;
 
 	while( true ){
-		fread( &ntimestep, sizeof(bigint), 1, in );
+		std::fread( &ntimestep, sizeof(bigint), 1, in );
 		if( !in ){
 			std::cerr << "Error opening binary file!\n";
 			return -1;
@@ -103,22 +106,22 @@ int dump_reader_lammps_bin::next_block_meta( block_data &block,
 			return 1;
 		}
 
-		fread(&natoms,sizeof(bigint),1,in);
-		fread(&triclinic,sizeof(int),1,in);
-		fread(&boundary[0][0],6*sizeof(int),1,in);
-		fread(xlo  ,sizeof(double),1,in);
-		fread(xhi  ,sizeof(double),1,in);
-		fread(xlo+1,sizeof(double),1,in);
-		fread(xhi+1,sizeof(double),1,in);
-		fread(xlo+2,sizeof(double),1,in);
-		fread(xhi+2,sizeof(double),1,in);
+		std::fread(&natoms,sizeof(bigint),1,in);
+		std::fread(&triclinic,sizeof(int),1,in);
+		std::fread(&boundary[0][0],6*sizeof(int),1,in);
+		std::fread(xlo  ,sizeof(double),1,in);
+		std::fread(xhi  ,sizeof(double),1,in);
+		std::fread(xlo+1,sizeof(double),1,in);
+		std::fread(xhi+1,sizeof(double),1,in);
+		std::fread(xlo+2,sizeof(double),1,in);
+		std::fread(xhi+2,sizeof(double),1,in);
 		if (triclinic) {
-			fread(&xy,sizeof(double),1,in);
-			fread(&xz,sizeof(double),1,in);
-			fread(&yz,sizeof(double),1,in);
+			std::fread(&xy,sizeof(double),1,in);
+			std::fread(&xz,sizeof(double),1,in);
+			std::fread(&yz,sizeof(double),1,in);
 		}
-		fread(&size_one,sizeof(int),1,in);
-		fread(&nchunk,sizeof(int),1,in);
+		std::fread(&size_one,sizeof(int),1,in);
+		std::fread(&nchunk,sizeof(int),1,in);
 
 		block.N = natoms;
 		block.tstep = ntimestep;
@@ -129,23 +132,6 @@ int dump_reader_lammps_bin::next_block_meta( block_data &block,
 		block.dom.xhi[0] = xhi[0];
 		block.dom.xhi[1] = xhi[1];
 		block.dom.xhi[2] = xhi[2];
-
-		int m = 0;
-		for (int idim = 0; idim < 3; idim++) {
-			for (int iside = 0; iside < 2; iside++) {
-				if (boundary[idim][iside] == 0){
-					boundstr[m++] = 'p';
-				}else if (boundary[idim][iside] == 1){
-					boundstr[m++] = 'f';
-				}else if (boundary[idim][iside] == 2){
-					boundstr[m++] = 's';
-				}else if (boundary[idim][iside] == 3){
-					boundstr[m++] = 'm';
-				}
-			}
-			boundstr[m++] = ' ';
-		}
-		boundstr[8] = '\0';
 
 		block.dom.periodic = 0;
 		if( (boundary[0][0] == 0) && (boundary[0][1] == 0) ){
@@ -174,17 +160,18 @@ int dump_reader_lammps_bin::next_block_body( block_data &block,
 	block.set_natoms( block.N );
 	const std::vector<std::string> &headers = get_column_headers();
 	std::vector<data_field*> data_fields(size_one);
+	std::size_t ssize_one = size_one;
 
 
 	my_assert( __FILE__, __LINE__, !headers.empty(),
 	           "Column headers required for binary LAMMPS dump files!" );
 
 
-	my_assert( __FILE__, __LINE__, headers.size() == size_one,
+	my_assert( __FILE__, __LINE__, headers.size() == ssize_one,
 	           "Column number does not match number of headers!" );
 
 	for( int i = 0; i < nchunk; i++ ){
-		fread(&n,sizeof(int),1,in);
+		std::fread(&n,sizeof(int),1,in);
 
 		// extend buffer to fit chunk size
 
@@ -196,7 +183,7 @@ int dump_reader_lammps_bin::next_block_body( block_data &block,
 
 		// read chunk and write as size_one values per line
 
-		fread(buf,sizeof(double),n,in);
+		std::fread(buf,sizeof(double),n,in);
 		n /= size_one;
 
 

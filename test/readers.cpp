@@ -59,8 +59,6 @@ TEST_CASE ( "LAMMPS plain text dump file gets read correctly.", "[read_lammps_du
 {
 	using namespace lammps_tools;
 	using namespace readers;
-	using dfd = data_field_double;
-	using dfi = data_field_int;
 
 	std::string fname = "lammps_dump_file_test.dump";
 	std::vector<std::string> headers = { "id", "type", "x", "y", "z", "c_pe" };
@@ -131,9 +129,6 @@ TEST_CASE ( "LAMMPS binary dump file gets read correctly.", "[read_lammps_dump_b
 
 	using namespace lammps_tools;
 	using namespace readers;
-
-	using dfd = data_field_double;
-	using dfi = data_field_int;
 
 	std::string fname = "lammps_dump_file_test.dump.bin";
 	std::vector<std::string> headers = { "id", "type", "x", "y", "z", "c_pe" };
@@ -209,9 +204,6 @@ TEST_CASE ( "LAMMPS gzipped text dump file gets read correctly.", "[read_lammps_
 {
 	using namespace lammps_tools;
 	using namespace readers;
-
-	using dfd = data_field_double;
-	using dfi = data_field_int;
 
 	std::string fname = "lammps_dump_file_test.dump.gz";
 	// std::vector<std::string> headers = { "id", "type", "x", "y", "z", "c_pe" };
@@ -321,9 +313,6 @@ TEST_CASE ( "Setting data type explicitly works.", "[read_lammps_dump_explicit_d
 {
 	using namespace lammps_tools;
 	using namespace readers;
-
-	using dfd = data_field_double;
-	using dfi = data_field_int;
 
 	std::string fname = "lammps_dump_file_test.dump.gz";
 

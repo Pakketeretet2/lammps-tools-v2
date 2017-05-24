@@ -37,6 +37,7 @@ struct are_neighbours
 {
 	virtual bool operator()( const block_data &b,
 	                         int i, int j ) const = 0;
+	virtual ~are_neighbours(){}
 };
 
 
@@ -45,6 +46,7 @@ struct dist_criterion : public are_neighbours
 {
 	explicit dist_criterion( double rc ) : rc(rc), rc2(rc*rc) {}
 	virtual bool operator()( const block_data &b, int i, int j ) const;
+	virtual ~dist_criterion(){}
 	double rc, rc2;
 };
 

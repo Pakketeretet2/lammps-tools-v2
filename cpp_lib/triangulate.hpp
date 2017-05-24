@@ -29,6 +29,7 @@ struct triangle
 
 	triangle( int j1, int j2, int j3,
 	          const double y1[3], const double y2[3], const double y3[3] )
+		: i1(-1), i2(-1), i3(-1), x1{0,0,0}, x2{0,0,0}, x3{0,0,0}
 	{
 		// Find the right mapping, which is indices sorted
 		// from low to high.

@@ -45,13 +45,11 @@ const std::vector<int> &lt_special_field_int( lt_block_data_handle *bdh,
 lt_data_field_handle lt_data_by_name( lt_block_data_handle *bdh, const char *name )
 {
 	const std::string n(name);
-	int i = 0;
-
 	lt_data_field_handle ldf;
 	ldf.df = nullptr;
 	const lammps_tools::block_data &b = *bdh->bd;
 
-	for( int i = 0; i < b.n_data_fields(); ++i ){
+	for( std::size_t i = 0; i < b.n_data_fields(); ++i ){
 		if( n == b[i].name ){
 			const lammps_tools::data_field *df = &b[i];
 			ldf.df = df;
@@ -67,8 +65,8 @@ lt_data_field_handle lt_data_by_index( lt_block_data_handle *bdh, int i )
 	lt_data_field_handle ldf;
 	ldf.df = nullptr;
 	const lammps_tools::block_data &b = *bdh->bd;
-
-	if( i < 0 || i >= b.n_data_fields() ){
+	std::size_t ii = i;
+	if( i < 0 || ii >= b.n_data_fields() ){
 		return ldf;
 	}
 	ldf.df = &b[i];

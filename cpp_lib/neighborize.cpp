@@ -20,7 +20,7 @@ neighborizer::neighborizer( const block_data &b, const std::list<int> &s1,
                             const std::list<int> &s2, int dims )
 	: dims(dims), periodic(b.dom.periodic), b(b),
 	  xlo{b.dom.xlo[0], b.dom.xlo[1], b.dom.xlo[2]},
-	  xhi{b.dom.xhi[0], b.dom.xhi[1], b.dom.xhi[2]},
+	  xhi{b.dom.xhi[0], b.dom.xhi[1], b.dom.xhi[2]}, n_atoms(0),
 	  quiet(true), mol_policy(IGNORE), bond_policy(IGNORE), s1(s1), s2(s2)
 { }
 
@@ -59,7 +59,7 @@ double neighborizer::build_list( neigh_list &neighs,
 
 	remove_doubles( neighs );
 
-	for( int i = 0; i < neighs.size(); ++i ){
+	for( std::size_t i = 0; i < neighs.size(); ++i ){
 		avg_neighs += neighs[i].size();
 	}
 	if( !quiet ){
@@ -153,7 +153,7 @@ int neighborizer::remove_particles_in_mol( neigh_list &neighs )
 
 	const std::vector<int> &mol = data_as<int>( mol_ptr );
 
-	for( int i = 0; i < neighs.size(); ++i ){
+	for( std::size_t i = 0; i < neighs.size(); ++i ){
 		std::vector<int> &ni = neighs[i];
 		int old_size = ni.size();
 		auto deleter = [i,mol](int j){ return mol[j] == mol[i]; };
@@ -279,7 +279,7 @@ void verify_neigh_list( const neigh_list &neighs )
 
 void remove_doubles( neigh_list &neighs )
 {
-	for( int i = 0; i < neighs.size(); ++i ){
+	for( std::size_t i = 0; i < neighs.size(); ++i ){
 		util::remove_doubles( neighs[i] );
 	}
 }

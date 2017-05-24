@@ -163,7 +163,6 @@ void neighborizer_bin::bin_atoms(  )
 		for( int j : s2 ){
 			s2_vec[c++] = j;
 		}
-		#pragma omp parallel for
 		for( std::size_t i = 0; i < s2_vec.size(); ++i ){
 			int j = s2_vec[i];
 			if( !quiet ){
@@ -395,8 +394,7 @@ int neighborizer_bin::build( neigh_list &neighs,
 		for( int j : s1 ){
 			s1_vec[c++] = j;
 		}
-		#pragma omp parallel for
-		for( int j = 0; j < s1_vec.size(); ++j ){
+		for( std::size_t j = 0; j < s1_vec.size(); ++j ){
 			int i = s1_vec[j];
 			neigh_bin_atom( i, neighs, criterion );
 		}

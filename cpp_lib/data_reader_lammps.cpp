@@ -77,7 +77,7 @@ int read_data_atoms( std::istream &in, block_data &b, bool quiet )
 	std::vector<std::string> words = util::split(line);
 	// Check size.
 	std::size_t n_cols = words.size();
-	int n_col_target = 5;
+	std::size_t n_col_target = 5;
 
 	if( b.atom_style == ATOM_STYLE_MOLECULAR ){
 		n_col_target = 6;
@@ -112,7 +112,7 @@ int read_data_atoms( std::istream &in, block_data &b, bool quiet )
 	}
 
 	if( b.atom_style == ATOM_STYLE_ATOMIC ){
-		for( std::size_t i = 0; i < b.N; ++i ){
+		for( bigint i = 0; i < b.N; ++i ){
 			std::stringstream ss(line);
 			ss >> id[i] >> type[i] >> x[i] >> y[i] >> z[i];
 
@@ -123,7 +123,7 @@ int read_data_atoms( std::istream &in, block_data &b, bool quiet )
 			std::getline(in,line);
 		}
 	}else if( b.atom_style == ATOM_STYLE_MOLECULAR ){
-		for( std::size_t i = 0; i < b.N; ++i ){
+		for( bigint i = 0; i < b.N; ++i ){
 			std::stringstream ss(line);
 			ss >> id[i] >> mol[i] >> type[i] >> x[i] >> y[i] >> z[i];
 
@@ -175,7 +175,7 @@ int read_data_atoms_velocities( std::istream &in, block_data &b, bool quiet )
 	data_field_double vy( "vy", b.N );
 	data_field_double vz( "vz", b.N );
 
-	for( std::size_t i = 0; i < b.N; ++i ){
+	for( bigint i = 0; i < b.N; ++i ){
 		std::stringstream ss(line);
 		int id;
 		ss >> id;
@@ -214,7 +214,7 @@ int get_data_body( std::istream &in, block_data &b,
 			if( !quiet ) std::cerr << "    ....Reading Masses...\n";
 			std::getline(in,line);
 			std::getline(in,line);
-			for( std::size_t i = 0; i < b.N_types; ++i ){
+			for( int i = 0; i < b.N_types; ++i ){
 				std::stringstream ss(line);
 				int type;
 				double mass;
@@ -257,7 +257,7 @@ int get_data_body( std::istream &in, block_data &b,
 			if( !quiet ) std::cerr << "    ....Reading pair coeffs...\n";
 			std::getline(in,line);
 			std::getline(in,line);
-			for( std::size_t i = 0; i < b.N_types; ++i ){
+			for( int i = 0; i < b.N_types; ++i ){
 				std::stringstream ss(line);
 				// Determine the number of coeffs.
 				int ncoeffs = util::split(line).size() - 1;

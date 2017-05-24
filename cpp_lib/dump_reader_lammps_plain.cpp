@@ -31,16 +31,11 @@ dump_reader_lammps_plain::dump_reader_lammps_plain( const std::string &fname,
 
 dump_reader_lammps_plain::dump_reader_lammps_plain( std::istream &istream,
                                                     int dump_style )
-	: dump_reader_lammps( dump_style ), in_file( nullptr ), in( nullptr )
-{
-	in = &istream;
-	my_assert( __FILE__, __LINE__, in,
-	           "Failed to open input stream!" );
-}
+	: dump_reader_lammps( dump_style ), in_file( nullptr ), in( &istream )
+{ }
 
 dump_reader_lammps_plain::~dump_reader_lammps_plain()
 {
-	// Works for either case because in always points to the open stream.
 	if( in_file ) delete in_file;
 }
 
@@ -278,7 +273,7 @@ void dump_reader_lammps_plain::append_data_to_fields(
 		get_line( line );
 
 		std::stringstream ss( line );
-		for( int j = 0; j < n_cols; ++j ){
+		for( std::size_t j = 0; j < n_cols; ++j ){
 			int type = data_fields[j]->type();
 			if( type == data_field::INT ){
 				std::vector<int> &vec =

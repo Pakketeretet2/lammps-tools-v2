@@ -91,10 +91,8 @@ TEST_CASE( "Cluster analysis on triangles", "[cluster_triangles]" ) {
 	std::vector<block_data> blocks;
 	block_data tmp;
 	// int n_blocks = 20;
-	bigint last_time = 0;
 	while( d->next_block(tmp) == 0 ){
 		blocks.push_back(tmp);
-		last_time = tmp.tstep;
 	}
 
 	double rc = 2.0;

@@ -1,16 +1,24 @@
 SHELL = /bin/sh
+CC=g++
+# Common flags:
+FLAGS = -std=c++11 -g -O3 -pedantic -frounding-math -fPIC \
+      -Wall -Werror=int-conversion -Werror=implicit \
+      -Werror=return-type -Werror=uninitialized -Weffc++
 
-CC = g++
-FLAGS = -std=c++11 -g -O3 -pedantic -frounding-math -shared -fPIC \
-	-Werror=int-conversion -Werror=implicit -L/usr/lib/openmpi/  \
-	-Werror=return-type -Werror=uninitialized -Wall
+ifeq ($(CC),g++)
+	FLAGS += -frounding-math
+endif
+
+ifeq ($(CC),clang++)
+	FLAGS = -Wno-missing-braces
+endif
 
 PY_DIR     = "/usr/include/python3.6m/"
 LAMMPS_DIR = "/home/stefan/projects/lammps-mine/src/"
 TIMER_DIR  = "$(HOME)/projects/my_timer/lib/"
 GSD_DIR    = "/usr/local/lib/"
 
-LNK = -L./ -lm
+LNK = -L./ -lm -shared -L/usr/lib/openmpi/
 INC = -I./ -I$(PY_DIR)
 
 EXT  = cpp
@@ -29,7 +37,7 @@ endif
 
 ifeq ($(HAVE_LIB_CGAL), 1)
 	LNK   += -lCGAL -lgmp
-	FLAGS += -DHAVE_LIB_CGAL -frounding-math
+	FLAGS += -DHAVE_LIB_CGAL
 endif
 
 ifeq ($(VERBOSE_LIB), 1)

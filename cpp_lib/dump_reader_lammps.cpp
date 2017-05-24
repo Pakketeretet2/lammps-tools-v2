@@ -149,7 +149,6 @@ void dump_reader_lammps::set_column_type( const std::string &header, int type )
 
 	for( std::size_t i = 0; i < column_headers.size(); ++i ){
 		if( column_headers[i] == header ){
-			int old_type = column_header_types[i];
 			column_header_types[i] = type;
 			return;
 		}

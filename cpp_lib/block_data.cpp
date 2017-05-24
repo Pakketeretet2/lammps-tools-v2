@@ -7,12 +7,14 @@ namespace lammps_tools {
 
 block_data::block_data()
 	: tstep( 0 ), N( 0 ), N_types( 1 ), atom_style( ATOM_STYLE_ATOMIC ),
+	  dom(), top(), data(),
 	  special_fields_by_name ( N_SPECIAL_FIELDS, "" ),
 	  special_fields_by_index( N_SPECIAL_FIELDS, -1 )
 { }
 
 block_data::block_data( std::size_t n_atoms )
 	: tstep( 0 ), N( n_atoms ), N_types( 1 ), atom_style( ATOM_STYLE_ATOMIC ),
+	  dom(), top(), data(),
 	  special_fields_by_name ( N_SPECIAL_FIELDS, "" ),
 	  special_fields_by_index( N_SPECIAL_FIELDS, -1 )
 { }
@@ -41,7 +43,7 @@ block_data::block_data( const block_data &o )
 
 		special_fields_by_name[i] = df->name;
 
-		for( int idx = 0; idx < data.size(); ++idx ){
+		for( std::size_t idx = 0; idx < data.size(); ++idx ){
 			const data_field *df = data[idx];
 			if( df->name == special_fields_by_name[i] ){
 				special_fields_by_index[i] = idx;
@@ -81,7 +83,8 @@ const data_field *block_data::get_data( const std::string &name ) const
 
 void block_data::add_field( const data_field &data_f, int special_field)
 {
-	my_assert( __FILE__, __LINE__, data_f.size() == N,
+	my_assert( __FILE__, __LINE__,
+	           data_f.size() == static_cast<std::size_t>(N),
 	           "Atom number mismatch on add_field! Call set_natoms first!");
 	// Check if this name is already in block or not.
 	if( get_data( data_f.name ) != nullptr ){
@@ -171,7 +174,7 @@ void block_data::set_natoms( std::size_t new_size )
 
 void block_data::set_special_field( const std::string &name, int field )
 {
-	int index = 0;
+	std::size_t index = 0;
 	my_assert( __FILE__, __LINE__, is_legal_special_field( field ),
 	           "Invalid field in set_special_field!" );
 	while( index < data.size() && data[index]->name != name ){

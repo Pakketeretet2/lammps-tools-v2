@@ -26,9 +26,9 @@ public:
 
 	neighborizer_bin( const block_data &b, const std::list<int> &s1,
 	                  const std::list<int> &s2, int dims, double rc )
-		: neighborizer( b, s1, s2, dims ),
-		  rc(rc), rc2(rc*rc),
-		  n_neighs(0), Nx(0), Ny(0), Nz(0), Nbins(0), bin_size(0.0)
+		: neighborizer( b, s1, s2, dims ), atom_to_bin(), bins(),
+		  rc(rc), n_neighs(0), Nx(0), Ny(0), Nz(0),
+		  Nbins(0), bin_size(0.0)
 	{}
 
 	~neighborizer_bin(){}
@@ -71,7 +71,7 @@ private:
 	std::vector<std::list<int> > bins;
 
 
-	double rc, rc2;
+	double rc;
 
 	int n_neighs;
 	int Nx, Ny, Nz, Nbins;

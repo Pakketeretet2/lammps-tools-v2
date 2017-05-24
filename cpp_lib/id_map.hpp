@@ -21,7 +21,7 @@ class id_map {
 public:
 
 	/// Empty constructor.
-	id_map(){}
+	id_map() : m() {}
 
 	/// Empty destructor.
 	~id_map(){}
@@ -32,7 +32,7 @@ public:
 	   \param ids  Vector containing the atom ids.
 	*/
 	template <typename int_type> explicit
-	id_map( const std::vector<int_type> &ids )
+	id_map( const std::vector<int_type> &ids ) : m()
 	{
 		build<int_type>( ids );
 	}
@@ -52,7 +52,7 @@ public:
 		           "Ids was empty!" );
 		int_type max_id = *max_id_p;
 		m.resize( max_id + 1 );
-		for( int i = 0; i < ids.size(); ++i ){
+		for( std::size_t i = 0; i < ids.size(); ++i ){
 			m[ids[i]] = i;
 		}
 	}

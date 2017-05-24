@@ -26,7 +26,7 @@ class dump_reader
 {
 public:
 	/// Empty constructor; this just defines the interface.
-	dump_reader() : quiet(true), current_block(-1) {}
+	dump_reader() : quiet(true) {}
 
 	/// Empty destructor:
 	virtual ~dump_reader(){}
@@ -50,8 +50,6 @@ public:
 	bool quiet;
 
 private:
-	int current_block;
-
 	virtual int  get_next_block( block_data &block ) = 0;
 	virtual bool check_eof()  const = 0;
 	virtual bool check_good() const = 0;

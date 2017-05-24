@@ -30,7 +30,9 @@ public:
 
 	/// Empty constructor
 	dump_reader_lammps( int dump_style )
-		: dump_style(dump_style), default_col_type( data_field::DOUBLE )
+		: dump_style(dump_style), default_col_type(data_field::DOUBLE),
+		  header_to_special_field(), column_headers(),
+		  column_header_types()
 	{
 		std::cerr << "Initiated dump_reader_lammps with "
 		          << "dump_style " << dump_style << ".\n";

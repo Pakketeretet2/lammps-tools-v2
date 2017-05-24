@@ -10,8 +10,9 @@
 
 #include "dump_reader_lammps.hpp"
 
-#include <string>
 #include <cstdio>
+#include <string>
+#include <memory>
 
 namespace lammps_tools {
 
@@ -55,7 +56,10 @@ private:
 	int next_block_meta( block_data &block, int &size_one, int &nchunk );
 	int next_block_body( block_data &block, int size_one, int nchunk );
 
-	std::FILE* in;
+	dump_reader_lammps_bin( dump_reader_lammps_bin& ) = delete;
+	dump_reader_lammps_bin &operator=(dump_reader_lammps_bin&) = delete;
+
+	std::FILE *in;
 };
 
 } // namespace dump_readers

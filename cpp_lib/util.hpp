@@ -7,12 +7,12 @@
    Declarations/definitions of various helper functions.
 */
 
-#include <string>
-#include <sstream>
-#include <algorithm>
-#include <numeric>
 #include <algorithm>
 #include <fstream>
+#include <memory>
+#include <numeric>
+#include <string>
+#include <sstream>
 #include <vector>
 
 #include "zip.hpp"
@@ -334,6 +334,16 @@ void remove_doubles( container &c )
 	c.erase( std::unique( c.begin(), c.end() ), c.end() );
 }
 
+
+/**
+   \brief custom implementation of make_unique for
+   backwards compatibility with C++11.
+*/
+template <typename T>
+std::unique_ptr<T> make_unique( T *t )
+{
+	return std::unique_ptr<T>(t);
+}
 
 
 // Iterates
