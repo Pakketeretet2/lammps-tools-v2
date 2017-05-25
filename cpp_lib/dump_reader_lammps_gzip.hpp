@@ -38,7 +38,7 @@ private:
 #else
 	// Just to trick the compiler. Using this class _will_ lead to a
 	// runtime error if GZIP is not compiled in.
-	std::ifstream &in;
+	std::ifstream in;
 #endif
 
 };
