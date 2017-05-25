@@ -1,7 +1,8 @@
 This is free and unencumbered software released into the public domain,
 with the exception of the gsd implementation which is distributed under
-the two-clause BSD license. See c_lib/gsd/LICENSE for its own license
-file.
+the two-clause BSD license and pybind11, which is covered under its own
+free licence. See dependencies/gsd/LICENSE for the GSD license and
+foreign_interfaces/python3/pybind11/LICENSE for the pybind11 license.
 
 The rest of this software is covered by the unlicense:
 
