@@ -74,11 +74,11 @@ lt_data_field_handle lt_data_by_index( lt_block_data_handle *bdh, int i )
 	const lammps_tools::block_data &b = *bdh->bd;
 	std::size_t ii = i;
 	if( i < 0 || ii >= b.n_data_fields() ){
-		return ldf;
-	}else{
 		std::cerr << "Index " << i << " is out of range! "
 		          << "Ignoring call to lt_data_by_index!\n";
+		return ldf;
 	}
+	// This cannot go wrong as the index is already asserted to be OK.
 	ldf.df = &b[i];
 	return ldf;
 }
