@@ -6,8 +6,8 @@
 
 
 // ****** Helper functions:  ********
-lammps_tools::readers::dump_reader_lammps
-*attempt_lammps_dump_reader_cast( lt_dump_reader_handle drh )
+lammps_tools::readers::dump_reader_lammps *
+attempt_lammps_dump_reader_cast( lt_dump_reader_handle drh )
 {
 	using lammps_tools::readers::dump_reader_lammps;
 	dump_reader_lammps *drl = static_cast<dump_reader_lammps*>( drh.dr );
@@ -18,11 +18,35 @@ lammps_tools::readers::dump_reader_lammps
 	return drl;
 }
 
+const char *lt_pretty_file_format( int fformat )
+{
+	switch( fformat ){
+		default:
+			return "UNKNOWN!";
+		case lammps_tools::FILE_FORMAT_PLAIN:
+			return "plain";
+		case lammps_tools::FILE_FORMAT_BIN:
+			return "binary";
+		case lammps_tools::FILE_FORMAT_GZIP:
+			return "gzip";
+	}
+}
+
+const char *lt_pretty_dump_format( int dformat )
+{
+	switch( dformat ){
+		default:
+			return "UNKNOWN!";
+		case lammps_tools::DUMP_FORMAT_LAMMPS:
+			return "lammps";
+		case lammps_tools::DUMP_FORMAT_HOOMD:
+			return "hoomd";
+		case lammps_tools::DUMP_FORMAT_NAMD:
+			return "namd";
+	}
+}
 
 // ******  Interface implementation:  ********
-
-
-
 extern "C" {
 
 lt_dump_reader_handle lt_new_dump_reader( const char *fname,
@@ -32,9 +56,10 @@ lt_dump_reader_handle lt_new_dump_reader( const char *fname,
 	drh.dr = lammps_tools::readers::make_dump_reader( fname, fformat, dformat );
 	drh.fformat = fformat;
 	drh.dformat = dformat;
-	std::cerr << "Created new dump_reader at " << drh.dr
-	          << " for fformat = " << fformat << " and dformat = "
-	          << dformat << ".\n";
+	std::cerr << "Created new dump_reader_lammps at " << drh.dr
+	          << " for fformat = " << lt_pretty_file_format(fformat)
+	          << " and dformat = " << lt_pretty_dump_format(dformat)
+	          << ".\n";
 	return drh;
 }
 
@@ -56,8 +81,9 @@ lt_dump_reader_handle lt_new_dump_reader_local( const char *fname,
 	drh.fformat = fformat;
 	drh.dformat = dformat;
 	std::cerr << "Created new dump_reader_lammps at " << drh.dr
-	          << " for fformat = " << fformat << " and dformat = "
-	          << dformat << ".\n";
+	          << " for fformat = " << lt_pretty_file_format(fformat)
+	          << " and dformat = " << lt_pretty_dump_format(dformat)
+	          << ".\n";
 	return drh;
 }
 
@@ -86,14 +112,28 @@ int lt_get_next_block( lt_dump_reader_handle drh, lt_block_data_handle *bdh )
 {
 	//lammps_tools::block_data tmp;
 	//*bdh->bd = tmp;
-	return drh.dr->next_block( *bdh->bd );
+	try {
+		int status = drh.dr->next_block( *bdh->bd );
+		return status;
+	}catch( std::runtime_error &e ){
+		std::cerr << "Error occured in lt_get_next_block! "
+		          << e.what() << "\n";
+		std::terminate();
+	}
 }
 
 
 
 int lt_number_of_blocks( lt_dump_reader_handle drh )
 {
-	return number_of_blocks( *(drh.dr) );
+	try{
+		int count = number_of_blocks( *(drh.dr) );
+		return count;
+	}catch( std::runtime_error &e ){
+		std::cerr << "Error occured in lt_number_of_blocks! "
+		          << e.what() << "\n";
+		std::terminate();
+	}
 }
 
 
@@ -105,7 +145,13 @@ void lt_set_col_header( lt_dump_reader_handle drh, int n, const char *header )
 		return;
 	}
 	if( dump_reader_lammps *drl = attempt_lammps_dump_reader_cast( drh ) ){
-		drl->set_column_header( n, header );
+		try{
+			drl->set_column_header( n, header );
+		}catch( std::runtime_error &e ){
+			std::cerr << "Error occured in lt_set_col_header! "
+			          << e.what() << "\n";
+			std::terminate();
+		}
 	}
 }
 
@@ -120,8 +166,17 @@ bool lt_set_column_header_as_special( lt_dump_reader_handle drh,
 	}
 
 	if( dump_reader_lammps *drl = attempt_lammps_dump_reader_cast( drh ) ){
-		return drl->set_column_header_as_special( header,
-		                                          special_field_type );
+		try{
+			int sft = special_field_type;
+			bool success =
+				drl->set_column_header_as_special( header, sft );
+			return success;
+		}catch( std::runtime_error &e ){
+			std::cerr << "Error occured in "
+			          << "lt_set_column_header_as_special! "
+			          << e.what() << "\n";
+			std::terminate();
+		}
 	}else{
 		std::cerr << "Error casting to LAMMPS dump reader!\n";
 		return false;
@@ -138,7 +193,13 @@ bool lt_set_column_type( lt_dump_reader_handle drh,
 	}
 
 	if( dump_reader_lammps *drl = attempt_lammps_dump_reader_cast( drh ) ){
-		drl->set_column_type( header, type );
+		try {
+			drl->set_column_type( header, type );
+		}catch( std::runtime_error &e ){
+			std::cerr << "Error occured in lt_set_column_type! "
+			          << e.what() << "\n";
+			std::terminate();
+		}
 		return true;
 	}else{
 		std::cerr << "Error casting to LAMMPS dump reader!\n";
@@ -156,7 +217,14 @@ int  lt_get_column_type( lt_dump_reader_handle drh,
 	}
 
 	if( dump_reader_lammps *drl = attempt_lammps_dump_reader_cast( drh ) ){
-		return drl->get_column_type( header );
+		try{
+			int type = drl->get_column_type( header );
+			return type;
+		}catch( std::runtime_error &e ){
+			std::cerr << "Error occured in lt_get_column_type! "
+			          << e.what() << "\n";
+			std::terminate();
+		}
 	}else{
 		std::cerr << "Error casting to LAMMPS dump reader!\n";
 		return -1;

@@ -3,12 +3,14 @@
 
 lt_block_data_handle lt_empty_block_data_handle()
 {
+	// Cannot throw:
 	lt_block_data_handle b;
 	return b;
 }
 
 bool lt_has_special_field( lt_block_data_handle *bdh, int special_field )
 {
+	// Cannot throw:
 	return bdh->bd->get_special_field( special_field ) != nullptr;
 }
 
@@ -24,7 +26,10 @@ const std::vector<double> &lt_special_field_double( lt_block_data_handle *bdh,
 		          << special_field << "!\n";
 		std::terminate();
 	}
-	return lammps_tools::data_as<double>( df );
+
+	lt_data_field_handle dfh;
+	dfh.df = df;
+	return lt_data_as_double_vec( dfh );
 }
 
 
@@ -38,7 +43,9 @@ const std::vector<int> &lt_special_field_int( lt_block_data_handle *bdh,
 		          << special_field << "!\n";
 		std::terminate();
 	}
-	return lammps_tools::data_as<int>( df );
+	lt_data_field_handle dfh;
+	dfh.df = df;
+	return lt_data_as_int_vec( dfh );
 }
 
 
@@ -68,6 +75,9 @@ lt_data_field_handle lt_data_by_index( lt_block_data_handle *bdh, int i )
 	std::size_t ii = i;
 	if( i < 0 || ii >= b.n_data_fields() ){
 		return ldf;
+	}else{
+		std::cerr << "Index " << i << " is out of range! "
+		          << "Ignoring call to lt_data_by_index!\n";
 	}
 	ldf.df = &b[i];
 	return ldf;

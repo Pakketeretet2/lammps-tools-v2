@@ -42,10 +42,26 @@ const char *lt_data_name( lt_data_field_handle d )
 
 const std::vector<double> &lt_data_as_double_vec ( lt_data_field_handle d )
 {
-	return lammps_tools::data_as<double>( d.df );
+	try{
+		const std::vector<double> &dvec =
+			lammps_tools::data_as<double>( d.df );
+		return dvec;
+	}catch( std::runtime_error &e ){
+		std::cerr << "Error occured in lt_data_as_double_vec! "
+		          << e.what() << "!\n";
+		std::terminate();
+	}
 }
 
 const std::vector<int> &lt_data_as_int_vec ( lt_data_field_handle d )
 {
-	return lammps_tools::data_as<int>( d.df );
+	try{
+		const std::vector<int> &dvec =
+			lammps_tools::data_as<int>( d.df );
+		return dvec;
+	}catch( std::runtime_error &e ){
+		std::cerr << "Error occured in lt_data_as_int_vec! "
+		          << e.what() << "\n";
+		std::terminate();
+	}
 }
