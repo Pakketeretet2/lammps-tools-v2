@@ -185,6 +185,9 @@ public:
 
 	   \param field  Identifier of the special field (see special_fields)
 
+	   \warning This function contains an assertion on the
+	            special field type passed.
+
 	   \return The name of the data_field that is special, or
                    empty string if the special field is not set.
 	*/
