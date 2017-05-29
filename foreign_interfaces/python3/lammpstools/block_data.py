@@ -52,8 +52,10 @@ class block_meta:
 
 class block_data:
     """ The actual block data for atoms: """
-    def __init__(self,meta,ids,types, x, mol = None):
+    def __init__(self,meta,ids,types, x, mol = None, handle = None):
         self.init_from_arrays(meta,ids,types,x,mol)
+        self.handle = handle
+        self.stored_name_map = False
 
     @classmethod
     def init_from_handle(cls, handle):
@@ -77,8 +79,17 @@ class block_data:
         # TODO: Domain data
         # TODO: Neatly check for mol.
 
-        return cls(meta, ids, types, X, mol)
+        return cls(meta, ids, types, X, mol, handle = handle)
 
+    def store_name_mapping(self):
+        name_to_col = {}
+
+        # Grab all names for mapping:
+        for i in range(0, block_data_.n_data_fields( handle )):
+            df = block_data_.data_by_index(handle,i)
+            name = data_field_.get_name(df)
+            name_to_col[ name ] = i
+        self.stored_name_map = True
 
     def init_from_arrays(self,meta,ids,types, x, mol = None):
         """ Initialises from np arrays """
@@ -99,6 +110,9 @@ class block_data:
             self.mol = mol
             self.meta.atom_style = "molecular"
 
+    def data_by_name(self, name):
+        """ Grabs data field by name. """
+        raise RuntimeError("data_by_name only works for local right now!")
 
 class block_data_local:
     """ The block data for a dump local: """
@@ -109,12 +123,17 @@ class block_data_local:
         self.data = []
         self.data_names = []
         self.data_types = []
+        self.name_to_col = {}
 
         """ Init block data from handle. """
         for i in range(0, block_data_.n_data_fields(handle)):
             df = block_data_.data_by_index(handle,i)
             self.data_names.append( data_field_.get_name( df ) )
             self.data_types.append( data_field_.get_type( df ) )
+
+            # Careful: Code duplication here. Should fix by making
+            # block_data derive from this, because it's a special case of.
+            self.name_to_col[ data_field_.get_name(df) ] = i
 
             # Grab the data as the proper underlying type:
             type = data_field_.get_type( df )
@@ -133,3 +152,7 @@ class block_data_local:
             for j in range(0, self.meta.N):
                 tmp_data[j] = tmp[j]
             self.data.append( tmp_data )
+
+    def data_by_name(self, name):
+        """ Grabs data field by name. """
+        return self.data[self.name_to_col[name]]
