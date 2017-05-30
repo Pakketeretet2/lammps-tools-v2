@@ -1,6 +1,6 @@
 CC = clang++
 # INC = -I../../../cpp_lib/
-INC = -I../../../c_interface/ -I../../../internal_include/
+INC = -I../../../c_interface/  -I../
 LNK = -L../../../ -llammpstools
 FLAGS = -O3 -std=c++11 -shared -fPIC `python3-config --cflags --ldflags`
 FLAGS += $(INC)
