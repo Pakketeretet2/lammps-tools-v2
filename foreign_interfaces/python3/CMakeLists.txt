@@ -32,7 +32,7 @@ else()
   message(SEND_ERROR "Cannot build Python interface without Python!")
 endif()
 
-include_directories( AFTER "/usr/include/python3.6m" )
+include_directories( AFTER ${PYTHON_INCLUDE_DIRS} )
 set(TARGET_LIBS lammpstools)
 
 set(PYBIND11_DIR "pybind11")
