@@ -77,7 +77,11 @@ class block_data:
         X[:,2] = z
 
         # TODO: Domain data
+
         # TODO: Neatly check for mol.
+        if( block_data_.has_special_field( handle, 2 ) ):
+            # print("Found MOL field, assuming this is MOLECULAR data.")
+            mol = block_data_.special_field_int( handle, 2 )
 
         return cls(meta, ids, types, X, mol, handle = handle)
 
