@@ -63,6 +63,7 @@ class dump_reader:
         if status !=  dump_reader_.DUMP_READER_STATUS.IS_GOOD:
             print("Error opening dump file ", fname, " for file format ",
                   fformat, " and dump format ", dformat, "!")
+            print("Got status",status)
             sys.exit(-1)
 
     def __del__(self):
@@ -106,6 +107,16 @@ class dump_reader:
 
     def set_column_headers(self, headers):
         """ Sets the column headers for the dump file. """
+        if self.local:
+            self.set_column_headers_local(headers)
+        else:
+            self.set_column_headers_custom(headers)
+
+    def set_column_headers_local(self, headers):
+        """ Sets the column headers for a dump file with local info. """
+
+    def set_column_headers_custom(self, headers):
+        """ Sets the column headers for a dump file containing atoms. """
         for i, h in zip( range(0,len(headers)), headers):
             dump_reader_.set_column_header( self.handle, i, h )
 

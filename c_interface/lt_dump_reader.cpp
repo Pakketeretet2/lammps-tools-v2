@@ -60,6 +60,8 @@ lt_dump_reader_handle lt_new_dump_reader( const char *fname,
 	          << " for fformat = " << lt_pretty_file_format(fformat)
 	          << " and dformat = " << lt_pretty_dump_format(dformat)
 	          << ".\n";
+	std::cerr << "Its good bit is " << drh.dr->good()
+	          << " and eof bit is " << drh.dr->eof() << "\n";
 	return drh;
 }
 
@@ -83,7 +85,9 @@ lt_dump_reader_handle lt_new_dump_reader_local( const char *fname,
 	std::cerr << "Created new dump_reader_lammps at " << drh.dr
 	          << " for fformat = " << lt_pretty_file_format(fformat)
 	          << " and dformat = " << lt_pretty_dump_format(dformat)
-	          << ".\n";
+	          << ", but a local one.\n";
+	std::cerr << "Its good bit is " << drh.dr->good()
+	          << " and eof bit is " << drh.dr->eof() << "\n";
 	return drh;
 }
 
