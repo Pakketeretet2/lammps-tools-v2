@@ -29,5 +29,20 @@ PYBIND11_PLUGIN(block_data_) {
 	      "Get data field by name");
 
 
+	pybind11::enum_<lammps_tools::block_data::special_fields>(m, "SPECIAL_COLS")
+		.value("ID", lammps_tools::block_data::ID)
+		.value("TYPE", lammps_tools::block_data::TYPE)
+		.value("MOL", lammps_tools::block_data::MOL)
+		.value("X", lammps_tools::block_data::X)
+		.value("Y", lammps_tools::block_data::Y)
+		.value("Z", lammps_tools::block_data::Z)
+		.value("VX", lammps_tools::block_data::VX)
+		.value("VY", lammps_tools::block_data::VY)
+		.value("VZ", lammps_tools::block_data::VZ)
+		.value("IX", lammps_tools::block_data::IX)
+		.value("IY", lammps_tools::block_data::IY)
+		.value("IZ", lammps_tools::block_data::IZ);
+
+
 	return m.ptr();
 }

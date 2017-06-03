@@ -123,18 +123,23 @@ class dump_reader:
         header_set = [ False ]*6
 
         # Pretty names for the special columns:
-        pretty_names = [ "ID", "MOL", "TYPE", "X", "Y", "Z" ]
-
+        special_col_names = [ "ID", "MOL", "TYPE", "X", "Y", "Z" ]
+        special_col_enum  = [ block_data_.SPECIAL_COLS.ID,
+                              block_data_.SPECIAL_COLS.MOL,
+                              block_data_.SPECIAL_COLS.TYPE,
+                              block_data_.SPECIAL_COLS.X,
+                              block_data_.SPECIAL_COLS.Y,
+                              block_data_.SPECIAL_COLS.Z ]
         for h in headers:
             # Assume some defaults:
-            if   h == "id":   i = 0;
+            if   h == "id":   i = 0
             elif h == "mol":  i = 1
             elif h == "type": i = 2
             elif h == "x":    i = 3
             elif h == "y":    i = 4
             elif h == "z":    i = 5
 
-            name = pretty_names[i]
+            name = special_col_names[i]
 
             if( header_set[i]  ):
                 print( "Warning: Overwriting", name, "header.",
@@ -142,7 +147,7 @@ class dump_reader:
             else:
                 print( "Guessing header", h, "\tis for", name,
                        file = sys.stderr )
-            self.set_special_column( h, i )
+            self.set_special_column( h, special_col_enum[i] )
             header_set[i] = True
 
 

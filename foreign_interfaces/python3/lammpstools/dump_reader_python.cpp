@@ -3,6 +3,8 @@
 
 #include "lt_dump_reader.h"
 #include "../../../cpp_lib/enums.hpp"
+#include "../../../cpp_lib/block_data.hpp"
+
 
 PYBIND11_PLUGIN(dump_reader_) {
 	pybind11::module m("dump_reader_", "Exposes dump_reader through pybind11");
@@ -29,9 +31,9 @@ PYBIND11_PLUGIN(dump_reader_) {
 	using namespace lammps_tools;
 
 	pybind11::enum_<LT_DUMP_READER_STATUS>(m, "DUMP_READER_STATUS")
-		.value("IS_GOOD", LT_DUMP_READER_STATUS::IS_GOOD)
-		.value("AT_EOF",  LT_DUMP_READER_STATUS::AT_EOF)
-		.value("IS_BAD",  LT_DUMP_READER_STATUS::IS_BAD)
+		.value("IS_GOOD",      LT_DUMP_READER_STATUS::IS_GOOD)
+		.value("AT_EOF",       LT_DUMP_READER_STATUS::AT_EOF)
+		.value("IS_BAD",       LT_DUMP_READER_STATUS::IS_BAD)
 		.value("POINTER_NULL", LT_DUMP_READER_STATUS::POINTER_NULL);
 
 	pybind11::enum_<LT_DUMP_READER_FILE_FORMATS>(m, "FILE_FORMATS")
@@ -45,10 +47,6 @@ PYBIND11_PLUGIN(dump_reader_) {
 		.value("HOOMD",  DUMP_FORMAT_HOOMD)
 		.value("NAMD",   DUMP_FORMAT_NAMD)
 		.value("UNSET",  DUMP_FORMAT_UNSET);
-
-
-
-
 
 	return m.ptr();
 }

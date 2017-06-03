@@ -78,6 +78,7 @@ lt_data_field_handle lt_data_by_index( lt_block_data_handle *bdh, int i )
 		          << "Ignoring call to lt_data_by_index!\n";
 		return ldf;
 	}
+
 	// This cannot go wrong as the index is already asserted to be OK.
 	ldf.df = &b[i];
 	return ldf;
