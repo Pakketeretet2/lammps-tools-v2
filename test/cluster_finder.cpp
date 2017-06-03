@@ -22,7 +22,7 @@ TEST_CASE( "Cluster analysis on triangles (smaller set)", "[cluster_triangles_sm
 
 	std::string dname = "triangle_neighs_test.data";
 	int status;
-	block_data b = block_data_from_lammps_data( dname, status );
+	block_data b = block_data_from_lammps_data( dname, status, false );
 
 	REQUIRE( status == 0 );
 

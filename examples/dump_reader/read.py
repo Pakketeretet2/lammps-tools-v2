@@ -27,6 +27,7 @@ for b, bl in zip(d, dl):
         i = 1233
         if b.meta.N > i:
             print("Position of particle",i,"is",b.x[i])
+            print("Type is",b.types[i],"and mol is",b.mol[i])
         if bl.meta.N > i:
             print("data of bond",i,"is [ ", end = "")
             for j in range(0, len(bl.data)):
