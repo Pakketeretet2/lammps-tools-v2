@@ -1,13 +1,16 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/stl_bind.h>
 
 #include "lt_block_data.h"
 #include "lt_data_field.h"
 
+PYBIND11_MAKE_OPAQUE(std::vector<int>);
+PYBIND11_MAKE_OPAQUE(std::vector<double>);
 
 PYBIND11_PLUGIN(data_field_) {
-
 	pybind11::module m("data_field_", "Exposes data_field through pybind11");
+
 
 	pybind11::class_<lt_data_field_handle>(m, "data_field_handle")
 		.def(pybind11::init<>());

@@ -71,6 +71,9 @@ struct lt_block_data_handle
 	int atom_style() const
 	{ return bd->atom_style; }
 
+	const lammps_tools::block_data &get_const_ref() const
+	{ return *bd; }
+
 	std::unique_ptr<lammps_tools::block_data> bd;
 };
 

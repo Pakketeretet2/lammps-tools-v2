@@ -119,7 +119,7 @@ struct data_field_der : public data_field
 	                         const std::vector<T> &vec )
 		: data_field(n), data(vec)
 	{
-		std::cerr << "Called copy-from-vector constructor.\n";
+		// std::cerr << "Called copy-from-vector constructor.\n";
 	}
 
 	/**
@@ -129,7 +129,7 @@ struct data_field_der : public data_field
 	                         std::vector<T> &&vec )
 		: data_field(n), data(vec)
 	{
-		std::cerr << "Called move-from-vector constructor.\n";
+		// std::cerr << "Called move-from-vector constructor.\n";
 	}
 
 
