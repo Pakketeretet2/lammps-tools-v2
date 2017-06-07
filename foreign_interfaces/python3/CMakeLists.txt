@@ -45,6 +45,7 @@ pybind11_add_module(dump_reader_.so lammpstools/dump_reader_python.cpp ${TARGET_
 pybind11_add_module(block_data_.so  lammpstools/block_data_python.cpp ${TARGET_LIBS})
 pybind11_add_module(data_field_.so  lammpstools/data_field_python.cpp ${TARGET_LIBS})
 pybind11_add_module(skeletonize_.so  lammpstools/skeletonize_python.cpp ${TARGET_LIBS})
+
 target_link_libraries(dump_reader_.so PRIVATE "${TARGET_LIBS}")
 target_link_libraries(block_data_.so PRIVATE "${TARGET_LIBS}")
 target_link_libraries(data_field_.so PRIVATE "${TARGET_LIBS}")

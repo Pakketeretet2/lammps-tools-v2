@@ -10,7 +10,6 @@ namespace lammps_tools {
 namespace neighborize {
 
 using lammps_tools::constants::pi;
-
 void compute_rdf( const block_data &b, int Nbins, double r0, double r1,
                   int dims, int itype, int jtype,
                   std::vector<double> &rdf, std::vector<double> &coord )

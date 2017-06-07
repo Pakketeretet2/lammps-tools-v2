@@ -5,8 +5,8 @@
 
 #include "lt_block_data.h"
 
-PYBIND11_MAKE_OPAQUE(std::vector<int>);
-PYBIND11_MAKE_OPAQUE(std::vector<double>);
+PYBIND11_MAKE_OPAQUE(std::vector<int>)
+PYBIND11_MAKE_OPAQUE(std::vector<double>)
 
 PYBIND11_PLUGIN(block_data_) {
 	pybind11::module m("block_data_", "Exposes block_data through pybind11");
