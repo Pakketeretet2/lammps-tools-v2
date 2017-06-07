@@ -103,8 +103,8 @@ inline void my_assert( const std::string &file, int line, bool test,
 		}else{
 			my_assert_terminate( file, line, test, msg );
 		}
-	}
 #endif
+	}
 }
 
 
@@ -127,8 +127,8 @@ inline void my_logic_error( const std::string &file, int line,
 		}else{
 			my_logic_error_terminate( file, line, msg );
 		}
-	}
 #endif
+	}
 }
 
 /**
@@ -150,8 +150,8 @@ inline void my_runtime_error( const std::string &file, int line,
 		}else{
 			my_runtime_error_terminate( file, line, msg );
 		}
-	}
 #endif
+	}
 }
 
 /**
