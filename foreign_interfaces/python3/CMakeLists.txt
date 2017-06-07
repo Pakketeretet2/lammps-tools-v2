@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 2.8)
 project (lammps-tools-python-interface)
 # The version number.
 set(Tutorial_VERSION_MAJOR 2)
@@ -7,7 +7,6 @@ set(Tutorial_VERSION_MINOR 0)
 # Compiler settings:
 set(CXX_STANDARD_REQUIRED "11")
 set(CMAKE_CXX_FLAGS "-std=c++11 -g -O3 -pedantic -fPIC -Wall -Werror=implicit")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=int-conversion")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=return-type")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=uninitialized")
 
@@ -29,7 +28,7 @@ if( PythonLibs_FOUND )
   message("Found Python header in ${PYTHON_INCLUDE_DIRS}")
   include_directories( AFTER ${PYTHON_INCLUDE_DIRS} )
 else()
-  message(SEND_ERROR "Cannot build Python interface without Python!")
+  message(SEND_WARNING "Could not automatically find Python! Set it yourself in advanced options!")
 endif()
 
 include_directories( AFTER ${PYTHON_INCLUDE_DIRS} )
@@ -42,12 +41,10 @@ execute_process( COMMAND "python-config --cflags --ldflags" OUTPUT_VARIABLE PYTH
 pybind11_add_module(dump_reader_.so lammpstools/dump_reader_python.cpp ${TARGET_LIBS})
 pybind11_add_module(block_data_.so  lammpstools/block_data_python.cpp ${TARGET_LIBS})
 pybind11_add_module(data_field_.so  lammpstools/data_field_python.cpp ${TARGET_LIBS})
+pybind11_add_module(skeletonize_.so  lammpstools/skeletonize_python.cpp ${TARGET_LIBS})
 target_link_libraries(dump_reader_.so PRIVATE "${TARGET_LIBS}")
 target_link_libraries(block_data_.so PRIVATE "${TARGET_LIBS}")
 target_link_libraries(data_field_.so PRIVATE "${TARGET_LIBS}")
+target_link_libraries(skeletonize_.so PRIVATE "${TARGET_LIBS}")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PYTHON_FLAGS}")
-
-
-
-
