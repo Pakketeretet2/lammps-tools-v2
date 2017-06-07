@@ -68,8 +68,16 @@ class block_data:
 
         for i in range(0, N):
             df = block_data_.data_by_index(self.handle,i)
-            self.data_types[i] = data_field_.get_type(df)
-            self.data.append(df)
+            ttype = data_field_.get_type( df )
+            self.data_types[i] = ttype
+
+            if ttype == data_field_.TYPES.DOUBLE:
+                raw_data = data_field_.as_float(df)
+            elif ttype == data_field_.TYPES.INT:
+                raw_data = data_field_.as_int(df)
+            else:
+                raise RuntimeError("Unkown data type encountered!")
+            self.data.append(raw_data)
             name = data_field_.get_name(df)
             self.name_to_col[ name ] = i
         self.stored_name_map = True
@@ -81,17 +89,19 @@ class block_data:
         if self.stored_name_map is False:
             self.store_name_mapping()
 
-        df = self.data[ self.name_to_col[ name ] ]
-        if df is None:
-            raise RuntimeError("Failed to find data field of name", name)
-        # Resolve type here:
-        if data_field_.get_type( df ) == data_field_.TYPES.INT:
-            return data_field_.as_int( df )
-        elif data_field_.get_type( df ) == data_field_.TYPES.DOUBLE:
-            return data_field_.as_float( df )
-        else:
-            raise RuntimeError("Failed to resolve data type for data field",
-                               data_field_.get_name(df))
+        raw_data = self.data[ self.name_to_col[ name ] ]
+        return raw_data
+
+        # if df is None:
+        #     raise RuntimeError("Failed to find data field of name", name)
+        # # Resolve type here:
+        # if data_field_.get_type( df ) == data_field_.TYPES.INT:
+        #     return data_field_.as_int( df )
+        # elif data_field_.get_type( df ) == data_field_.TYPES.DOUBLE:
+        #     return data_field_.as_float( df )
+        # else:
+        #     raise RuntimeError("Failed to resolve data type for data field",
+        #                        data_field_.get_name(df))
 
 
     def get_ref(self):
@@ -156,35 +166,8 @@ class block_data_local(block_data):
     """ The block data for a dump local: """
 
     def __init__(self, handle):
-        block_data.__init__(handle)
+        super(block_data_local,self).__init__(handle)
 
         self.dom = domain_data( np.array( [0,0,0] ), np.array( [0,0,0] ), 0 )
         self.meta = block_meta( handle.time_step(), handle.n_atoms(), self.dom )
-        self.data = []
-        #self.data_names = []
-        #self.data_types = []
-
-        """ Init block data from handle. """
-        for i in range(0, block_data_.n_data_fields(handle)):
-            df = block_data_.data_by_index(handle,i)
-            self.name_to_col[ data_field_.get_name(df) ] = i
-
-            # Grab the data as the proper underlying type:
-            type = data_field_.get_type( df )
-            if type == data_field_.TYPES.DOUBLE:
-                tmp = data_field_.as_float( block_data_.data_by_index( handle, i ) )
-            elif type == data_field_.TYPES.INT:
-                tmp = data_field_.as_int( block_data_.data_by_index( handle, i ) )
-            else:
-                    raise RuntimeError("Unknown data type encountered in block_data")
-
-            if self.data_types[i] == data_field_.TYPES.DOUBLE:
-                tmp_data = np.zeros( self.meta.N, dtype = float )
-            else: # Assume int.
-                tmp_data = np.zeros( self.meta.N, dtype = int )
-
-            for j in range(0, self.meta.N):
-                tmp_data[j] = tmp[j]
-            self.data.append( tmp_data )
-
-        self.stored_name_map = True
+        self.store_name_mapping()
