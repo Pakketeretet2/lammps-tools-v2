@@ -29,7 +29,6 @@ option(LEGACY_COMPILER "Disable some features for ancient compilers." OFF)
 
 # Compiler settings:
 set(CMAKE_CXX_FLAGS "-std=c++11 -g -O3 -pedantic -fPIC -Wall -Werror=implicit")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=int-conversion")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=return-type")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=uninitialized -Weffc++")
 
