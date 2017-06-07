@@ -20,11 +20,12 @@ add_library(lammpstools SHARED
 set(CMAKE_SHARED_LINKER_FLAGS "-shared")
 
 # Custom options:
-option(USE_CGAL       "Use CGAL for Voronoi tesselation."         OFF)
-option(USE_ARMADILLO  "Use Armadillo for normal mode analysis."   OFF)
-option(USE_GSD        "Use GSD for reading HOOMD-Blue GSD files." OFF)
-option(USE_BOOST_GZIP "Use boost for reading in GZIP files."      OFF)
-option(USE_EXCEPTIONS "Use C++ exceptions for error handling."    ON)
+option(USE_CGAL        "Use CGAL for Voronoi tesselation."            OFF)
+option(USE_ARMADILLO   "Use Armadillo for normal mode analysis."      OFF)
+option(USE_GSD         "Use GSD for reading HOOMD-Blue GSD files."    OFF)
+option(USE_BOOST_GZIP  "Use boost for reading in GZIP files."         OFF)
+option(USE_EXCEPTIONS  "Use C++ exceptions for error handling."       ON)
+option(LEGACY_COMPILER "Disable some features for ancient compilers." OFF)
 
 # Compiler settings:
 set(CMAKE_CXX_FLAGS "-std=c++11 -g -O3 -pedantic -fPIC -Wall -Werror=implicit")
@@ -83,8 +84,11 @@ if(USE_BOOST_GZIP)
   endif()
 endif(USE_BOOST_GZIP)
 
+if(LEGACY_COMPILER)
+  set(USE_EXCEPTIONS off)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLEGACY_COMPILER")
+endif(LEGACY_COMPILER)
 
 if(USE_EXCEPTIONS)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_EXCEPTIONS")
 endif(USE_EXCEPTIONS)
-
