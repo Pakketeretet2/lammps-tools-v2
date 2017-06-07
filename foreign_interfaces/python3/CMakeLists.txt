@@ -11,7 +11,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=return-type")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=uninitialized")
 
 include_directories( ../../c_interface/ ../../dependencies/ )
-link_directories( ../../ )
+
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wno-missing-braces")
@@ -32,6 +32,10 @@ else()
 endif()
 
 include_directories( AFTER ${PYTHON_INCLUDE_DIRS} )
+
+set(LAMMPSTOOLS_DIR "default " CACHE FILEPATH "Path to dir containing liblammpstools.so")
+
+find_library(LAMMPSTOOLS_LIBRARY lammpstools HINTS ${LAMMPSTOOLS_DIR})
 set(TARGET_LIBS lammpstools)
 
 set(PYBIND11_DIR "pybind11")
