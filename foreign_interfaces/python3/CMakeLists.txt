@@ -34,9 +34,8 @@ endif()
 include_directories( AFTER ${PYTHON_INCLUDE_DIRS} )
 
 set(LAMMPSTOOLS_DIR "default " CACHE FILEPATH "Path to dir containing liblammpstools.so")
-
 find_library(LAMMPSTOOLS_LIBRARY lammpstools HINTS ${LAMMPSTOOLS_DIR})
-set(TARGET_LIBS lammpstools)
+set(TARGET_LIBS ${LAMMPSTOOLS_LIBRARY})
 
 set(PYBIND11_DIR "pybind11")
 add_subdirectory( ${PYBIND11_DIR} )
