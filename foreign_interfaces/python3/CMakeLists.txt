@@ -28,7 +28,7 @@ if( PythonLibs_FOUND )
   message("Found Python header in ${PYTHON_INCLUDE_DIRS}")
   include_directories( AFTER ${PYTHON_INCLUDE_DIRS} )
 else()
-  message(SEND_WARNING "Could not automatically find Python! Set it yourself in advanced options!")
+  message(SEND_WARNING " Could not automatically find Python! Set it yourself in advanced options!")
 endif()
 
 include_directories( AFTER ${PYTHON_INCLUDE_DIRS} )
