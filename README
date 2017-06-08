@@ -118,9 +118,9 @@ should be run as is (without the "$" that is).
     lammpstools with your interpreter. To be able to import it from
     anywhere, just make sure the module is in your PYTHONPATH. On Linux,
     if you use bash, this does the trick:
-    $ echo 'export PYTHONPATH="$PYTHONPATH":'$( pwd )'"' >> ~/.bashrc
+    $ echo 'export PYTHONPATH=$PYTHONPATH":'$( pwd )'"' >> ~/.bashrc
     On Mac OS X, this works:
-    $ echo 'export PYTHONPATH="$PYTHONPATH":'$( pwd )'"' >> ~/.bash_profile
+    $ echo 'export PYTHONPATH=$PYTHONPATH":'$( pwd )'"' >> ~/.bash_profile
 
     Alternatively, you can copy lammpstools to a location that is already
     in the python path. This is more nice for administrators. Replace
