@@ -23,6 +23,9 @@ Here are some examples of functionality in the three domains:
                      |                       |  cffi, whatever.
 
 +==================  Building lammps-tools  ==================+
+NOTE: If you simply want to _update_ a working lammps-tools to
+a new version, this procedure is not necessary. Instead, follow
+the steps described in Updating lammps-tools.
 
 There are two ways right now of building lammps-tools:
 CMake or plain old make. These instructions only really
@@ -133,3 +136,21 @@ should be run as is (without the "$" that is).
 +==================  make                   ==================+
  1) If you want to use GNU make, you probably already know what
     you're doing and you don't need instructions. :)
+
+
++==================  Updating lammps-tools  ==================+
+If you already have a working instance of lammps-tools and simply
+want to update (to get the latest features), follow these steps:
+
+ 1) Go to the lammps-tools-v2 dir.
+ 2) $ git pull
+ 3) $ cd build
+ 4) $ make
+ 5) On Linux:    $ cp liblammpstools.so ../
+    On Mac OS X: $ cp liblammpstools.dylib ../
+ 6) cd ../
+ 7) cd foreign_interfaces/python3/build
+ 8) make
+ 9) cp *_.so ../lammpstools
+
+  Done.
