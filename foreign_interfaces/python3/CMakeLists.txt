@@ -33,7 +33,7 @@ endif()
 
 include_directories( AFTER ${PYTHON_INCLUDE_DIRS} )
 
-set(LAMMPSTOOLS_DIR "default " CACHE FILEPATH "Path to dir containing liblammpstools.so")
+set(LAMMPSTOOLS_DIR "../../" CACHE FILEPATH "Path to dir containing liblammpstools.so")
 find_library(LAMMPSTOOLS_LIBRARY lammpstools HINTS ${LAMMPSTOOLS_DIR})
 set(TARGET_LIBS ${LAMMPSTOOLS_LIBRARY})
 
@@ -44,11 +44,11 @@ execute_process( COMMAND "python-config --cflags --ldflags" OUTPUT_VARIABLE PYTH
 pybind11_add_module(dump_reader_.so lammpstools/dump_reader_python.cpp ${TARGET_LIBS})
 pybind11_add_module(block_data_.so  lammpstools/block_data_python.cpp ${TARGET_LIBS})
 pybind11_add_module(data_field_.so  lammpstools/data_field_python.cpp ${TARGET_LIBS})
-pybind11_add_module(skeletonize_.so  lammpstools/skeletonize_python.cpp ${TARGET_LIBS})
+pybind11_add_module(neighborize_.so lammpstools/neighborize_python.cpp ${TARGET_LIBS})
 
 target_link_libraries(dump_reader_.so PRIVATE "${TARGET_LIBS}")
 target_link_libraries(block_data_.so PRIVATE "${TARGET_LIBS}")
 target_link_libraries(data_field_.so PRIVATE "${TARGET_LIBS}")
-target_link_libraries(skeletonize_.so PRIVATE "${TARGET_LIBS}")
+target_link_libraries(neighborize_.so PRIVATE "${TARGET_LIBS}")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PYTHON_FLAGS}")
