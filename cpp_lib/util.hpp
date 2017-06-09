@@ -345,6 +345,53 @@ std::unique_ptr<T> make_unique( T *t )
 	return std::unique_ptr<T>(t);
 }
 
+/**
+   \brief norm of fixed-length array or vector
+*/
+template <typename C, std::size_t N> inline
+double norm2( const C &c )
+{
+	double nn2 = 0.0;
+	for( std::size_t i = 0; i < N; ++i ){
+		nn2 += c[i]*c[i];
+	}
+	return nn2;
+}
+
+template <std::size_t N> inline
+double norm2( const double *c )
+{
+	double nn2 = 0.0;
+	for( std::size_t i = 0; i < N; ++i ){
+		nn2 += c[i]*c[i];
+	}
+	return nn2;
+}
+
+
+
+/**
+   \brief dot of fixed-length array or vector
+*/
+template <typename C, std::size_t N> inline
+double dot( const C &c1, const C &c2 )
+{
+	double ddot = 0.0;
+	for( std::size_t i = 0; i < N; ++i ){
+		ddot += c1[i]*c2[i];
+	}
+	return ddot;
+}
+
+template <std::size_t N> inline
+double dot( const double *c1, const double *c2 )
+{
+	double ddot = 0.0;
+	for( std::size_t i = 0; i < N; ++i ){
+		ddot += c1[i]*c2[i];
+	}
+	return ddot;
+}
 
 // Iterates
 

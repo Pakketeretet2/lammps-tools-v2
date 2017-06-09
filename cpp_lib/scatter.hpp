@@ -14,13 +14,19 @@ namespace lammps_tools {
 namespace scatter {
 
 /// Calculates Raygleigh-Gans scattering data from block_data.
-void rayleigh_gans( const class block_data &b );
+std::vector<double> rayleigh_gans( const class block_data &b,
+                                   const std::vector<double> &qs );
+
 /// Calculates Raygleigh-Gans scattering data from block_data for given ids
-void rayleigh_gans( const class block_data &b, const std::vector<int> &ids );
+std::vector<double> rayleigh_gans( const class block_data &b,
+                                   const std::vector<double> &qs,
+                                   const std::vector<int> &ids );
 
 // Ugly crap for pybind11:
-void rayleigh_gans_( const class block_data &b, const std::vector<int> &ids )
-{ rayleigh_gans(b,ids); }
+std::vector<double> rayleigh_gans_( const class block_data &b,
+                                    const std::vector<double> &qs,
+                                    const std::vector<int> &ids )
+{ return rayleigh_gans(b,qs,ids); }
 
 
 
