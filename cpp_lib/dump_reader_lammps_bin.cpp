@@ -223,8 +223,6 @@ int dump_reader_lammps_bin::next_block_body( block_data &block,
 			++line_count;
 		}
 	}
-	my_warning_if( __FILE__, __LINE__, line_count != block.N,
-	               "Dump file did not contain lines equal to atoms!" );
 
 	// Copy all data fields into the block data.
 	add_custom_data_fields( data_fields, block );

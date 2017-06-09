@@ -7,8 +7,7 @@
    \brief Contains routines that calculate centers of mass and stuff.
 */
 
-#include "types.hpp"
-
+#include "geometry.hpp"
 
 namespace lammps_tools {
 

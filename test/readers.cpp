@@ -24,6 +24,9 @@ TEST_CASE ( "LAMMPS data file gets read correctly.", "[read_lammps_data]" )
 	REQUIRE( b.get_data( "xhi" ) == nullptr );
 	REQUIRE( b.get_data( "atom_style" ) == nullptr );
 	REQUIRE( b.get_data( "timestep" ) == nullptr );
+	REQUIRE( b.N_types == 1 );
+	REQUIRE( b.ati.mass[1] == Approx(1.0) );
+
 
 
 	// These entries should all be found:

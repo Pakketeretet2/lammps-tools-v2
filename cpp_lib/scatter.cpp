@@ -26,7 +26,7 @@ void get_position( const block_data &b, int idx, double ri[3] )
 	double yy = get_y(b)[idx];
 	double zz = get_z(b)[idx];
 
-	double scale = 10.0;
+	double scale = 1.0;
 	ri[0] = xx*scale;
 	ri[1] = yy*scale;
 	ri[2] = zz*scale;
@@ -46,12 +46,10 @@ std::vector<double> rayleigh_gans( const class block_data &b,
 	std::cerr << "Calculating raygleigh_gans scattering for "
 	          << ids.size() << " particles.\n";
 	// In units of micrometers:
-	std::vector<double> radius( b.N, 1.0 );
+	std::vector<double> radius( b.N, 0.5 );
 	id_map im( get_id( b ) );
 	double d_epsilon_0  = 1e-3;
 	double d_epsilon_02 = d_epsilon_0 * d_epsilon_0;
-	double d_epsilon   = 0.0;
-	// In units of per micrometer:
 
 	std::size_t Nqs = qs.size();
 	std::vector<double> FXre( Nqs, 0.0 );
