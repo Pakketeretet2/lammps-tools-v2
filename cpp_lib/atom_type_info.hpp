@@ -8,6 +8,7 @@
 */
 
 #include <algorithm>
+#include <vector>
 
 namespace lammps_tools {
 
@@ -16,13 +17,19 @@ namespace lammps_tools {
 */
 struct atom_type_info
 {
-	atom_type_info( int n_types ) : n_types( n_types ){}
-	~atom_type_info() {}
+	std::vector<double> mass;
 
-	int n_types;
+	atom_type_info();
+	explicit atom_type_info( int n_types );
 
 	friend void swap( atom_type_info &f, atom_type_info &s );
+
+	void set_size( int Ntypes );
+	void set_defaults();
 };
+
+
+
 
 }// namespace lammps_tools
 

@@ -99,6 +99,14 @@ void block_to_lammps_data( std::ostream &out, const block_data &b )
 	}
 	out << "\n";
 
+	out << "Masses\n\n";
+	for( int i = 0; i < b.N_types; ++i ){
+		int type = i + 1;
+		out << type << " " << b.ati.mass[type] << "\n";
+	}
+	out << "\n";
+
+
 	std::string atom_style = "atomic";
 	if( b.atom_style == ATOM_STYLE_MOLECULAR ) atom_style = "molecular";
 	out << "Atoms # " << atom_style << "\n\n";

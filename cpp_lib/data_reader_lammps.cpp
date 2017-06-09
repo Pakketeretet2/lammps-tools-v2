@@ -41,7 +41,7 @@ int get_header_info( std::istream &in, block_data &b,
 			if( words[1] == "atoms" ){
 				b.set_natoms( std::stoul( words[0] ) );
 			}else if( words[1] == "atom" && words[2] == "types" ){
-				b.N_types = std::stoi( words[0] );
+				b.set_ntypes( std::stoi( words[0] ) );
 			}
 		}
 		if( words.size() >= 4 ){
@@ -219,6 +219,7 @@ int get_data_body( std::istream &in, block_data &b,
 				int type;
 				double mass;
 				ss >> type >> mass;
+				b.ati.mass[i+1] = mass;
 				std::getline(in,line);
 			}
 			std::getline(in,line);

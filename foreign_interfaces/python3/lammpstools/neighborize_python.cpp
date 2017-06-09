@@ -1,18 +1,16 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-// #include <pybind11/numpy.h>
+#include <pybind11/numpy.h>
 
 #include "../../../cpp_lib/neighborize.hpp"
 #include "../../../cpp_lib/rdf.hpp"
 #include "../../../cpp_lib/skeletonize.hpp"
-
 
 PYBIND11_MAKE_OPAQUE(std::vector<int>)
 PYBIND11_MAKE_OPAQUE(std::vector<double>)
 
 PYBIND11_PLUGIN(neighborize_) {
 	using namespace lammps_tools;
-
 
 	pybind11::module m("neighborize", "Exposes nearest neighbour functions.");
 

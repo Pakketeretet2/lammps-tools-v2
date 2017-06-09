@@ -10,6 +10,7 @@ set(CXX_STANDARD_REQUIRED "11")
 add_library(lammpstools SHARED
   cpp_lib/atom_type_info.cpp
   cpp_lib/block_data.cpp
+  cpp_lib/center_of_mass.cpp
   cpp_lib/cluster_finder.cpp
   cpp_lib/data_field.cpp
   cpp_lib/data_reader_lammps.cpp
@@ -24,6 +25,7 @@ add_library(lammpstools SHARED
   cpp_lib/neighborize.cpp
   cpp_lib/neighborize_nsq.cpp
   cpp_lib/rdf.cpp
+  cpp_lib/scatter.cpp
   cpp_lib/skeletonize.cpp
   cpp_lib/topology.cpp
   cpp_lib/triangulate.cpp

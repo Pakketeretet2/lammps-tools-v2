@@ -35,4 +35,5 @@ for b, bl in zip(d, dl):
             print(" ]")
             print("Grabbing by name works: ", end="")
             print( bl.data_by_name('c_bonds[1]')[i] )
+            print( b.data_by_name('y')[i] )
     c += 1

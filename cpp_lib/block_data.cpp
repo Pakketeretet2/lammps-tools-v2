@@ -7,14 +7,14 @@ namespace lammps_tools {
 
 block_data::block_data()
 	: tstep( 0 ), N( 0 ), N_types( 1 ), atom_style( ATOM_STYLE_ATOMIC ),
-	  dom(), top(), data(),
+	  dom(), top(), ati(), data(),
 	  special_fields_by_name ( N_SPECIAL_FIELDS, "" ),
 	  special_fields_by_index( N_SPECIAL_FIELDS, -1 )
 { }
 
 block_data::block_data( std::size_t n_atoms )
 	: tstep( 0 ), N( n_atoms ), N_types( 1 ), atom_style( ATOM_STYLE_ATOMIC ),
-	  dom(), top(), data(),
+	  dom(), top(), ati(), data(),
 	  special_fields_by_name ( N_SPECIAL_FIELDS, "" ),
 	  special_fields_by_index( N_SPECIAL_FIELDS, -1 )
 { }
@@ -26,6 +26,7 @@ block_data::block_data( const block_data &o )
 	  atom_style( o.atom_style ),
 	  dom( o.dom ),
 	  top( o.top ),
+	  ati( o.ati ),
 	  data( o.n_data_fields() ),
 	  special_fields_by_name ( N_SPECIAL_FIELDS, "" ),
 	  special_fields_by_index( N_SPECIAL_FIELDS, -1 )
@@ -169,6 +170,13 @@ void block_data::set_natoms( std::size_t new_size )
 		           "Data field not initialised in attempted resize!" );
 		d->resize(N);
 	}
+}
+
+
+void block_data::set_ntypes( std::size_t N )
+{
+	N_types = N;
+	ati.set_size( N_types );
 }
 
 
@@ -335,5 +343,8 @@ bool is_legal_special_field( int special_field )
 	return (special_field >= block_data::ID) &&
 		(special_field < block_data::N_SPECIAL_FIELDS);
 }
+
+
+
 
 } // namespace lammps_tools

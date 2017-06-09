@@ -23,7 +23,6 @@
 
 namespace lammps_tools {
 
-
 /**
    Returns true if the special_field should be treated as int instead of double
 */
@@ -60,13 +59,14 @@ public:
 	};
 
 	// Public members:
-	bigint tstep;    ///< The current time step
-	bigint N;        ///< The number of atoms
-	int    N_types;  ///< The number of atom types
-	int atom_style;  ///< The current atom style
+	bigint tstep;       ///< The current time step
+	bigint N;           ///< The number of atoms
+	int    N_types;     ///< The number of atom types
+	int atom_style;     ///< The current atom style
 
-	domain dom;      ///< Domain information
-	topology top;    ///< Topology information
+	domain dom;         ///< Domain information
+	topology top;       ///< Topology information
+	atom_type_info ati; ///< Stores per-atom-type info.
 
 
 	/**
@@ -171,6 +171,12 @@ public:
 	void set_natoms( std::size_t N );
 
 	/**
+	   Sets new number of atom types.
+	   \param N New number of atom types.
+	*/
+	void set_ntypes( std::size_t N );
+
+	/**
 	   Returns the number of data fields contained.
 	*/
 	std::size_t n_data_fields() const;
@@ -270,6 +276,16 @@ void block_data::sort_along( const std::string &header, const comparator &comp )
    \returns true if special_field is legal, false otherwise.
 */
 bool is_legal_special_field( int special_field );
+
+
+template <typename container>
+void all_ids( const block_data &b, container &c )
+{
+	for( int i : data_as<int>( b.get_special_field( block_data::ID ) ) ){
+		c.push_back(i);
+	}
+}
+
 
 
 
