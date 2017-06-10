@@ -6,7 +6,7 @@ FLAGS = -O3 -std=c++11 -shared -fPIC `python3-config --cflags --ldflags`
 FLAGS += $(INC)
 FLAGS += $(LNK)
 
-OBJS = block_data_.so dump_reader_.so data_field_.so
+OBJS = block_data_.so dump_reader_.so data_field_.so skeletonize_.so # stl_bindings_.so
 
 .PHONY = clean all
 

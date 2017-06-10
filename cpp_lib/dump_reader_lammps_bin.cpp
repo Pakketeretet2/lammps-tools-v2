@@ -126,6 +126,10 @@ int dump_reader_lammps_bin::next_block_meta( block_data &block,
 		std::fread(&size_one,sizeof(int),1,in);
 		std::fread(&nchunk,sizeof(int),1,in);
 
+		my_warning_if( __FILE__, __LINE__, nchunk > 1,
+		               "You've got multiple processor "
+		               "chunks incoming!\n" );
+
 		block.N = natoms;
 		block.tstep = ntimestep;
 		block.dom.xlo[0] = xlo[0];
@@ -165,6 +169,20 @@ int dump_reader_lammps_bin::next_block_body( block_data &block,
 	std::vector<data_field*> data_fields(size_one);
 	std::size_t ssize_one = size_one;
 
+	int idx = 0;
+	for( std::string h : headers ){
+		// Depending on the keyword, you want to take
+		// either an int or a double.
+		if( is_int_data_field( h ) ){
+			dfi *new_field = new dfi( h, block.N );
+			data_fields[idx] = new_field;
+		}else{
+			// Assume it's a double.
+			dfd *new_field = new dfd( h, block.N );
+			data_fields[idx] = new_field;
+		}
+		++idx;
+	}
 
 	my_assert( __FILE__, __LINE__, !headers.empty(),
 	           "Column headers required for binary LAMMPS dump files!" );
@@ -173,6 +191,7 @@ int dump_reader_lammps_bin::next_block_body( block_data &block,
 	my_assert( __FILE__, __LINE__, headers.size() == ssize_one,
 	           "Column number does not match number of headers!" );
 
+	int line_count = 0;
 	for( int i = 0; i < nchunk; i++ ){
 		std::fread(&n,sizeof(int),1,in);
 
@@ -189,38 +208,26 @@ int dump_reader_lammps_bin::next_block_body( block_data &block,
 		std::fread(buf,sizeof(double),n,in);
 		n /= size_one;
 
-
-		int m = 0, j = 0;
-		for( std::string h : headers ){
-			// Depending on the keyword, you want to take
-			// either an int or a double.
-			if( is_int_data_field( h ) ){
-				dfi *new_field = new dfi( h, block.N );
-				data_fields[i] = new_field;
-			}else{
-				// Assume it's a double.
-				dfd *new_field = new dfd( h, block.N );
-				data_fields[i] = new_field;
-			}
-			++i;
-		}
-
-		for( j = 0; j < n; j++ ){
-			for( int k = 0; k < size_one; k++ ){
+		int m = 0;
+		for( int j = 0; j < n; ++j ){
+			for( int k = 0; k < size_one; ++k ){
 				int type = data_fields[k]->type();
 				data_field *df = data_fields[k];
 				if( type == data_field::INT ){
 					dfi *field = static_cast<dfi*>( df );
-					(*field)[j] = buf[m++];
+					(*field)[line_count] = buf[m++];
 				}else if( type == data_field::DOUBLE ){
 					dfd *field = static_cast<dfd*>( df );
-					(*field)[j] = buf[m++];
+					(*field)[line_count] = buf[m++];
 				}else{
 					// No clue.
 				}
 			}
+			++line_count;
 		}
 	}
+	my_warning_if( __FILE__, __LINE__, line_count != block.N,
+	               "Dump file did not contain lines equal to atoms!" );
 
 	// Copy all data fields into the block data.
 	add_custom_data_fields( data_fields, block );

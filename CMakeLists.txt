@@ -1,34 +1,52 @@
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 2.8)
 project (lammps-tools)
 # The version number.
-set(Tutorial_VERSION_MAJOR 2)
-set(Tutorial_VERSION_MINOR 0)
+set(lammpstools_VERSION_MAJOR 2)
+set(lammpstools_VERSION_MINOR 0)
+
+set(CXX_STANDARD_REQUIRED "11")
 
 # Set up source files:
 add_library(lammpstools SHARED
-  cpp_lib/atom_type_info.cpp cpp_lib/block_data.cpp cpp_lib/cluster_finder.cpp
-  cpp_lib/data_field.cpp cpp_lib/data_reader_lammps.cpp cpp_lib/domain.cpp
-  cpp_lib/dump_reader.cpp cpp_lib/dump_reader_lammps_bin.cpp
-  cpp_lib/dump_reader_lammps.cpp cpp_lib/dump_reader_lammps_gzip.cpp
-  cpp_lib/dump_reader_lammps_plain.cpp cpp_lib/markov_state_model.cpp
-  cpp_lib/neighborize_bin.cpp cpp_lib/neighborize.cpp
-  cpp_lib/neighborize_nsq.cpp cpp_lib/skeletonize.cpp cpp_lib/topology.cpp
-  cpp_lib/triangulate.cpp cpp_lib/util.cpp cpp_lib/writers_lammps.cpp
-  c_interface/lt_block_data.cpp c_interface/lt_data_field.cpp
+  cpp_lib/atom_type_info.cpp
+  cpp_lib/block_data.cpp
+  cpp_lib/center_of_mass.cpp
+  cpp_lib/cluster_finder.cpp
+  cpp_lib/data_field.cpp
+  cpp_lib/data_reader_lammps.cpp
+  cpp_lib/domain.cpp
+  cpp_lib/dump_reader.cpp
+  cpp_lib/dump_reader_lammps.cpp
+  cpp_lib/dump_reader_lammps_bin.cpp
+  cpp_lib/dump_reader_lammps_gzip.cpp
+  cpp_lib/dump_reader_lammps_plain.cpp
+  cpp_lib/markov_state_model.cpp
+  cpp_lib/neighborize_bin.cpp
+  cpp_lib/neighborize.cpp
+  cpp_lib/neighborize_nsq.cpp
+  cpp_lib/rdf.cpp
+  cpp_lib/scatter.cpp
+  cpp_lib/skeletonize.cpp
+  cpp_lib/topology.cpp
+  cpp_lib/triangulate.cpp
+  cpp_lib/util.cpp
+  cpp_lib/writers_lammps.cpp
+  c_interface/lt_block_data.cpp
+  c_interface/lt_data_field.cpp
   c_interface/lt_dump_reader.cpp)
 
 set(CMAKE_SHARED_LINKER_FLAGS "-shared")
 
 # Custom options:
-option(USE_CGAL       "Use CGAL for Voronoi tesselation."         OFF)
-option(USE_ARMADILLO  "Use Armadillo for normal mode analysis."   OFF)
-option(USE_GSD        "Use GSD for reading HOOMD-Blue GSD files." OFF)
-option(USE_BOOST_GZIP "Use boost for reading in GZIP files."      OFF)
-option(USE_EXCEPTIONS "Use C++ exceptions for error handling."    ON)
+option(USE_CGAL        "Use CGAL for Voronoi tesselation."            OFF)
+option(USE_ARMADILLO   "Use Armadillo for normal mode analysis."      OFF)
+option(USE_GSD         "Use GSD for reading HOOMD-Blue GSD files."    OFF)
+option(USE_BOOST_GZIP  "Use boost for reading in GZIP files."         OFF)
+option(USE_EXCEPTIONS  "Use C++ exceptions for error handling."       ON)
+option(LEGACY_COMPILER "Disable some features for ancient compilers." OFF)
 
 # Compiler settings:
 set(CMAKE_CXX_FLAGS "-std=c++11 -g -O3 -pedantic -fPIC -Wall -Werror=implicit")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=int-conversion")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=return-type")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=uninitialized -Weffc++")
 
@@ -83,8 +101,11 @@ if(USE_BOOST_GZIP)
   endif()
 endif(USE_BOOST_GZIP)
 
+if(LEGACY_COMPILER)
+  set(USE_EXCEPTIONS off)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLEGACY_COMPILER")
+endif(LEGACY_COMPILER)
 
 if(USE_EXCEPTIONS)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_EXCEPTIONS")
 endif(USE_EXCEPTIONS)
-

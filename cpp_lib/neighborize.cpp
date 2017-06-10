@@ -239,6 +239,21 @@ double make_list_dist( neigh_list &neighs,
 	return 0.0;
 }
 
+
+
+neigh_list nearest_neighs( const block_data &b,
+                           int itype, int jtype, int method, int dims,
+                           double rc,
+                           int mol_policy, int bond_policy, bool quiet )
+{
+	neigh_list neighs;
+	make_list_dist( neighs, b, itype, jtype, method, dims, rc,
+	                mol_policy, bond_policy, quiet );
+	return neighs;
+}
+
+
+
 void verify_unique( int i, int j, const neigh_list &neighs )
 {
 	if( !util::is_unique(neighs[i], j) ){

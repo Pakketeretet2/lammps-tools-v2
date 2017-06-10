@@ -22,3 +22,135 @@ Here are some examples of functionality in the three domains:
     neighborize      |  lt_neighborize(...)  |  Created by pybind11,
                      |                       |  cffi, whatever.
 
++==================  Building lammps-tools  ==================+
+NOTE: If you simply want to _update_ a working lammps-tools to
+a new version, this procedure is not necessary. Instead, follow
+the steps described in Updating lammps-tools.
+
+There are two ways right now of building lammps-tools:
+CMake or plain old make. These instructions only really
+work on Linux or Mac OS X, and probably BSD, not Windows.
+
+There are some prerequisites:
+ - Python 3 (>=3.4 seems to work)
+ - CMake 2.8 or later (if you want to build using CMake)
+ - A C++11-capable compiler (gcc >= 4.8 works)
+
+In the guide shell commands are prefixed with a "$" and
+should be run as is (without the "$" that is).
+
++==================  CMake                  ==================+
+ 0) This section requires that you have CMake installed.
+ 1) Follow these instructions to build the C++ library:
+ 1a) $ cd lammps-tools-v2
+ 1b) $ mkdir build
+ 1c) $ cmake ../
+ 
+     Optional: Configure your build. If not necessary,
+     continue with 2).
+ 1d) $ ccmake ../
+ 
+     This opens a graphical interface in your terminal. In it,
+     you can set some options. For older compilers, you'll want
+     to disable USE_EXCEPTIONS and enable LEGACY_COMPILER.
+ 
+     If the found compiler version is lower than 4.8, you need
+     to change it to point to a higher version. Follow these steps:
+     
+ 1d1) In ccmake, press t to enable "advanced options"
+ 1d2) Select CMAKE_CXX_COMPILER
+ 1d3) Press enter to edit. Change it to point to a modern C++
+      compiler that fully supports C++11.
+      Press Enter after you're done editting.
+ 1d4) Press c twice, and then g.
+ 1d5) Press q to leave ccmake.
+ 
+ 2) $ make
+     This will build the library. You can speed it up by
+     adding "-j<a number>" to build in parallel:
+    $ make -j4
+ 3)  After building, copy the library to the lammps-tools-v2 dir.
+     On Linux:
+     $ cp liblammpstools.so ../
+     On Mac OS X:
+    $ cp liblammpstools.dylib ../
+ 
+     Now we need to build the Python bindings.
+ 4) $ cd ../
+ 5) $ cd foreign_interfaces/python3/
+ 6) $ mkdir build
+ 7) $ cd build
+ 8) $ cmake ../
+
+    CMake might fail to find a compiler that's recent enough.
+    If so, follow these steps. Else, continue at 8e).
+ 8a) $ ccmake ../
+ 8b) Press t
+ 8c) Change "CMAKE_CXX_COMPILER" to a C++11-capable one.
+     In particular, you need to pick one that supports pybind11
+     (see https://github.com/pybind/pybind11, "Supported compilers").
+ 8d) Press c twice.
+     
+ 8e) CMake might also fail to find Python, especially on clusters.
+     If so, it will print a warning:
+     "SEND_WARNING Could not automatically find Python! Set it "
+     "yourself in advanced options!".
+     If it finds Python3, continue at step 9). Else, follow these steps:
+ 8f) $ ccmake ../
+ 8g) Press t
+ 8f) Change PYTHON_INCLUDE_DIR to a Python 3 include directory
+     (one that contains Python.h)
+ 8g) Change PYTHON_LIBRARY to a Python 3 library (libpython3.so (Linux)
+     or libpython3.dylib (Mac OS X))
+ 8h) Press c twice. As of writing, CMAKE just repeats the aforementioned
+     warning; ignore it. I need to fix that later. :$
+ 8i) Press g.
+ 
+ 9) $ make
+10) $ cp *_.so ../lammpstools
+11) Now you're all set. lammps-tools-v2/foreign_interfaces/python3 now
+    contains a functional Python package called "lammpstools". You can
+    test using it bu running Python3 and importing the module. Make sure
+    that you use the same interpreter version as what you compiled against.
+    That is, if in step 8 you compiled against libpython3.5m.so, your
+    Python interpreter version needs to be 3.5 too.
+
+12) $ cd ../
+13) $ python3 -c "import lammpstools"
+    If this command executes without errors, you can definitely use
+    lammpstools with your interpreter. To be able to import it from
+    anywhere, just make sure the module is in your PYTHONPATH. On Linux,
+    if you use bash, this does the trick:
+    $ echo 'export PYTHONPATH=$PYTHONPATH":'$( pwd )'"' >> ~/.bashrc
+    On Mac OS X, this works:
+    $ echo 'export PYTHONPATH=$PYTHONPATH":'$( pwd )'"' >> ~/.bash_profile
+
+    Alternatively, you can copy lammpstools to a location that is already
+    in the python path. This is more nice for administrators. Replace
+    "<some dir that is in PYTHONPATH>" with a dir that is in PYTHONPATH:
+    $ cp -r lammpstools <some dir that is in PYTHONPATH>
+    
+14) Now you're all set. You can just use "import lammpstools"
+    in any python3 script and it should work.
+
++==================  make                   ==================+
+ 1) If you want to use GNU make, you probably already know what
+    you're doing and you don't need instructions. :)
+
+
++==================  Updating lammps-tools  ==================+
+If you already have a working instance of lammps-tools and simply
+want to update (to get the latest features), follow these steps:
+
+ 1) Go to the lammps-tools-v2 dir.
+ 2) $ git pull
+ 3) $ cd build
+ 4) $ make
+ 5) On Linux:    $ cp liblammpstools.so ../
+    On Mac OS X: $ cp liblammpstools.dylib ../
+ 6) cd ../
+ 7) cd foreign_interfaces/python3/build
+ 8) make
+ 9) cp *_.so ../lammpstools
+
+  Done.

@@ -5,7 +5,6 @@ import data_field
 import numpy as np
 
 
-
 class domain_data:
     """ Some basic info about the simulation domain """
     def __init__( self, xlo, xhi, periodic ):
@@ -51,11 +50,73 @@ class block_meta:
 
 
 class block_data:
-    """ The actual block data for atoms: """
-    def __init__(self,meta,ids,types, x, mol = None, handle = None):
-        self.init_from_arrays(meta,ids,types,x,mol)
-        self.handle = handle
+    """ A class representing a block of data. """
+    def __init__(self, handle = None):
+        """ Initialiser. Empty."""
         self.stored_name_map = False
+        self.handle = handle
+        self.name_to_col = None
+        self.data_types  = None
+        self.data = None
+
+    def store_name_mapping(self):
+        # Grab all names for mapping:
+        N = block_data_.n_data_fields(self.handle)
+        self.name_to_col = {}
+        self.data = []
+        self.data_types = np.zeros( N, dtype = int )
+
+        for i in range(0, N):
+            df = block_data_.data_by_index(self.handle,i)
+            ttype = data_field_.get_type( df )
+            self.data_types[i] = ttype
+
+            if ttype == data_field_.TYPES.DOUBLE:
+                raw_data = data_field_.as_float(df)
+            elif ttype == data_field_.TYPES.INT:
+                raw_data = data_field_.as_int(df)
+            else:
+                raise RuntimeError("Unkown data type encountered!")
+            self.data.append(raw_data)
+            name = data_field_.get_name(df)
+            self.name_to_col[ name ] = i
+        self.stored_name_map = True
+
+
+    def data_by_name(self, name):
+        """ Grab data field by name. """
+        # Lazy create name map:
+        if self.stored_name_map is False:
+            self.store_name_mapping()
+
+        raw_data = self.data[ self.name_to_col[ name ] ]
+        return raw_data
+
+        # if df is None:
+        #     raise RuntimeError("Failed to find data field of name", name)
+        # # Resolve type here:
+        # if data_field_.get_type( df ) == data_field_.TYPES.INT:
+        #     return data_field_.as_int( df )
+        # elif data_field_.get_type( df ) == data_field_.TYPES.DOUBLE:
+        #     return data_field_.as_float( df )
+        # else:
+        #     raise RuntimeError("Failed to resolve data type for data field",
+        #                        data_field_.get_name(df))
+
+
+    def get_ref(self):
+        """ Returns a ref to the pointer contained. This eases some foreign
+            function calling but shouldn't be used inside Python too much! """
+        return self.handle.get_const_ref()
+
+
+
+class block_data_custom(block_data):
+    """ The actual block data for atoms: """
+    def __init__(self, meta, ids, types, x, mol = None, handle = None):
+        """ Initialiser. """
+        super(block_data_custom,self).__init__(handle)
+        self.init_from_arrays(meta,ids,types,x,mol)
 
     @classmethod
     def init_from_handle(cls, handle):
@@ -76,24 +137,10 @@ class block_data:
         X[:,1] = y
         X[:,2] = z
 
-        # TODO: Domain data
-
-        # TODO: Neatly check for mol.
         if( block_data_.has_special_field( handle, 2 ) ):
-            # print("Found MOL field, assuming this is MOLECULAR data.")
             mol = block_data_.special_field_int( handle, 2 )
+        return cls(meta, ids, types, X, mol, handle)
 
-        return cls(meta, ids, types, X, mol, handle = handle)
-
-    def store_name_mapping(self):
-        name_to_col = {}
-
-        # Grab all names for mapping:
-        for i in range(0, block_data_.n_data_fields( handle )):
-            df = block_data_.data_by_index(handle,i)
-            name = data_field_.get_name(df)
-            name_to_col[ name ] = i
-        self.stored_name_map = True
 
     def init_from_arrays(self,meta,ids,types, x, mol = None):
         """ Initialises from np arrays """
@@ -114,49 +161,13 @@ class block_data:
             self.mol = mol
             self.meta.atom_style = "molecular"
 
-    def data_by_name(self, name):
-        """ Grabs data field by name. """
-        raise RuntimeError("data_by_name only works for local right now!")
 
-class block_data_local:
+class block_data_local(block_data):
     """ The block data for a dump local: """
+
     def __init__(self, handle):
+        super(block_data_local,self).__init__(handle)
 
         self.dom = domain_data( np.array( [0,0,0] ), np.array( [0,0,0] ), 0 )
         self.meta = block_meta( handle.time_step(), handle.n_atoms(), self.dom )
-        self.data = []
-        self.data_names = []
-        self.data_types = []
-        self.name_to_col = {}
-
-        """ Init block data from handle. """
-        for i in range(0, block_data_.n_data_fields(handle)):
-            df = block_data_.data_by_index(handle,i)
-            self.data_names.append( data_field_.get_name( df ) )
-            self.data_types.append( data_field_.get_type( df ) )
-
-            # Careful: Code duplication here. Should fix by making
-            # block_data derive from this, because it's a special case of.
-            self.name_to_col[ data_field_.get_name(df) ] = i
-
-            # Grab the data as the proper underlying type:
-            type = data_field_.get_type( df )
-            if type == data_field_.TYPES.DOUBLE:
-                tmp = data_field_.as_float( block_data_.data_by_index( handle, i ) )
-            elif type == data_field_.TYPES.INT:
-                tmp = data_field_.as_int( block_data_.data_by_index( handle, i ) )
-            else:
-                    raise RuntimeError("Unknown data type encountered in block_data")
-
-            if self.data_types[i] == data_field_.TYPES.DOUBLE:
-                tmp_data = np.zeros( self.meta.N, dtype = float )
-            else: # Assume int.
-                tmp_data = np.zeros( self.meta.N, dtype = int )
-
-            for j in range(0, self.meta.N):
-                tmp_data[j] = tmp[j]
-            self.data.append( tmp_data )
-
-    def data_by_name(self, name):
-        """ Grabs data field by name. """
-        return self.data[self.name_to_col[name]]
+        self.store_name_mapping()

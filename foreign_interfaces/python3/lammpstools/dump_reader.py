@@ -100,7 +100,7 @@ class dump_reader:
             if self.local:
                 b = block_data.block_data_local( bh )
             else:
-                b = block_data.block_data.init_from_handle( bh )
+                b = block_data.block_data_custom.init_from_handle( bh )
             return b
         else:
             return None
@@ -138,6 +138,9 @@ class dump_reader:
             elif h == "x":    i = 3
             elif h == "y":    i = 4
             elif h == "z":    i = 5
+            # Add more here:
+            # Bail if not guessable:
+            else: continue
 
             name = special_col_names[i]
 

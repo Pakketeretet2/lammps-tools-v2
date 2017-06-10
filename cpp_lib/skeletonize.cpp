@@ -378,6 +378,38 @@ std::vector<double> get_ribbon_widths( const block_data &b,
 }
 
 
+std::vector<double> neighbour_strain( block_data &b, double r0,
+                                      int itype, int jtype, int method,
+                                      int dims, double rc )
+{
+	const std::vector<int> &id = get_id( b );
+	const std::vector<int> &type = get_type( b );
+	const std::vector<double> &x = get_x( b );
+	const std::vector<double> &y = get_y( b );
+	const std::vector<double> &z = get_z( b );
+	std::vector<double> strain( b.N );
+
+	neighborize::neigh_list nl;
+	neighborize::make_list_dist( nl, b, itype, jtype, method, dims, rc );
+
+	for( bigint i = 0; i < b.N; ++i ){
+		int nc = nl[i].size();
+		double s_avg = 0.0;
+		double xi[3] = { x[i], y[i], z[i] };
+		double c = 1.0 / nc;
+		for( int j : nl[i] ){
+			double xj[3] = { x[j], y[j], z[j] };
+			double rr[3];
+			double r2 = b.dom.dist_2( xi, xj, rr );
+			double r = std::sqrt(r2);
+			s_avg += (r - r0) * c;
+		}
+		strain[i] = s_avg;
+	}
+
+	return strain;
+}
+
 
 
 } // namespace skeletonize
