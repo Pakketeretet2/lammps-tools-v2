@@ -253,6 +253,28 @@ const data_field *block_data::get_special_field( int field ) const
 
 
 
+int block_data::n_special_fields() const
+{
+	int c = 0;
+	for( int i : special_fields_by_index ){
+		if( i >= 0 ) ++c;
+	}
+	return c;
+}
+
+
+const data_field &block_data::operator[]( int i ) const
+{
+	return *data[i];
+}
+
+data_field &block_data::operator[]( int i )
+{
+	return *data[i];
+}
+
+
+
 // ******************   Non-member functions:    ************************
 void swap( block_data &f, block_data &s )
 {
@@ -302,15 +324,6 @@ bool grab_common_fields( const block_data &b,
 }
 
 
-const data_field &block_data::operator[]( int i ) const
-{
-	return *data[i];
-}
-
-data_field &block_data::operator[]( int i )
-{
-	return *data[i];
-}
 
 
 bool is_special_field_int( int special_field )

@@ -205,6 +205,9 @@ public:
 	/// Get read-only pointer to special data field of given kind.
 	const data_field *get_special_field( int field ) const;
 
+	/// Counts the number of special fields in block_data.
+	int n_special_fields() const;
+
 	/// Sorts the data along given header with given comparator.
 	template <typename comparator>
 	void sort_along( const std::string &header, const comparator &comp );

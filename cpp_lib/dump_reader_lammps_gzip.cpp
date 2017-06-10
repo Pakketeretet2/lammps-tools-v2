@@ -17,6 +17,9 @@ dump_reader_lammps_gzip::dump_reader_lammps_gzip( const std::string &fname, int 
 	: dump_reader_lammps_plain( fname, dump_style ),
 	  infile( fname, std::ios_base::in |std::ios_base::binary ), in()
 {
+	my_assert( __FILE__, __LINE__, util::file_exists( fname ),
+	           "Dump file does not exist!" );
+
 	in.push( boost::iostreams::gzip_decompressor() );
 	in.push( infile );
 
