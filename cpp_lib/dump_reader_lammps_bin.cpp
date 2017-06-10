@@ -33,6 +33,9 @@ dump_reader_lammps_bin::dump_reader_lammps_bin( const std::string &fname,
                                                 int dump_style )
 	: dump_reader_lammps( dump_style ), in( nullptr )
 {
+	my_assert( __FILE__, __LINE__, util::file_exists( fname ),
+	           "Dump file does not exist!" );
+
 	in = fopen( fname.c_str(), "rb" );
 	my_assert( __FILE__, __LINE__, in != nullptr,
 	           "Failed to open dump file!" );

@@ -296,6 +296,9 @@ int get_data_body( std::istream &in, block_data &b,
 block_data block_data_from_lammps_data( const std::string &fname, int &status,
                                         bool quiet )
 {
+	my_assert( __FILE__, __LINE__, util::file_exists( fname ),
+	           "Data file does not exist!" );
+
 	std::ifstream in( fname );
 	return block_data_from_lammps_data( in, status, quiet );
 }

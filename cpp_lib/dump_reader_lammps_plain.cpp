@@ -23,6 +23,8 @@ dump_reader_lammps_plain::dump_reader_lammps_plain( const std::string &fname,
                                                     int dump_style )
 	: dump_reader_lammps( dump_style ), in_file( nullptr ), in( nullptr )
 {
+	my_assert( __FILE__, __LINE__, util::file_exists( fname ),
+	           "Dump file does not exist!" );
 	in_file = new std::ifstream( fname );
 	my_assert( __FILE__, __LINE__, in_file,
 	           "Failed to open input stream!" );
