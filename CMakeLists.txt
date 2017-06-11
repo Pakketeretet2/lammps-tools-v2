@@ -46,14 +46,14 @@ option(USE_EXCEPTIONS  "Use C++ exceptions for error handling."       ON)
 option(LEGACY_COMPILER "Disable some features for ancient compilers." OFF)
 
 # Compiler settings:
-set(CMAKE_CXX_FLAGS "-std=c++11 -g -O3 -pedantic -fPIC -Wall -Werror=implicit")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=return-type")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=uninitialized -Weffc++")
+set(CXX_STANDARD_REQUIRED "11")
+set(CMAKE_CXX_NON_MS_FLAGS "-Werror=implicit -Werror=return-type -Werror=uninitialized -Wall")
+set(CMAKE_CXX_FLAGS "-std=c++11 -g -O3 -pedantic -fPIC")
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wno-missing-braces")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wno-missing-braces ${CMAKE_CXX_NON_MS_FLAGS}")
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -frounding-math")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -frounding-math ${CMAKE_CXX_NON_MS_FLAGS}")
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 
 endif()
