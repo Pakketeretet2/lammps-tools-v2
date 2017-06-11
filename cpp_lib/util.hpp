@@ -231,6 +231,7 @@ bool is_bit( T& x )
 */
 inline bool is_non_negative( const std::string &s )
 {
+#ifndef _WIN32
 	int i = 0;
 	while( s[i] ){
 		if( !std::isdigit( s[i] ) ){
@@ -238,6 +239,16 @@ inline bool is_non_negative( const std::string &s )
 		}
 	}
 	return true;
+#else
+	// Windows sucks:
+	int i = 0;
+	while( s[i] ){
+		if( !iswdigit( s[i] ) ){
+			return false;
+		}
+	}
+	return true;
+#endif // _WIN32
 }
 
 /**
