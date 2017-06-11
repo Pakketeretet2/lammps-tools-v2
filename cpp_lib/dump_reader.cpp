@@ -1,5 +1,6 @@
 #include "dump_reader.hpp"
 
+#include "dump_reader_lammps.hpp"
 #include "dump_reader_lammps_bin.hpp"
 #include "dump_reader_lammps_gzip.hpp"
 #include "dump_reader_lammps_plain.hpp"
@@ -9,6 +10,26 @@
 namespace lammps_tools {
 
 namespace readers {
+
+
+int dump_reader::next_block( block_data &block, bool warn_if_no_special )
+{
+	int status = get_next_block( block );
+	if( status ) return status;
+
+	if( warn_if_no_special && (block.n_special_fields() == 0) ){
+		dump_reader_lammps *drl;
+		drl = dynamic_cast<dump_reader_lammps*>( this );
+		if( !drl || (drl && drl->dump_style != drl->LOCAL) ){
+			std::cerr << "Dump style is " << drl->dump_style << "\n";
+			my_warning( __FILE__, __LINE__,
+			            "Block has no special fields!" );
+		}
+
+	}
+	return status;
+}
+
 
 const char *fformat_to_str( int file_format )
 {

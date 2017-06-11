@@ -39,16 +39,7 @@ public:
 
            \returns 0 on success, positive if EOF reached, negative on failure.
 	*/
-	int next_block( block_data &block, bool warn_if_no_special = true )
-	{
-		int status = get_next_block( block );
-		if( status ) return status;
-		if( warn_if_no_special && (block.n_special_fields() == 0) ){
-			my_warning( __FILE__, __LINE__,
-			            "Block has no special fields!" );
-		}
-		return status;
-	}
+	int next_block( block_data &block, bool warn_if_no_special = true );
 
 	/// Checks if the internal file is at eof:
 	bool eof()  const { return check_eof(); }

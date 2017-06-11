@@ -11,8 +11,8 @@ TEST_CASE ( "Quaternions", "[quat]" )
 	quat two( 1.0, 1.0, 1.0, 0.0 );
 
 	quat oneptwo = one + two;
-	quat onemtwo = one + two;
-	quat twomone = one - two;
+	quat onemtwo = one - two;
+	quat twomone = two - one;
 
 	quat one_con = one.conj();
 	quat two_con = two.conj();
@@ -46,6 +46,30 @@ TEST_CASE ( "Quaternions", "[quat]" )
 	REQUIRE( oneone_i[2] == Approx( 0.0 ) );
 	REQUIRE( oneone_i[3] == Approx( 0.0 ) );
 
+	REQUIRE( oneptwo[0] == Approx( 2 ) );
+	REQUIRE( oneptwo[1] == Approx( 3 ) );
+	REQUIRE( oneptwo[2] == Approx( 4 ) );
+	REQUIRE( oneptwo[3] == Approx( 4 ) );
+
+	REQUIRE( onemtwo[0] == Approx( 0 ) );
+	REQUIRE( onemtwo[1] == Approx( 1 ) );
+	REQUIRE( onemtwo[2] == Approx( 2 ) );
+	REQUIRE( onemtwo[3] == Approx( 4 ) );
+
+	REQUIRE( twomone[0] == Approx( -0 ) );
+	REQUIRE( twomone[1] == Approx( -1 ) );
+	REQUIRE( twomone[2] == Approx( -2 ) );
+	REQUIRE( twomone[3] == Approx( -4 ) );
+
+	REQUIRE( onetwo[0] == Approx( -4 ) );
+	REQUIRE( onetwo[1] == Approx( -1 ) );
+	REQUIRE( onetwo[2] == Approx(  8 ) );
+	REQUIRE( onetwo[3] == Approx(  3 ) );
+
+        REQUIRE( twoone[0] == Approx( -4 ) );
+	REQUIRE( twoone[1] == Approx(  7 ) );
+	REQUIRE( twoone[2] == Approx(  0 ) );
+	REQUIRE( twoone[3] == Approx(  5 ) );
 
 
 

@@ -3,6 +3,7 @@
 from lammpstools import block_data
 from lammpstools import dump_reader
 from lammpstools import data_field   # for data_field_types
+import sys
 
 # Define a new dump reader for a LAMMPS dump file.
 d = dump_reader.dump_reader( "polymer.dump",
@@ -19,6 +20,16 @@ dl.set_default_column_type( "int" )
 d.set_column_headers( [ 'id', 'mol', 'type', 'x', 'y', 'z' ] )
 
 c = 0
+
+# for b in d:
+#     if c > 0 and c%25 == 0:
+#         print("At block",c,", t =", b.meta.t, " contains N =",
+#               b.meta.N, " particles")
+#         i = 1233
+#         if b.meta.N > i:
+#             print("Position of particle",i,"is",b.x[i])
+#             print("Type is",b.types[i],"and mol is",b.mol[i])
+#     c += 1
 
 for b, bl in zip(d, dl):
     if c > 0 and c%25 == 0:

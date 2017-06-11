@@ -74,6 +74,12 @@ int main( int argc, char **argv )
 			          << "dump-cat. Instead, stream text output "
 			          << "through gzip!\n";
 			return -2;
+		}else{
+			std::cerr << "Assuming file " << out_file
+			          << " is plain text dump file.\n";
+			out_fformat = FILE_FORMAT_PLAIN;
+			out_fstream = new std::ofstream( out_file );
+			out = out_fstream;
 		}
 	}
 
