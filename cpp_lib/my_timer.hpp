@@ -4,10 +4,12 @@
 /**
    \file my_timer.hpp
 */
-
-#include <sys/time.h>
 #include <iostream>
 #include <memory>
+
+
+#ifndef _WIN32
+#include <sys/time.h>
 
 /**
   \brief A simple timer class based on sys/time
@@ -101,5 +103,69 @@ private:
 	my_timer( const my_timer &o ) = delete;
 	my_timer &operator=( const my_timer &o ) = delete;
 };
+
+#else
+// On Windows, treat everything as No-op.
+class my_timer {
+public:
+	/// Default constructor, no output.
+	my_timer(){}
+
+	/// Constructor that takes an std::ostream to which stuff is
+	/// occasionally printed.
+	explicit my_timer(std::ostream &out_stream) {}
+
+	/// Empty destructor
+	~my_timer(){}
+
+	/// Sets the "tic"-time to current time.
+	void tic() {}
+
+	/**
+	  \brief Computes difference between the "tic"-time and current time.
+
+	  \param msg   A message to print to out in addition
+	               to the elapsed time (optional)
+	  \returns     The difference between tic-time and
+	               current time in milliseconds.
+	*/
+	double toc( const std::string &msg, const std::string &post )
+	{
+		return 0.0;
+	}
+	double toc( const std::string &msg )
+	{
+		return toc( msg, "" );
+	}
+	double toc( )
+	{
+		return toc( "", "" );
+	}
+
+
+	/// Enables output stream and sets it to o.
+	void enable_output( std::ostream &o )
+	{ }
+
+	/**
+	  \brief Disables the output stream.
+
+	  \warning After calling this, out is lost!
+	*/
+	void disable_output()
+	{ }
+
+private:
+	void init_tic_toc()
+	{ }
+
+	// This class is not copy-able:
+	my_timer( const my_timer &o ) = delete;
+	my_timer &operator=( const my_timer &o ) = delete;
+};
+
+
+#endif // _WIN32
+
 
 #endif // MY_TIMER_HPP
