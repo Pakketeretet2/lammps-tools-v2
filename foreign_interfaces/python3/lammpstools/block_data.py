@@ -4,6 +4,29 @@ import data_field
 
 import numpy as np
 
+class xyz_array_acessor:
+    """ Provides an abstraction to indexing the xyz array in block data. """
+    def __init__(self, x_arr, y_arr, z_arr):
+        self.x = x_arr
+        self.y = y_arr
+        self.z = z_arr
+
+    def __getitem__(self, atom_index):
+        return (self.x[atom_index], self.y[atom_index], self.z[atom_index])
+
+    
+    # def __getitem__(self, atom_index, coord_index):
+    #     if coord_index == 0:
+    #         return self.x[atom_index]
+    #     elif coord_index == 1:
+    #         return self.y[atom_index]
+    #     elif coord_index == 2:
+    #         return self.z[atom_index]
+    #     else:
+    #         raise RuntimeError("coordinate index",coord_index,"out of bounds!")
+
+    def __len__(self):
+        return len(self.x)
 
 class domain_data:
     """ Some basic info about the simulation domain """
@@ -113,41 +136,46 @@ class block_data:
 
 class block_data_custom(block_data):
     """ The actual block data for atoms: """
-    def __init__(self, meta, ids, types, x, mol = None, handle = None):
+    def __init__(self, meta, ids, types, x, mol = None, handle = None, no_copy = False):
         """ Initialiser. """
         super(block_data_custom,self).__init__(handle)
+        self.no_copy = no_copy
         self.init_from_arrays(meta,ids,types,x,mol)
 
     @classmethod
-    def init_from_handle(cls, handle):
+    def init_from_handle(cls, handle, no_copy = False):
         """ Initialises from a block_data_handle. """
         dom = domain_data( np.array( [0,0,0] ), np.array( [0,0,0] ), 0 )
         meta = block_meta( handle.time_step(), handle.n_atoms(), dom )
-
+        
+        N = handle.n_atoms()
         ids   = block_data_.special_field_int( handle, 0 )
         types = block_data_.special_field_int( handle, 1 )
         mol   = None
         x = block_data_.special_field_double( handle, 3 )
         y = block_data_.special_field_double( handle, 4 )
         z = block_data_.special_field_double( handle, 5 )
-
-        N = handle.n_atoms()
-        X = np.empty( [ N, 3], dtype = float )
-        X[:,0] = x
-        X[:,1] = y
-        X[:,2] = z
+        
+        if no_copy:
+            X = xyz_array_acessor( x, y, z )
+        else:
+            X = np.empty( [ N, 3], dtype = float )
+            X[:,0] = x
+            X[:,1] = y
+            X[:,2] = z
 
         if( block_data_.has_special_field( handle, 2 ) ):
             mol = block_data_.special_field_int( handle, 2 )
-        return cls(meta, ids, types, X, mol, handle)
+        return cls(meta, ids, types, X, mol, handle, no_copy)
 
 
-    def init_from_arrays(self,meta,ids,types, x, mol = None):
+    def init_from_arrays(self,meta,ids,types, x, mol = None, no_copy = False):
         """ Initialises from np arrays """
         # Check lengths:
         if not all(meta.N == length for length in
                    [ len(ids), len(types), len(x) ] ):
             raise RuntimeError("Length mismatch in arrays passed to block_data!")
+
         if (not mol is None) and (len(mol) != meta.N):
             raise RuntimeError("Length mismatch in arrays passed to block_data!")
 

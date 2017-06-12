@@ -30,6 +30,7 @@ class dump_reader:
         """ Initialises dump reader. """
         self.local  = is_local
         self.handle = None
+        self.no_block_data_copy = False
 
         fformat = dump_reader_.FILE_FORMATS.UNSET
         dformat = dump_reader_.DUMP_FORMATS.UNSET
@@ -100,7 +101,8 @@ class dump_reader:
             if self.local:
                 b = block_data.block_data_local( bh )
             else:
-                b = block_data.block_data_custom.init_from_handle( bh )
+                b = block_data.block_data_custom.init_from_handle(
+                    bh, self.no_block_data_copy )
             return b
         else:
             return None
