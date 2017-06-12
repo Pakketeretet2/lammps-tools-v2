@@ -126,10 +126,11 @@ int dump_reader_lammps_bin::next_block_meta( block_data &block,
 		std::fread(&size_one,sizeof(int),1,in);
 		std::fread(&nchunk,sizeof(int),1,in);
 
+		/*
 		my_warning_if( __FILE__, __LINE__, nchunk > 1,
 		               "You've got multiple processor "
 		               "chunks incoming!\n" );
-
+		*/
 		block.N = natoms;
 		block.tstep = ntimestep;
 		block.dom.xlo[0] = xlo[0];

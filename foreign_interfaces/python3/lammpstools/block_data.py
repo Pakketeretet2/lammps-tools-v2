@@ -7,25 +7,21 @@ import numpy as np
 class xyz_array_acessor:
     """ Provides an abstraction to indexing the xyz array in block data. """
     def __init__(self, x_arr, y_arr, z_arr):
+        """ Initialises references to the arrays. """
+        if len(x_arr) != len(z_arr) or len(x_arr) != len(y_arr):
+            raise RuntimeError("Arrays not of equal lengths!")
+        
         self.x = x_arr
         self.y = y_arr
         self.z = z_arr
 
     def __getitem__(self, atom_index):
-        return (self.x[atom_index], self.y[atom_index], self.z[atom_index])
-
+        """ Returns a slice of atom coordinates. """
+        return np.array( [self.x[atom_index], self.y[atom_index], self.z[atom_index] ])
+        # return ( self.x[atom_index], self.y[atom_index], self.z[atom_index] )
     
-    # def __getitem__(self, atom_index, coord_index):
-    #     if coord_index == 0:
-    #         return self.x[atom_index]
-    #     elif coord_index == 1:
-    #         return self.y[atom_index]
-    #     elif coord_index == 2:
-    #         return self.z[atom_index]
-    #     else:
-    #         raise RuntimeError("coordinate index",coord_index,"out of bounds!")
-
     def __len__(self):
+        """ Returns the length of the arrays. """
         return len(self.x)
 
 class domain_data:
@@ -136,10 +132,9 @@ class block_data:
 
 class block_data_custom(block_data):
     """ The actual block data for atoms: """
-    def __init__(self, meta, ids, types, x, mol = None, handle = None, no_copy = False):
+    def __init__(self, meta, ids, types, x, mol = None, handle = None):
         """ Initialiser. """
         super(block_data_custom,self).__init__(handle)
-        self.no_copy = no_copy
         self.init_from_arrays(meta,ids,types,x,mol)
 
     @classmethod
@@ -166,10 +161,10 @@ class block_data_custom(block_data):
 
         if( block_data_.has_special_field( handle, 2 ) ):
             mol = block_data_.special_field_int( handle, 2 )
-        return cls(meta, ids, types, X, mol, handle, no_copy)
+        return cls(meta, ids, types, X, mol, handle)
 
 
-    def init_from_arrays(self,meta,ids,types, x, mol = None, no_copy = False):
+    def init_from_arrays(self,meta,ids,types, x, mol = None):
         """ Initialises from np arrays """
         # Check lengths:
         if not all(meta.N == length for length in
