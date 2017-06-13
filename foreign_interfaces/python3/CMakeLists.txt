@@ -20,13 +20,14 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 
 endif()
 
-if(${WIN32})
-  set(EXTENSION "_.pyd")
-elseif(${APPLE})
-  set(EXTENSION "_.dylib")  
-elseif(${UNIX})
-  set(EXTENSION "_.so")
-endif()
+#if(${WIN32})
+#  set(EXTENSION "_.pyd")
+#elseif(${APPLE})
+#  set(EXTENSION "_.dylib")
+#elseif(${UNIX})
+#  set(EXTENSION "_.so")
+#endif()
+set(EXTENSION "_")
 
 # Check if you find Python at all:
 find_package( PythonLibs )
@@ -59,10 +60,10 @@ foreach(SRC_FILE
 
   string(REPLACE "lammpstools/" "" TMP ${SRC_FILE})
   string(REPLACE "_python.cpp" "${EXTENSION}" OBJ_NAME ${TMP})
-  
+
   pybind11_add_module( ${OBJ_NAME} ${SRC_FILE} ${TARGET_LIBS} )
   target_link_libraries( ${OBJ_NAME} PRIVATE ${TARGET_LIBS} )
-  
+
 endforeach(SRC_FILE)
 
 # pybind11_add_module(conversions_.so lammpstools/conversions_python.cpp ${TARGET_LIBS})
