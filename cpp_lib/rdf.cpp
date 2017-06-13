@@ -38,10 +38,8 @@ void compute_rdf_with_neighs( const block_data &b, int Nbins,
 	for( std::size_t i = 0; i < neighs.size(); ++i ){
 		total_neighs += neighs[i].size();
 	}
-	double avg_neighs = total_neighs / b.N;
+	// double avg_neighs = total_neighs / b.N;
 
-
-	const std::vector<int> &ids = get_id( b );
 	const std::vector<double> &x = get_x( b );
 	const std::vector<double> &y = get_y( b );
 	const std::vector<double> &z = get_z( b );
@@ -49,11 +47,9 @@ void compute_rdf_with_neighs( const block_data &b, int Nbins,
 	double rc2 = r1*r1;
 	int adds = 0;
 
-	for( int i = 0; i < neighs.size(); ++i ){
+	for( std::size_t i = 0; i < neighs.size(); ++i ){
 		const std::vector<int> &ni = neighs[i];
-		int idi = ids[i];
 		for( int j : ni ){
-			int idj = ids[j];
 			double xi[3] = { x[i], y[i], z[i] };
 			double xj[3] = { x[j], y[j], z[j] };
 
@@ -127,10 +123,7 @@ std::vector<double> rdf( const block_data &b, int Nbins, double r0, double r1,
 	for( std::size_t i = 0; i < neighs.size(); ++i ){
 		total_neighs += neighs[i].size();
 	}
-	double avg_neighs = total_neighs / b.N;
 
-
-	const std::vector<int> &ids = get_id( b );
 	const std::vector<double> &x = get_x( b );
 	const std::vector<double> &y = get_y( b );
 	const std::vector<double> &z = get_z( b );
@@ -138,11 +131,9 @@ std::vector<double> rdf( const block_data &b, int Nbins, double r0, double r1,
 	double rc2 = r1*r1;
 	int adds = 0;
 
-	for( int i = 0; i < neighs.size(); ++i ){
+	for( std::size_t i = 0; i < neighs.size(); ++i ){
 		const std::vector<int> &ni = neighs[i];
-		int idi = ids[i];
 		for( int j : ni ){
-			int idj = ids[j];
 			double xi[3] = { x[i], y[i], z[i] };
 			double xj[3] = { x[j], y[j], z[j] };
 

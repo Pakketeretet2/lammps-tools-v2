@@ -20,13 +20,12 @@ inline double bessel_j1( double x )
 }
 
 
-void get_position( const block_data &b, int idx, double ri[3] )
+void get_position( const block_data &b, int idx, double ri[3], double scale )
 {
 	double xx = get_x(b)[idx];
 	double yy = get_y(b)[idx];
 	double zz = get_z(b)[idx];
 
-	double scale = 1.0;
 	ri[0] = xx*scale;
 	ri[1] = yy*scale;
 	ri[2] = zz*scale;
@@ -34,22 +33,26 @@ void get_position( const block_data &b, int idx, double ri[3] )
 
 
 std::vector<double> rayleigh_gans( const class block_data &b,
-                                   const std::vector<double> &qs )
+                                   const std::vector<double> &qs,
+                                   const std::vector<double> &radius,
+                                   double position_scale, double d_epsilon0 )
 {
-	return rayleigh_gans( b, qs, get_id( b ) );
+	return rayleigh_gans( b, qs, radius, position_scale,
+	                      d_epsilon0, get_id( b ) );
 }
 
 std::vector<double> rayleigh_gans( const class block_data &b,
                                    const std::vector<double> &qs,
+                                   const std::vector<double> &radius,
+                                   double position_scale, double d_epsilon0,
                                    const std::vector<int> &ids )
 {
 	std::cerr << "Calculating raygleigh_gans scattering for "
 	          << ids.size() << " particles.\n";
 	// In units of micrometers:
-	std::vector<double> radius( b.N, 0.5 );
 	id_map im( get_id( b ) );
-	double d_epsilon_0  = 1e-3;
-	double d_epsilon_02 = d_epsilon_0 * d_epsilon_0;
+
+	double d_epsilon_02 = d_epsilon0 * d_epsilon0;
 
 	std::size_t Nqs = qs.size();
 	std::vector<double> FXre( Nqs, 0.0 );
@@ -74,7 +77,7 @@ std::vector<double> rayleigh_gans( const class block_data &b,
 		double Ri3 = Ri2*Ri;
 		// You need to convert the positions somewhow!
 		double ri[3];
-		get_position( b, idx, ri );
+		get_position( b, idx, ri, position_scale );
 
 		std::size_t bin = 0;
 		for( double q : qs ){
