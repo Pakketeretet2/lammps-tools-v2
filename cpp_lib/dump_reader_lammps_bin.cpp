@@ -131,6 +131,17 @@ int dump_reader_lammps_bin::next_block_meta( block_data &block,
 		               "You've got multiple processor "
 		               "chunks incoming!\n" );
 		*/
+		if( nchunk == 0 ){
+			my_warning( __FILE__, __LINE__,
+			           "nchunk was 0. That's not good.\n");
+			if( feof(in) ){
+				std::cerr << "The dump is at EOF, "
+				          << "assuming it's fine...\n";
+				return 2;
+			}else{
+				return -1;
+			}
+		}
 		block.N = natoms;
 		block.tstep = ntimestep;
 		block.dom.xlo[0] = xlo[0];
