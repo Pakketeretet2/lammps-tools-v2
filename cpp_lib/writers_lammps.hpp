@@ -42,17 +42,19 @@ void block_to_lammps_data( std::ostream &out, const block_data &b );
                    in dump_readers.hpp)
 */
 void block_to_lammps_dump( const std::string &fname, const block_data &b,
-                           int fformat );
+                           int fformat, bool is_local = false );
 
 /**
    \brief Writes block_data to output stream in LAMMPS dump format.
 
    \overloads block_to_lammps_dump
 */
-void block_to_lammps_dump( std::ostream &out, const block_data &b, int fformat );
+void block_to_lammps_dump( std::ostream &out, const block_data &b, int fformat,
+                           bool is_local = false );
 
 /// Writes block to output stream in plain text LAMMPS dump format.
-void block_to_lammps_dump_text( std::ostream &out, const block_data &b );
+void block_to_lammps_dump_text( std::ostream &out, const block_data &b,
+                                bool is_local );
 
 /// Writes block to output stream in binary LAMMPS dump format.
 void block_to_lammps_dump_bin( std::ostream &out, const block_data &b );

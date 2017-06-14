@@ -24,7 +24,7 @@ int main( int argc, char **argv )
 	std::vector<std::string> dumps;
 	std::string headers;
 	std::string out_file = "-";
-
+	bool to_local = false;
 
 	int i = 1;
 	while( i < argc ){
@@ -36,6 +36,9 @@ int main( int argc, char **argv )
 			}else if( a == "-o" || a == "--output" ){
 				out_file = argv[i+1];
 				i += 2;
+			}else if( a == "-l" || a == "--local" ){
+				to_local = true;
+				i += 1;
 			}else if( a == "-h" || a == "--help" ){
 				print_usage();
 				return 1;
@@ -87,12 +90,20 @@ int main( int argc, char **argv )
 		std::istream &in( std::cin );
 		int fformat = FILE_FORMAT_PLAIN;
 		block_data b;
-		std::unique_ptr<readers::dump_reader_lammps> d(
-			readers::make_dump_reader_lammps( in ) );
-		d->set_column_headers( util::split( headers ) );
-		while( d->next_block(b) == 0 ){
-			std::cerr << "Grabbed block at t = " << b.tstep << ".\n";
-			writers::block_to_lammps_dump( *out, b, out_fformat );
+		if( to_local ){
+			std::unique_ptr<readers::dump_reader_lammps> d(
+				readers::make_dump_reader_lammps( in, readers::dump_reader_lammps::LOCAL ) );
+			d->set_column_headers( util::split( headers ) );
+			while( d->next_block(b) == 0 ){
+				writers::block_to_lammps_dump( *out, b, out_fformat, to_local );
+			}
+		}else{
+			std::unique_ptr<readers::dump_reader_lammps> d(
+				readers::make_dump_reader_lammps( in ) );
+			d->set_column_headers( util::split( headers ) );
+			while( d->next_block(b) == 0 ){
+				writers::block_to_lammps_dump( *out, b, out_fformat, to_local );
+			}
 		}
 
 	}else{
@@ -105,12 +116,24 @@ int main( int argc, char **argv )
 			}
 			std::cerr << "Catting " << dname << ".\n";
 			block_data b;
-			std::unique_ptr<readers::dump_reader_lammps> d(
-				readers::make_dump_reader_lammps( dname, fformat ) );
-			d->set_column_headers( util::split( headers ) );
-			while( d->next_block(b) == 0 ){
-				std::cerr << "Grabbed block at t = " << b.tstep << ".\n";
-				writers::block_to_lammps_dump( *out, b, out_fformat );
+			if( to_local ){
+				std::unique_ptr<readers::dump_reader_lammps> d(
+					readers::make_dump_reader_lammps( dname, fformat, readers::dump_reader_lammps::LOCAL ) );
+				d->set_column_headers( util::split( headers ) );
+				while( d->next_block(b) == 0 ){
+					writers::block_to_lammps_dump( *out, b,
+					                               out_fformat,
+					                               to_local );
+				}
+			}else{
+				std::unique_ptr<readers::dump_reader_lammps> d(
+					readers::make_dump_reader_lammps( dname, fformat ) );
+				d->set_column_headers( util::split( headers ) );
+				while( d->next_block(b) == 0 ){
+					writers::block_to_lammps_dump( *out, b,
+					                               out_fformat,
+					                               to_local );
+				}
 			}
 
 		}

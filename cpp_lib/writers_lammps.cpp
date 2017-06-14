@@ -131,7 +131,8 @@ void block_to_lammps_data( std::ostream &out, const block_data &b )
 
 
 void block_to_lammps_dump( const std::string &fname,
-                           const block_data &b, int fformat )
+                           const block_data &b, int fformat,
+                           bool is_local )
 {
 	switch(fformat){
 		default:
@@ -139,7 +140,7 @@ void block_to_lammps_dump( const std::string &fname,
 			                 "Unknown file format!" );
 		case FILE_FORMAT_PLAIN: {
 			std::ofstream out( fname );
-			block_to_lammps_dump_text( out, b );
+			block_to_lammps_dump_text( out, b, is_local );
 			break;
 		}
 		case FILE_FORMAT_BIN:{
@@ -155,7 +156,7 @@ void block_to_lammps_dump( const std::string &fname,
 			filtering_stream<output> out;
 			out.push(gzip_compressor());
 			out.push(in);
-			block_to_lammps_dump_text( out, b );
+			block_to_lammps_dump_text( out, b, is_local );
 			break;
 #else
 			my_runtime_error( __FILE__, __LINE__,
@@ -167,14 +168,15 @@ void block_to_lammps_dump( const std::string &fname,
 }
 
 void block_to_lammps_dump( std::ostream &out,
-                          const block_data &b, int fformat )
+                          const block_data &b, int fformat,
+                           bool is_local )
 {
 	switch(fformat){
 		default:
 			my_runtime_error(__FILE__, __LINE__,
 			                 "Unknown file format!" );
 		case FILE_FORMAT_PLAIN:{
-			block_to_lammps_dump_text( out, b );
+			block_to_lammps_dump_text( out, b, is_local );
 			break;
 		}
 		case FILE_FORMAT_BIN:{
@@ -182,7 +184,7 @@ void block_to_lammps_dump( std::ostream &out,
 			break;
 		}
 		case FILE_FORMAT_GZIP:{
-			block_to_lammps_dump_text( out, b );
+			block_to_lammps_dump_text( out, b, is_local );
 			break;
 		}
 	}
@@ -235,7 +237,8 @@ void output_atom_line( const block_data &b, std::ostream &out, int i )
 	out << "\n";
 }
 
-void block_to_lammps_dump_text( std::ostream &out, const block_data &b )
+void block_to_lammps_dump_text( std::ostream &out, const block_data &b,
+                                bool is_local )
 {
 	std::string boxline = "ITEM: BOX BOUNDS";
 	if( b.dom.periodic & domain::BIT_X ) boxline += " pp";
@@ -246,13 +249,21 @@ void block_to_lammps_dump_text( std::ostream &out, const block_data &b )
 	else                                 boxline += " ff";
 
 
-	out<< "ITEM: TIMESTEP\n" << b.tstep << "\nITEM: NUMBER OF ATOMS\n";
+	out<< "ITEM: TIMESTEP\n" << b.tstep << "\n";
+	if( is_local ){
+		out << "ITEM: NUMBER OF ENTRIES\n";
+	}else{
+		out << "ITEM: NUMBER OF ATOMS\n";
+	}
 	out << b.N << "\n" << boxline << "\n";
 	out << b.dom.xlo[0] << " " << b.dom.xhi[0] << "\n";
 	out << b.dom.xlo[1] << " " << b.dom.xhi[1] << "\n";
 	out << b.dom.xlo[2] << " " << b.dom.xhi[2] << "\n";
 
 	std::string header_line = "ITEM: ATOMS";
+	if( is_local ){
+		header_line = "ITEM: ENTRIES";
+	}
 	for( std::size_t i = 0; i < b.n_data_fields(); ++i ){
 		const std::string &header = b[i].name;
 		header_line += " " + header;

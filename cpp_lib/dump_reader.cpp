@@ -68,6 +68,8 @@ dump_reader *make_dump_reader( const std::string &fname,
 
 	if( dformat == DUMP_FORMAT_LAMMPS ){
 		reader = make_dump_reader_lammps( fname, fformat );
+	}else if( dformat == DUMP_FORMAT_LAMMPS_LOCAL ){
+		reader = make_dump_reader_lammps( fname, fformat, dump_reader_lammps::LOCAL );
 	}else if( dformat == DUMP_FORMAT_HOOMD ){
 		if( fformat == FILE_FORMAT_BIN ){
 			// reader = dump_reader_hoomd_gsd( fname );
@@ -96,6 +98,10 @@ dump_reader *make_dump_reader( std::istream &input,
 	if( dformat == DUMP_FORMAT_LAMMPS ){
 		if( fformat == FILE_FORMAT_PLAIN ){
 			reader = make_dump_reader_lammps( input );
+		}
+	}else if( dformat == DUMP_FORMAT_LAMMPS_LOCAL ){
+		if( fformat == FILE_FORMAT_PLAIN ){
+			reader = make_dump_reader_lammps( input, dump_reader_lammps::LOCAL );
 		}
 	}
 
