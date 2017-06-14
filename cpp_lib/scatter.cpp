@@ -47,8 +47,6 @@ std::vector<double> rayleigh_gans( const class block_data &b,
                                    double position_scale, double d_epsilon0,
                                    const std::vector<int> &ids )
 {
-	std::cerr << "Calculating raygleigh_gans scattering for "
-	          << ids.size() << " particles.\n";
 	// In units of micrometers:
 	id_map im( get_id( b ) );
 

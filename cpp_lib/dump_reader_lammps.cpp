@@ -99,6 +99,10 @@ void dump_reader_lammps::add_custom_data_fields( std::vector<data_field*> &dfs,
 		if( header_to_special_field.count( df->name ) ){
 			int special_field_type =
 				header_to_special_field[ df->name ];
+
+			if( special_field_type == block_data::MOL ){
+				b.atom_style = ATOM_STYLE_MOLECULAR;
+			}
 			b.add_field( *df, special_field_type );
 		}else{
 			b.add_field( *df );

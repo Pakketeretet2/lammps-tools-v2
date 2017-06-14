@@ -58,6 +58,10 @@ block_data::~block_data()
 	for( data_field *df : data ){
 		delete df;
 	}
+	/*
+	std::cerr << "Deleted block_data at " << this
+	          << ", hope you don't need it anymore...\n";
+	*/
 }
 
 data_field *block_data::get_data_rw( const std::string &name )

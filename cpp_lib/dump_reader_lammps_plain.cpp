@@ -257,11 +257,6 @@ void dump_reader_lammps_plain::set_custom_data_fields(
 			data_fields.push_back( new_field );
 		}
 
-		if( header_to_special_field.count(w) ){
-			if( header_to_special_field[w] == block_data::MOL ){
-				block.atom_style = ATOM_STYLE_MOLECULAR;
-			}
-		}
 	}
 }
 

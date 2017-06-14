@@ -17,5 +17,5 @@ def rayleigh_gans( b, qs, ids = None, radius = None, d_epsilon = 1e-2,
     rradius = conversions_.list_to_double_vector(radius.tolist())
     qqs  = conversions_.list_to_double_vector(qs.tolist())
 
-    return scatter_.rayleigh_gans_( b.get_ref(), qqs, rradius, position_scale,
+    return scatter_.rayleigh_gans_( b.get_ref_(), qqs, rradius, position_scale,
                                     d_epsilon, ids )

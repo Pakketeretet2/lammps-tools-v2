@@ -27,37 +27,30 @@ struct lt_block_data_handle
 	lt_block_data_handle() : bd(nullptr)
 	{
 		using lammps_tools::util::make_unique;
-		bd = make_unique( new lammps_tools::block_data );
+		bd = new lammps_tools::block_data;
 	}
 
 	lt_block_data_handle( const lt_block_data_handle &o ) : bd(nullptr)
 	{
-		using lammps_tools::util::make_unique;
-		bd = make_unique( new lammps_tools::block_data );
+		bd = new lammps_tools::block_data;
 		// No worries, this calls the copy constructor of block_data:
 		*bd = *o.bd;
 	}
 
-	/*
-	  lt_block_data_handle( const lt_block_data_handle *o ) : bd(nullptr)
-	{
-		using lammps_tools::util::make_unique;
-		bd = make_unique( new lammps_tools::block_data );
-		*bd = *o->bd;
-		}
-	*/
-
 	lt_block_data_handle &operator=( const lt_block_data_handle &o )
 	{
+		// I think this might break now, you need to copy or move.
 		using std::swap;
 		lt_block_data_handle new_block( o );
-		// swap( *this, new_block );
-		bd.swap( new_block.bd );
+		swap( *this, new_block );
+		// bd->swap( new_block.bd );
 		return *this;
 	}
 
 	~lt_block_data_handle()
-	{}
+	{
+		if( bd ) delete bd;
+	}
 
 	lammps_tools::bigint time_step() const
 	{ return bd->tstep; }
@@ -74,7 +67,11 @@ struct lt_block_data_handle
 	const lammps_tools::block_data &get_const_ref() const
 	{ return *bd; }
 
-	std::unique_ptr<lammps_tools::block_data> bd;
+	lammps_tools::block_data *get_ptr()
+	{ return bd; }
+
+
+	lammps_tools::block_data *bd;
 };
 
 

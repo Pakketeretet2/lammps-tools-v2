@@ -22,7 +22,9 @@ PYBIND11_PLUGIN(block_data_) {
 		.def(pybind11::init<lt_block_data_handle &>())
 		.def("time_step", &lt_block_data_handle::time_step)
 		.def("n_atoms", &lt_block_data_handle::n_atoms)
-		.def("get_const_ref", &lt_block_data_handle::get_const_ref);
+		.def("get_const_ref", &lt_block_data_handle::get_const_ref)
+		.def("get_ptr", &lt_block_data_handle::get_ptr);
+
 
 	// m.def("get_data", &lt_get_data, "Get block data from dump reader handle" );
 	m.def("has_special_field", &lt_has_special_field,

@@ -10,7 +10,7 @@ class xyz_array_acessor:
         """ Initialises references to the arrays. """
         if len(x_arr) != len(z_arr) or len(x_arr) != len(y_arr):
             raise RuntimeError("Arrays not of equal lengths!")
-        
+
         self.x = x_arr
         self.y = y_arr
         self.z = z_arr
@@ -19,7 +19,7 @@ class xyz_array_acessor:
         """ Returns a slice of atom coordinates. """
         return np.array( [self.x[atom_index], self.y[atom_index], self.z[atom_index] ])
         # return ( self.x[atom_index], self.y[atom_index], self.z[atom_index] )
-    
+
     def __len__(self):
         """ Returns the length of the arrays. """
         return len(self.x)
@@ -123,10 +123,17 @@ class block_data:
         #                        data_field_.get_name(df))
 
 
-    def get_ref(self):
+    def get_ref_(self):
         """ Returns a ref to the pointer contained. This eases some foreign
             function calling but shouldn't be used inside Python too much! """
         return self.handle.get_const_ref()
+
+    def get_ptr_(self):
+        """ Returns a ref to the pointer contained. This eases some foreign
+            function calling but shouldn't be used inside Python too much! """
+        return self.handle.get_ptr()
+
+
 
 
 
@@ -142,7 +149,7 @@ class block_data_custom(block_data):
         """ Initialises from a block_data_handle. """
         dom = domain_data( np.array( [0,0,0] ), np.array( [0,0,0] ), 0 )
         meta = block_meta( handle.time_step(), handle.n_atoms(), dom )
-        
+
         N = handle.n_atoms()
         ids   = block_data_.special_field_int( handle, 0 )
         types = block_data_.special_field_int( handle, 1 )
@@ -150,7 +157,7 @@ class block_data_custom(block_data):
         x = block_data_.special_field_double( handle, 3 )
         y = block_data_.special_field_double( handle, 4 )
         z = block_data_.special_field_double( handle, 5 )
-        
+
         if no_copy:
             X = xyz_array_acessor( x, y, z )
         else:

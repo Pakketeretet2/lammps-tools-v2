@@ -133,7 +133,7 @@ void lt_set_col_header( lt_dump_reader_handle drh, int n, const char *header );
    \param special_field_type   The ID of the special field type the header is.
 */
 bool lt_set_column_header_as_special( lt_dump_reader_handle drh,
-                                      const std::string &header,
+                                      const char *header,
                                       int special_field_type );
 
 /**

@@ -12,13 +12,17 @@ PYBIND11_PLUGIN(transformations_) {
 	      "Rotates all particles over an axis at given origin.");
 	m.def("shift_all", &lt_transformations_shift_all_pb,
 	      "Shifts all particles over given distance.");
-	/*m.def("center_box_on", &lt_transformations_center_box_on_pb,
+	m.def("center_box_on", &lt_transformations_center_box_on_pb,
 	      "Centers the entire box on given point.");
-*/
+
 	m.def("shift", &lt_transformations_shift_pb,
 	      "Shifts given particles over given distance");
 	m.def("rotate", &lt_transformations_rotate_pb,
 	      "Rotates given particles over an axis at given origin.");
+
+	m.def("unfold_mols", &lt_transformations_unfold_mols,
+	      "Unfolds particles belonging to same molecule");
+
 
 
 	return m.ptr();

@@ -22,9 +22,6 @@ PYBIND11_PLUGIN(neighborize_) {
 	m.def( "nearest_neighbours_dist", &neighborize::nearest_neighs,
 	       "Calculates the nearest neighbour list" );
 
-
-
-
 	m.def( "euclidian_distance_transform",
 	       &skeletonize::euclidian_distance_transform,
 	       "Calculates the Euclidian distance transform for given block." );
