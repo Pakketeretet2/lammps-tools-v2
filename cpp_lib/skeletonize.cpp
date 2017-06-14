@@ -382,8 +382,6 @@ std::vector<double> neighbour_strain( block_data &b, double r0,
                                       int itype, int jtype, int method,
                                       int dims, double rc )
 {
-	const std::vector<int> &id = get_id( b );
-	const std::vector<int> &type = get_type( b );
 	const std::vector<double> &x = get_x( b );
 	const std::vector<double> &y = get_y( b );
 	const std::vector<double> &z = get_z( b );

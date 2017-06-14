@@ -7,14 +7,14 @@ namespace lammps_tools {
 
 block_data::block_data()
 	: tstep( 0 ), N( 0 ), N_types( 1 ), atom_style( ATOM_STYLE_ATOMIC ),
-	  dom(), top(), ati(), data(),
+	  dom(), top(), ati(N_types), data(),
 	  special_fields_by_name ( N_SPECIAL_FIELDS, "" ),
 	  special_fields_by_index( N_SPECIAL_FIELDS, -1 )
 { }
 
 block_data::block_data( std::size_t n_atoms )
 	: tstep( 0 ), N( n_atoms ), N_types( 1 ), atom_style( ATOM_STYLE_ATOMIC ),
-	  dom(), top(), ati(), data(),
+	  dom(), top(), ati(N_types), data(),
 	  special_fields_by_name ( N_SPECIAL_FIELDS, "" ),
 	  special_fields_by_index( N_SPECIAL_FIELDS, -1 )
 { }

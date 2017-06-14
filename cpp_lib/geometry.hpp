@@ -14,7 +14,7 @@ namespace lammps_tools {
 struct point
 {
 	point() : x(0), y(0), z(0) {}
-	explicit point(double *v) : x(v[0]), y(v[1]), z(v[2]) {}
+	point(const double *v) : x(v[0]), y(v[1]), z(v[2]) {}
 	point(double x, double y, double z) : x(x), y(y), z(z) {}
 
 
@@ -26,6 +26,20 @@ struct point
 		return *this;
 	}
 
+	double &operator[]( int i )
+	{
+		my_assert( __FILE__, __LINE__, i >= 0, "Negative index not allowed!" );
+		my_assert( __FILE__, __LINE__, i  < 3, "Index out of bounds!" );
+
+		switch(i){
+			case 0: return x;
+			case 1: return y;
+			case 2: return z;
+			default: return x; // Never reached.
+		}
+		// Never reached:
+
+	}
 	double operator[]( int i ) const
 	{
 		my_assert( __FILE__, __LINE__, i >= 0, "Negative index not allowed!" );
@@ -38,8 +52,8 @@ struct point
 		}
 		// Never reached:
 		return -1.337;
-
 	}
+
 
 	template <int i>
 	double get() const
@@ -70,6 +84,8 @@ struct quat {
 	quat( double a, double b, double c, double d )
 		: a(a), b(b), c(c), d(d) {}
 	quat( const quat &o ) : a(o.a), b(o.b), c(o.c), d(o.d) {}
+	quat( const point &p ) : a(0.0), b(p[0]), c(p[1]), d(p[2]) {}
+
 	quat &operator=( quat o )
 	{
 		quat n(o);

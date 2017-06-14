@@ -28,12 +28,15 @@ add_library(lammpstools SHARED
   cpp_lib/scatter.cpp
   cpp_lib/skeletonize.cpp
   cpp_lib/topology.cpp
+  cpp_lib/transformations.cpp
   cpp_lib/triangulate.cpp
   cpp_lib/util.cpp
   cpp_lib/writers_lammps.cpp
   c_interface/lt_block_data.cpp
+  c_interface/lt_block_writers.cpp
   c_interface/lt_data_field.cpp
-  c_interface/lt_dump_reader.cpp)
+  c_interface/lt_dump_reader.cpp
+  c_interface/lt_transformations.cpp)
 
 set(CMAKE_SHARED_LINKER_FLAGS "-shared")
 
@@ -48,7 +51,7 @@ option(LEGACY_COMPILER "Disable some features for ancient compilers." OFF)
 # Compiler settings:
 set(CXX_STANDARD_REQUIRED "11")
 set(CMAKE_CXX_NON_MS_FLAGS "-Werror=implicit -Werror=return-type -Werror=uninitialized -Wall")
-set(CMAKE_CXX_FLAGS "-std=c++11 -g -O3 -pedantic -fPIC")
+set(CMAKE_CXX_FLAGS "-std=c++11 -g -O3 -pedantic -fPIC -ffast-math")
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wno-missing-braces ${CMAKE_CXX_NON_MS_FLAGS}")

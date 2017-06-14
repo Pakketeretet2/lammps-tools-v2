@@ -51,15 +51,15 @@ struct domain {
 	double dist_2( const double *xi, const double *xj, double *r ) const;
 
 	/**
-	   \brief Rewraps coordinate inside periodic boundaries:
+	   \brief Rewraps position inside periodic boundaries:
 
 	   \param x  Position vector to wrap
 	   \param ix Image flag vector to wrap
 	*/
-	void rewrap( double x[3], int ix[3] ) const;
+	void rewrap_position( double x[3], int ix[3] ) const;
 
 	/// Rewraps only position. \overloads rewrap.
-	void rewrap( double x[3] ) const;
+	void rewrap_position( double x[3] ) const;
 
 	/**
 	   \brief Rewraps a single coordinate of a vector
@@ -71,7 +71,22 @@ struct domain {
 	   -1 if it moved one down, 0 if it is in same box.
 	*/
 	template <int coord>
-	int rewrap_coord( double x[3] ) const;
+	int rewrap_position_component( double x[3] ) const;
+
+
+	/// Rewraps vector to minimum image convention
+	void rewrap_vector( double v[3] ) const;
+
+	/**
+	   \brief Rewraps single vector component to minimum image convention.
+
+	   \param x     The vector to rewrap
+	   \param coord The position index to rewrap (0 for x, 1 for y, 2 for z).
+	*/
+	template <int coord>
+	void rewrap_vector_component( double v[3] ) const;
+
+
 };
 
 inline
@@ -81,54 +96,86 @@ double domain::dist_2( const double *xi, const double *xj, double *r ) const
 	r[1] = xi[1] - xj[1];
 	r[2] = xi[2] - xj[2];
 
-	rewrap( r );
+	rewrap_vector( r );
 
 	return r[0]*r[0] + r[1]*r[1] + r[2]*r[2];
 }
 
 inline
-void domain::rewrap( double x[3] ) const
+void domain::rewrap_position( double x[3] ) const
 {
 	int ix[3] = {0,0,0};
-	rewrap( x, ix );
+	rewrap_position( x, ix );
 }
 
 inline
-void domain::rewrap( double x[3], int ix[3] ) const
+void domain::rewrap_position( double x[3], int ix[3] ) const
 {
 	// Periodicity:
 	if( periodic & BIT_X ){
-		int d_ix = rewrap_coord<0>(x);
+		int d_ix = rewrap_position_component<0>(x);
 		ix[0] += d_ix;
 	}
 	if( periodic & BIT_Y ){
-		int d_iy = rewrap_coord<1>(x);
+		int d_iy = rewrap_position_component<1>(x);
 		ix[1] += d_iy;
 	}
 	if( periodic & BIT_Z ){
-		int d_iz = rewrap_coord<2>(x);
+		int d_iz = rewrap_position_component<2>(x);
 		ix[2] += d_iz;
 
 	}
 }
 
+inline
+void domain::rewrap_vector( double x[3] ) const
+{
+	// Periodicity:
+	if( periodic & BIT_X ){
+		rewrap_vector_component<0>(x);
+	}
+	if( periodic & BIT_Y ){
+		rewrap_vector_component<1>(x);
+	}
+	if( periodic & BIT_Z ){
+		rewrap_vector_component<2>(x);
+
+	}
+}
+
 template <int coord> inline
-int domain::rewrap_coord( double x[3] ) const
+void domain::rewrap_vector_component( double v[3] ) const
 {
 	double  L = xhi[coord] - xlo[coord];
 	double  Lh = 0.5*L;
-	double &rr = x[coord];
+	double &rr = v[coord];
 
 	if( rr > Lh ){
 		rr -= L;
-		return 1;
 	}else if( rr < -Lh ){
 		rr += L;
+	}
+}
+
+template <int coord> inline
+int domain::rewrap_position_component( double x[3] ) const
+{
+	double x0 = xlo[coord];
+	double x1 = xhi[coord];
+	double  L = x1 - x0;
+	double &xx = x[coord];
+
+	if( xx > x1 ){
+		xx -= L;
+		return 1;
+	}else if( xx < x0 ){
+		xx += L;
 		return -1;
 	}else{
 		return 0;
 	}
 }
+
 
 
 

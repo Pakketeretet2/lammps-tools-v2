@@ -6,10 +6,10 @@ from lammpstools import data_field   # for data_field_types
 import sys
 
 # Define a new dump reader for a LAMMPS dump file.
-d = dump_reader.dump_reader( "polymer.dump",
+d = dump_reader.dump_reader( "../common_dump_files/polymer.dump",
                             file_format = "PLAIN", dump_format = "LAMMPS" )
 
-dl = dump_reader.dump_reader( "bondinfo.dump",
+dl = dump_reader.dump_reader( "../common_dump_files/bondinfo.dump",
                               file_format = "PLAIN", dump_format = "LAMMPS",
                               is_local = True )
 

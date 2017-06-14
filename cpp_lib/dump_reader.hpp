@@ -39,7 +39,7 @@ public:
 
            \returns 0 on success, positive if EOF reached, negative on failure.
 	*/
-	int next_block( block_data &block, bool warn_if_no_special = true );
+	int next_block( block_data &block, bool warn_if_no_special = false );
 
 	/// Checks if the internal file is at eof:
 	bool eof()  const { return check_eof(); }

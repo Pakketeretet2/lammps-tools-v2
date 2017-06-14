@@ -20,14 +20,11 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 
 endif()
 
-#if(${WIN32})
-#  set(EXTENSION "_.pyd")
-#elseif(${APPLE})
-#  set(EXTENSION "_.dylib")
-#elseif(${UNIX})
-#  set(EXTENSION "_.so")
-#endif()
-set(EXTENSION "_")
+if(UNIX)
+  set(EXTENSION "_.so")
+else()
+  set(EXTENSION "_")
+endif()
 
 # Check if you find Python at all:
 find_package( PythonLibs )
@@ -54,9 +51,11 @@ foreach(SRC_FILE
     lammpstools/conversions_python.cpp
     lammpstools/dump_reader_python.cpp
     lammpstools/block_data_python.cpp
+    lammpstools/block_writers_python.cpp
     lammpstools/data_field_python.cpp
     lammpstools/neighborize_python.cpp
-    lammpstools/scatter_python.cpp)
+    lammpstools/scatter_python.cpp
+    lammpstools/transformations_python.cpp)
 
   string(REPLACE "lammpstools/" "" TMP ${SRC_FILE})
   string(REPLACE "_python.cpp" "${EXTENSION}" OBJ_NAME ${TMP})
@@ -65,20 +64,6 @@ foreach(SRC_FILE
   target_link_libraries( ${OBJ_NAME} PRIVATE ${TARGET_LIBS} )
 
 endforeach(SRC_FILE)
-
-# pybind11_add_module(conversions_.so lammpstools/conversions_python.cpp ${TARGET_LIBS})
-# pybind11_add_module(dump_reader_.so lammpstools/dump_reader_python.cpp ${TARGET_LIBS})
-# pybind11_add_module(block_data_.so  lammpstools/block_data_python.cpp ${TARGET_LIBS})
-# pybind11_add_module(data_field_.so  lammpstools/data_field_python.cpp ${TARGET_LIBS})
-# pybind11_add_module(neighborize_.so lammpstools/neighborize_python.cpp ${TARGET_LIBS})
-# pybind11_add_module(scatter_.so     lammpstools/scatter_python.cpp ${TARGET_LIBS})
-
-# target_link_libraries(conversions_.so PRIVATE "${TARGET_LIBS}")
-# target_link_libraries(dump_reader_.so PRIVATE "${TARGET_LIBS}")
-# target_link_libraries(block_data_.so PRIVATE "${TARGET_LIBS}")
-# target_link_libraries(data_field_.so PRIVATE "${TARGET_LIBS}")
-# target_link_libraries(neighborize_.so PRIVATE "${TARGET_LIBS}")
-# target_link_libraries(scatter_.so PRIVATE "${TARGET_LIBS}")
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PYTHON_FLAGS}")
