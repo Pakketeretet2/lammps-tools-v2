@@ -50,12 +50,13 @@ class dump_reader:
             dformat == dump_reader_.FILE_FORMATS.UNSET):
             raise RuntimeError("Dump or file format not recognised!")
 
-        if is_local:
-            if fformat != dump_reader_.FILE_FORMATS.PLAIN:
-                raise RuntimeError("Dump style local only works for " +
-                                   "plain text format!")
+        #if is_local:
+        #    if fformat != dump_reader_.FILE_FORMATS.PLAIN:
+        #        raise RuntimeError("Dump style local only works for " +
+        #                           "plain text format!")
 
         if self.local:
+            # dformat = dump_reader_.DUMP_FORMATS.LAMMPS_LOCAL
             self.handle = dump_reader_.new_local( fname, fformat, dformat )
         else:
             self.handle = dump_reader_.new( fname, fformat, dformat )
@@ -116,6 +117,8 @@ class dump_reader:
 
     def set_column_headers_local(self, headers):
         """ Sets the column headers for a dump file with local info. """
+        for i, h in zip( range(0,len(headers)), headers):
+            dump_reader_.set_column_header( self.handle, i, h )
 
     def set_column_headers_custom(self, headers):
         """ Sets the column headers for a dump file containing atoms. """

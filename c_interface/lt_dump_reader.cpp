@@ -75,11 +75,6 @@ lt_dump_reader_handle lt_new_dump_reader_local( const char *fname,
 	lt_dump_reader_handle drh;
 	int dstyle = lammps_tools::readers::dump_reader_lammps::LOCAL;
 
-	if( fformat != lammps_tools::FILE_FORMAT_PLAIN ){
-		drh.dr = nullptr;
-		return drh;
-	}
-
 	drh.dr = lammps_tools::readers::make_dump_reader_lammps( fname, fformat,
 	                                                         dstyle );
 	drh.fformat = fformat;
