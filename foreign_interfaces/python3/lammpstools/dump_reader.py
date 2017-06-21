@@ -3,7 +3,7 @@ import data_field_
 import block_data_
 import block_data
 
-import sys
+import sys, os
 
 class dump_reader:
     """
@@ -31,6 +31,11 @@ class dump_reader:
         self.local  = is_local
         self.handle = None
         self.no_block_data_copy = False
+
+        # Check if file exists:
+        if not os.path.isfile(fname):
+            print("File '", fname, "' does not exist!", file = sys.stderr)
+            raise RuntimeError("Dump file does not exist!")
 
         fformat = dump_reader_.FILE_FORMATS.UNSET
         dformat = dump_reader_.DUMP_FORMATS.UNSET

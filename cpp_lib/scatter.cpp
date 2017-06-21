@@ -2,6 +2,7 @@
 #include "block_data_access.hpp"
 #include "id_map.hpp"
 #include "scatter.hpp"
+#include "fast_math.hpp"
 
 #include <cmath>
 #include <iostream>
@@ -11,12 +12,26 @@ namespace lammps_tools {
 
 namespace scatter {
 
+
+// size of 512 should fit in L1 cache.
+static lut_sin_cos sincos(1024);
+constexpr const bool use_lut = true;
+//constexpr const bool use_lut = false;
+
+
 inline double bessel_j1( double x )
 {
 	double inv_x  = 1.0/x;
-	double s = std::sin(x);
-	double c = std::cos(x);
-	return inv_x * ( s * inv_x - c );
+	if( use_lut ){
+		double s, c;
+		// sincos.sincos( x, s, c );
+		fast_math::sincos( x, s, c );
+		return inv_x * ( s * inv_x - c );
+	}else{
+		double s = std::sin(x);
+		double c = std::cos(x);
+		return inv_x * ( s * inv_x - c );
+	}
 }
 
 
@@ -83,8 +98,15 @@ std::vector<double> rayleigh_gans( const class block_data &b,
 			double qRi = q * Ri;
 			double FFq = Ri3 * bessel_j1( qRi ) / qRi;
 			double qdotr = util::dot<3>( qq, ri );
-			double exp_part_real = std::cos( -qdotr );
-			double exp_part_imag = std::sin( -qdotr );
+			double exp_part_real, exp_part_imag;
+			if( use_lut ){
+				fast_math::sincos( -qdotr,
+				                   exp_part_imag,
+				                   exp_part_real );
+			}else{
+				exp_part_real = std::cos( -qdotr );
+				exp_part_imag = std::sin( -qdotr );
+			}
 
 			FXre[bin] += FFq * exp_part_real;
 			FXim[bin] += FFq * exp_part_imag;

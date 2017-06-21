@@ -61,7 +61,6 @@ int dump_reader_lammps_plain::get_next_block( block_data &block )
 	if( status ) return status;
 
 	// At this point, tmp_block should be in a 100% correct state.
-
 	block = tmp_block;
 
 	return 0;

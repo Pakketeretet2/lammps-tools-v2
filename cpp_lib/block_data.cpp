@@ -139,7 +139,7 @@ std::size_t block_data::n_data_fields() const
 	return data.size();
 }
 
-
+/*
 void block_data::copy_meta( const block_data &o )
 {
 	tstep = o.tstep;
@@ -148,6 +148,7 @@ void block_data::copy_meta( const block_data &o )
 	atom_style = o.atom_style;
 	dom = o.dom;
 	top = o.top;
+	ati = o.ati;
 
 	for( int spec_field = block_data::ID;
 	     spec_field < N_SPECIAL_FIELDS; ++spec_field ){
@@ -163,8 +164,8 @@ void block_data::copy_meta( const block_data &o )
 			}
 		}
 	}
-
 }
+*/
 
 void block_data::set_natoms( std::size_t new_size )
 {
@@ -286,12 +287,14 @@ void swap( block_data &f, block_data &s )
 
 	f.tstep = s.tstep;
 	f.N = s.N;
+	f.N_types = s.N_types;
 	f.atom_style = s.atom_style;
 	swap( f.dom, s.dom );
 	swap( f.top, s.top );
 	swap( f.data, s.data );
 	swap( f.special_fields_by_name, s.special_fields_by_name );
 	swap( f.special_fields_by_index, s.special_fields_by_index );
+	swap( f.ati, s.ati );
 }
 
 

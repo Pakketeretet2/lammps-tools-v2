@@ -64,6 +64,9 @@ struct lt_block_data_handle
 	int atom_style() const
 	{ return bd->atom_style; }
 
+	int n_types() const
+	{ return bd->N_types; }
+
 	const lammps_tools::block_data &get_const_ref() const
 	{ return *bd; }
 

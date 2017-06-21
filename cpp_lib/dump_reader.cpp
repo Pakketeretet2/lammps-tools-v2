@@ -27,6 +27,17 @@ int dump_reader::next_block( block_data &block, bool warn_if_no_special )
 		}
 
 	}
+
+
+	// You might have read in atom types. In this case, make sure
+	// the block data knows that.
+	if( auto df = block.get_special_field( block_data::TYPE ) ){
+		const std::vector<int> &types = data_as<int>( df );
+		int ntypes = *std::max_element( types.begin(), types.end() );
+		block.set_ntypes( ntypes );
+	}
+	std::cerr << "Got block at t = " << block.tstep << " and "
+	          << block.N_types << " types.\n";
 	return status;
 }
 

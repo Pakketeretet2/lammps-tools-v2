@@ -22,6 +22,7 @@ int lt_block_writers_lammps_data( const char *fname, const char *w_mode,
 		return -1;
 	}
 
+	std::cerr << "Writing " << bdh.bd->N_types << " types to " << fname << "\n";
 	lammps_tools::writers::block_to_lammps_data( out, *bdh.bd );
 	return 0;
 }

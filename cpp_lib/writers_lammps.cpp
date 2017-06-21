@@ -47,6 +47,8 @@ void block_to_lammps_data( const std::string &fname, const block_data &b )
 
 void block_to_lammps_data( std::ostream &out, const block_data &b )
 {
+	std::cerr << "Writing out " << b.N_types << " atom types.\n";
+
 	std::vector<int> id, type, mol, ix, iy, iz;
 	std::vector<double> x, y, z;
 
@@ -86,7 +88,6 @@ void block_to_lammps_data( std::ostream &out, const block_data &b )
 
 	my_assert( __FILE__, __LINE__, success,
 	           "Failure to grab essential fields for write to data!" );
-
 
 	out << "LAMMPS data file via lammps-tools\n\n";
 	out << b.N << " atoms\n";

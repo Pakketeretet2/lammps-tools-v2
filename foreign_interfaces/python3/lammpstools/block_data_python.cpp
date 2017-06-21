@@ -22,6 +22,7 @@ PYBIND11_PLUGIN(block_data_) {
 		.def(pybind11::init<lt_block_data_handle &>())
 		.def("time_step", &lt_block_data_handle::time_step)
 		.def("n_atoms", &lt_block_data_handle::n_atoms)
+		.def("n_types", &lt_block_data_handle::n_types)
 		.def("get_const_ref", &lt_block_data_handle::get_const_ref)
 		.def("get_ptr", &lt_block_data_handle::get_ptr);
 

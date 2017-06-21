@@ -111,7 +111,7 @@ public:
 
 	   \param o the block_data to copy from.
 	*/
-	void copy_meta( const block_data &o );
+	// void copy_meta( const block_data &o );
 
 
 	/**

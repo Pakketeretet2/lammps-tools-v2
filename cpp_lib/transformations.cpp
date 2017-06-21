@@ -236,9 +236,12 @@ void unfold_mols( block_data *b )
 			++remap_count;
 		}
 	}
+	/*
 	std::cerr << remap_count << " of " << max_mol
 	          << " mols need remapping.\n";
+	*/
 	int n_remapped = 0;
+
 
 	// Do the remapping itself:
 	for( int imol = 1; imol <= max_mol; ++imol ){
@@ -324,8 +327,10 @@ void unfold_mols( block_data *b )
 			}
 		}
 	}
+	/*
 	std::cerr << "Done remapping, remapped particles " << n_remapped
 	          << " times in 3 dimensions.\n";
+	*/
 
 }
 
