@@ -22,13 +22,11 @@ struct atom_type_info
 	atom_type_info();
 	explicit atom_type_info( int n_types );
 
-	friend void swap( atom_type_info &f, atom_type_info &s );
-
 	void set_size( int Ntypes );
 	void set_defaults();
 };
 
-
+void swap( atom_type_info &f, atom_type_info &s );
 
 
 }// namespace lammps_tools

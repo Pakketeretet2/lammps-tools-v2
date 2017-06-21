@@ -42,7 +42,7 @@ TEST_CASE ( "Tests the creation of a dump_reader and getting a block.", "[interf
 	REQUIRE( lt_dump_reader_status(reader) == IS_GOOD );
 
 	lt_block_data_handle block;
-	std::cerr << "Block data is located at " << block.bd.get() << ".\n";
+	std::cerr << "Block data is located at " << block.bd << ".\n";
 	for( int i = 0; i < 3; ++i ){
 		int status = lt_get_next_block( reader, &block );
 

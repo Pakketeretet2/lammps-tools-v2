@@ -1,4 +1,6 @@
+#include "atom_type_info.hpp"
 #include "block_data.hpp"
+#include "domain.hpp"
 #include "my_assert.hpp"
 
 using namespace lammps_tools;
@@ -283,7 +285,7 @@ data_field &block_data::operator[]( int i )
 // ******************   Non-member functions:    ************************
 void swap( block_data &f, block_data &s )
 {
-	using std::swap;
+	// using std::swap;
 
 	f.tstep = s.tstep;
 	f.N = s.N;

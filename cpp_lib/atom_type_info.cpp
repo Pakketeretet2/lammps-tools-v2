@@ -1,11 +1,12 @@
 #include "atom_type_info.hpp"
+#include <iostream>
 
 namespace lammps_tools {
 
 void swap( atom_type_info &f, atom_type_info &s )
 {
 	using std::swap;
-	swap( s, f );
+	swap( s.mass, f.mass );
 }
 
 
@@ -21,8 +22,12 @@ atom_type_info::atom_type_info( int Ntypes ) : mass(Ntypes + 1)
 
 void atom_type_info::set_size( int Ntypes )
 {
-	mass.resize(Ntypes);
-	set_defaults();
+	int old_n_types = mass.size();
+	mass.resize(Ntypes+1);
+
+	for( int i = old_n_types; i <= Ntypes; ++i ){
+		mass[i] = 1.0;
+	}
 }
 
 void atom_type_info::set_defaults()

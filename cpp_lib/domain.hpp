@@ -33,9 +33,6 @@ struct domain {
 	/// Copy constructor
 	domain( const domain &o );
 
-	/// Swap, doesn't need to be friend.
-	void swap( domain &f, domain &s );
-
 	/**
 	   \brief Calculates distance vector and distance^2 between two points.
 
@@ -176,6 +173,9 @@ int domain::rewrap_position_component( double x[3] ) const
 	}
 }
 
+
+/// Swap, doesn't need to be friend.
+void swap( domain &f, domain &s );
 
 
 

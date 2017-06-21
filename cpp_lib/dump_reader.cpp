@@ -36,8 +36,6 @@ int dump_reader::next_block( block_data &block, bool warn_if_no_special )
 		int ntypes = *std::max_element( types.begin(), types.end() );
 		block.set_ntypes( ntypes );
 	}
-	std::cerr << "Got block at t = " << block.tstep << " and "
-	          << block.N_types << " types.\n";
 	return status;
 }
 
