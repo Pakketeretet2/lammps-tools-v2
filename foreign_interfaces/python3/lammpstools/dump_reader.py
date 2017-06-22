@@ -188,3 +188,16 @@ class dump_reader:
             raise RuntimeError( "Type " + type + " not recognized!" );
 
         dump_reader_.set_default_column_type( self.handle, proper_type )
+
+def read_lammps_data( dname ):
+    """ Reads in a block from given data file. """
+    if not os.path.isfile(dname):
+        print( "File ", dname, " does not exist!", file = sys.stderr )
+        raise RuntimeError( "Data file does not exist!" )
+    bh = block_data_.block_data_handle()
+    status = dump_reader_.read_lammps_data( dname, bh )
+    if status == 0:
+        return block_data.block_data_custom.init_from_handle( bh )
+    else:
+        print( "Error reading data file ", dname, "!", file = sys.stderr )
+        return None

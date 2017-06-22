@@ -4,6 +4,21 @@ import data_field
 
 import numpy as np
 
+
+SPECIAL_COLS_ID   = block_data_.SPECIAL_COLS.ID
+SPECIAL_COLS_TYPE = block_data_.SPECIAL_COLS.TYPE
+SPECIAL_COLS_MOL  = block_data_.SPECIAL_COLS.MOL
+SPECIAL_COLS_X    = block_data_.SPECIAL_COLS.X
+SPECIAL_COLS_Y    = block_data_.SPECIAL_COLS.Y
+SPECIAL_COLS_Z    = block_data_.SPECIAL_COLS.Z
+SPECIAL_COLS_VX   = block_data_.SPECIAL_COLS.VX
+SPECIAL_COLS_VY   = block_data_.SPECIAL_COLS.VY
+SPECIAL_COLS_VZ   = block_data_.SPECIAL_COLS.VZ
+SPECIAL_COLS_IX   = block_data_.SPECIAL_COLS.IX
+SPECIAL_COLS_IY   = block_data_.SPECIAL_COLS.IY
+SPECIAL_COLS_IZ   = block_data_.SPECIAL_COLS.IZ
+
+
 class xyz_array_acessor:
     """ Provides an abstraction to indexing the xyz array in block data. """
     def __init__(self, x_arr, y_arr, z_arr):
@@ -101,6 +116,17 @@ class block_data:
             self.name_to_col[ name ] = i
         self.stored_name_map = True
 
+    def n_data_fields(self):
+        """ Returns the number of data fields. """
+        return block_data_.n_data_fields(self.handle)
+
+    def name_of_data(self, index):
+        """ Returns the name of given data index. """
+        if index < 0 or index >= self.n_data_fields():
+            raise RuntimeError("Index out of bounds!")
+
+        df = block_data_.data_by_index(self.handle, index)
+        return data_field_.get_name(df)
 
     def data_by_name(self, name):
         """ Grab data field by name. """
@@ -111,17 +137,14 @@ class block_data:
         raw_data = self.data[ self.name_to_col[ name ] ]
         return raw_data
 
-        # if df is None:
-        #     raise RuntimeError("Failed to find data field of name", name)
-        # # Resolve type here:
-        # if data_field_.get_type( df ) == data_field_.TYPES.INT:
-        #     return data_field_.as_int( df )
-        # elif data_field_.get_type( df ) == data_field_.TYPES.DOUBLE:
-        #     return data_field_.as_float( df )
-        # else:
-        #     raise RuntimeError("Failed to resolve data type for data field",
-        #                        data_field_.get_name(df))
-
+    def has_data(self, name):
+        """ Checks if block data has named data. """
+        try:
+            df = self.data_by_name( name )
+            return True
+        except KeyError:
+            # Apparently named data is not  there.
+            return False
 
     def get_ref_(self):
         """ Returns a ref to the pointer contained. This eases some foreign
@@ -133,9 +156,16 @@ class block_data:
             function calling but shouldn't be used inside Python too much! """
         return self.handle.get_ptr()
 
+    def add_data_field(self, d, special_field_type = None):
+        """ Adds given data_field to this block. """
+        if special_field_type is None:
+            block_data_.add_data_field( self.handle, d.handle )
+        else:
+            block_data_.add_special_field( self.handle, d.handle,
+                                           special_field_type )
 
-
-
+        # Reset name_mapping to force this to be in sync:
+        self.store_name_mapping()
 
 class block_data_custom(block_data):
     """ The actual block data for atoms: """

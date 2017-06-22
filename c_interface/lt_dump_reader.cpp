@@ -1,8 +1,9 @@
 #include "lt_dump_reader.h"
 
-#include "../cpp_lib/enums.hpp"
-#include "../cpp_lib/dump_reader_lammps.hpp"
 #include "../cpp_lib/block_data_access.hpp"
+#include "../cpp_lib/dump_reader_lammps.hpp"
+#include "../cpp_lib/enums.hpp"
+#include "../cpp_lib/readers.hpp"
 
 
 // ****** Helper functions:  ********
@@ -241,6 +242,18 @@ void lt_set_default_column_type( lt_dump_reader_handle drh, int type )
 		std::cerr << "Error casting to LAMMPS dump reader!\n";
 	}
 
+}
+
+int lt_read_lammps_data( const char *fname, lt_block_data_handle *bdh )
+{
+	using lammps_tools::readers::block_data_from_lammps_data;
+	using lammps_tools::block_data;
+	int status = 0;
+	block_data tmp = block_data_from_lammps_data( fname, status );
+	if( status ) return status;
+
+	*bdh->bd =tmp;
+	return status;
 }
 
 } // extern "C"

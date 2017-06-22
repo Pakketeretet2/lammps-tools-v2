@@ -73,7 +73,6 @@ struct lt_block_data_handle
 	lammps_tools::block_data *get_ptr()
 	{ return bd; }
 
-
 	lammps_tools::block_data *bd;
 };
 
@@ -105,6 +104,27 @@ lt_data_field_handle lt_data_by_name( lt_block_data_handle *bdh, const char *nam
 lt_data_field_handle lt_data_by_index( lt_block_data_handle *bdh, int i );
 
 
+/**
+   \brief Adds given data field to block_data.
+
+   \param[in/out] bdh  Block_data to add data to.
+   \param[in]     dfh  Data field to add. This is _copied_.
+*/
+void lt_block_data_add_data_field( lt_block_data_handle *bdh,
+                                   const lt_data_field_handle *dfh );
+
+
+/**
+   \brief Adds given data field to block_data as a special field.
+
+   \param[in/out] bdh  Block_data to add data to.
+   \param[in]     dfh  Data field to add. This is _copied_.
+   \parma[in]     type The type of the special field.
+*/
+void lt_block_data_add_special_field( lt_block_data_handle *bdh,
+                                      const lt_data_field_handle *dfh,
+                                      int type );
+
 } // extern "C"
 
 /**
@@ -125,6 +145,7 @@ const std::vector<double> &lt_special_field_double( lt_block_data_handle *bdh,
 */
 const std::vector<int> &lt_special_field_int( lt_block_data_handle *bdh,
                                               int special_field );
+
 
 
 

@@ -28,6 +28,9 @@ PYBIND11_PLUGIN(dump_reader_) {
 	m.def("get_column_type", &lt_get_column_type);
 	m.def("set_default_column_type", &lt_set_default_column_type );
 
+	// Data readers:
+	m.def("read_lammps_data", &lt_read_lammps_data );
+
 	using namespace lammps_tools;
 
 	pybind11::enum_<LT_DUMP_READER_STATUS>(m, "DUMP_READER_STATUS")

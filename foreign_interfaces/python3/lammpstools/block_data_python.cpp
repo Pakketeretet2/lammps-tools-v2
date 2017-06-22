@@ -42,6 +42,13 @@ PYBIND11_PLUGIN(block_data_) {
 	m.def("data_by_name", &lt_data_by_name,
 	      "Get data field by name");
 
+	// Some options to add data fields:
+	m.def("add_data_field", &lt_block_data_add_data_field,
+	      "Adds a data field to given block_data.");
+	m.def("add_special_field", &lt_block_data_add_special_field,
+	      "Adds a data field as special field to given block_data.");
+
+
 	pybind11::enum_<lammps_tools::block_data::special_fields>(m, "SPECIAL_COLS")
 		.value("ID", lammps_tools::block_data::ID)
 		.value("TYPE", lammps_tools::block_data::TYPE)

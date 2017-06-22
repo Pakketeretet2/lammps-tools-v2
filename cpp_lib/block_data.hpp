@@ -62,7 +62,7 @@ public:
 	bigint tstep;       ///< The current time step
 	bigint N;           ///< The number of atoms
 	int    N_types;     ///< The number of atom types
-	int atom_style;     ///< The current atom style
+	int    atom_style;  ///< The current atom style
 
 	domain dom;         ///< Domain information
 	topology top;       ///< Topology information

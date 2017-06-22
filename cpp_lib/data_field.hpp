@@ -31,7 +31,7 @@ struct data_field
 	/// Constructor that only sets the name of the data_field
 	explicit data_field( const std::string &n ) : name(n) {}
 	/// Empty destructor
-	virtual ~data_field(){}
+	virtual ~data_field() {}
 
 	/// Returns the type of the underlying data. See \p types.
 	virtual int type()     const = 0;
@@ -53,10 +53,6 @@ struct data_field
 
 
 const char *pretty_type( int type );
-
-
-
-
 
 
 

@@ -15,7 +15,6 @@ bool lt_has_special_field( lt_block_data_handle *bdh, int special_field )
 }
 
 
-
 const std::vector<double> &lt_special_field_double( lt_block_data_handle *bdh,
                                                     int special_field )
 {
@@ -29,7 +28,7 @@ const std::vector<double> &lt_special_field_double( lt_block_data_handle *bdh,
 
 	lt_data_field_handle dfh;
 	dfh.df = df;
-	return lt_data_as_double_vec( dfh );
+	return lt_data_as_double_vec( &dfh );
 }
 
 
@@ -45,7 +44,7 @@ const std::vector<int> &lt_special_field_int( lt_block_data_handle *bdh,
 	}
 	lt_data_field_handle dfh;
 	dfh.df = df;
-	return lt_data_as_int_vec( dfh );
+	return lt_data_as_int_vec( &dfh );
 }
 
 
@@ -88,4 +87,17 @@ lt_data_field_handle lt_data_by_index( lt_block_data_handle *bdh, int i )
 int lt_n_data_fields( lt_block_data_handle *bdh )
 {
 	return bdh->bd->n_data_fields();
+}
+
+void lt_block_data_add_data_field( lt_block_data_handle *bdh,
+                                   const lt_data_field_handle *dfh )
+{
+	bdh->bd->add_field( *dfh->df );
+}
+
+void lt_block_data_add_special_field( lt_block_data_handle *bdh,
+                                      const lt_data_field_handle *dfh,
+                                      int type )
+{
+	bdh->bd->add_field( *dfh->df, type );
 }

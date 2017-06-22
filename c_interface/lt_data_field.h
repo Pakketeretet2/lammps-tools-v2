@@ -21,20 +21,47 @@ enum LT_DATA_FIELD_TYPES {
 
 struct lt_data_field_handle
 {
+	lt_data_field_handle() : df(df_), df_(nullptr) {}
+	lt_data_field_handle( const char *name, int type, int size );
+	~lt_data_field_handle();
+
 	const lammps_tools::data_field *df;
+	lammps_tools::data_field *df_rw(){ return df_; }
+
+private:
+	lammps_tools::data_field *df_;
 };
 
-int           lt_data_field_size( lt_data_field_handle d );
-const double *lt_data_as_double ( lt_data_field_handle d );
-const int    *lt_data_as_int    ( lt_data_field_handle d );
-int           lt_data_type      ( lt_data_field_handle d );
-const char   *lt_data_name      ( lt_data_field_handle d );
 
+int           lt_data_field_size( const lt_data_field_handle *d );
+const double *lt_data_as_double ( const lt_data_field_handle *d );
+const int    *lt_data_as_int    ( const lt_data_field_handle *d );
+int           lt_data_field_type( const lt_data_field_handle *d );
+const char   *lt_data_field_name( const lt_data_field_handle *d );
+
+void lt_data_field_set_size( lt_data_field_handle *d, int size );
+void lt_data_field_set_name( lt_data_field_handle *d, const char *name );
+
+
+int lt_data_field_get_indexed_int_data( const lt_data_field_handle *d,
+                                        int index );
+void lt_data_field_set_indexed_int_data( lt_data_field_handle *d,
+                                         int index, int val );
+
+double lt_data_field_get_indexed_double_data( const lt_data_field_handle *d,
+                                              int index );
+void lt_data_field_set_indexed_double_data( lt_data_field_handle *d,
+                                            int index, double val );
+
+
+
+lt_data_field_handle *lt_new_data_field( const char *name, int dtype, int size );
+void lt_delete_data_field( lt_data_field_handle *d );
 
 } // extern "C"
 
-const std::vector<double> &lt_data_as_double_vec ( lt_data_field_handle d );
-const std::vector<int> &lt_data_as_int_vec ( lt_data_field_handle d );
+const std::vector<double> &lt_data_as_double_vec ( const lt_data_field_handle *d );
+const std::vector<int>    &lt_data_as_int_vec ( const lt_data_field_handle *d );
 
 
 #endif // LT_DATA_FIELD_H

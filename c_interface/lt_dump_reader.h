@@ -169,6 +169,18 @@ int  lt_get_column_type( lt_dump_reader_handle drh,
 void lt_set_default_column_type( lt_dump_reader_handle drh, int type );
 
 
+/**
+   \brief reads the given LAMMPS data file.
+
+   If the read was unsuccesful, bdh shall not be modified.
+
+   \param[in]  fname The data file to read.
+   \param[out] bdh   The block_data_handle to write to.
+
+   \return 0 on success, non-zero otherwise.
+*/
+int lt_read_lammps_data( const char *fname, lt_block_data_handle *bdh );
+
 
 } // extern "C"
 

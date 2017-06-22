@@ -110,6 +110,8 @@ void block_data::add_field( const data_field &data_f, int special_field)
 	int index = data.size();
 	data.push_back( cp );
 
+	std::cerr << "Now block_data has " << data.size() << " data fields.\n";
+
 	// Ignore some keys that are not unique for example:
 	if( !is_legal_special_field( special_field ) ){
 		return;
