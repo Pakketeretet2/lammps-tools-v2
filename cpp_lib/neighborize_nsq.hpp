@@ -23,8 +23,8 @@ namespace neighborize {
 class neighborizer_nsq : public neighborizer
 {
 public:
-	neighborizer_nsq( const block_data &b, const std::list<int> &s1,
-	                  const std::list<int> &s2, int dims )
+	neighborizer_nsq( const block_data &b, const std::vector<int> &s1,
+	                  const std::vector<int> &s2, int dims )
 		: neighborizer( b, s1, s2, dims )
 	{}
 

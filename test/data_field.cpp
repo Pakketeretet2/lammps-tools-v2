@@ -72,6 +72,9 @@ TEST_CASE ( "Data field copy constructor-by-ref.", "[data_field_constructor]" ) 
 	REQUIRE( copy_of_c.type() == c.type() );
 	REQUIRE( copy_of_c.size() == c.size() );
 
+	for( int i = 0; i < 5; ++i ){
+		REQUIRE( copy_of_c[i] == c[i] );
+	}
 }
 
 
@@ -95,6 +98,8 @@ TEST_CASE ( "Data field's data_as works as expected.", "[data_field_data_as]" ) 
 	const std::vector<double> &c_data = data_as<double>( &c );
 	const std::vector<int> &d_data    = data_as<int>( &d );
 
-
-
+	for( int i = 0; i < 5; ++i ){
+		REQUIRE( c_data[i] == c[i] );
+		REQUIRE( d_data[i] == d[i] );
+	}
 }

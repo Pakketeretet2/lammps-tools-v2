@@ -411,3 +411,43 @@ TEST_CASE( "Neighbour list can work with in-molecule connections", "[neigh_list_
 	}
 
 }
+
+
+TEST_CASE( "Two-dimensional neigh list works without hiccups", "[neigh_list_dist_2d]" )
+{
+	using lammps_tools::block_data;
+	using lammps_tools::readers::make_dump_reader_lammps;
+	using lammps_tools::readers::dump_reader_lammps;
+
+	using lammps_tools::neighborize::make_list_dist;
+	using lammps_tools::neighborize::neigh_list;
+	using lammps_tools::neighborize::DIST_NSQ;
+	using lammps_tools::neighborize::DIST_BIN;
+
+
+
+	std::string dname = "small_hex.dump";
+	std::vector<std::string> all_headers = { "id", "type",
+	                                         "x", "y", "z" };
+
+	std::unique_ptr<dump_reader_lammps> d(
+		make_dump_reader_lammps( dname, 0 ) );
+
+	d->set_column_headers( all_headers );
+
+	d->set_column_header_as_special(   "id", block_data::ID );
+	d->set_column_header_as_special( "type", block_data::TYPE );
+	d->set_column_header_as_special(    "x", block_data::X );
+	d->set_column_header_as_special(    "y", block_data::Y );
+	d->set_column_header_as_special(    "z", block_data::Z );
+
+	block_data b;
+	while( d->next_block(b) == 0 ){
+		neigh_list neighs;
+		double avg = make_list_dist( neighs, b, 0, 0, DIST_NSQ,
+		                             3, 1.35, 0, 0, false );
+		std::cerr << "Avg = " << avg << "\n";
+	}
+
+
+}

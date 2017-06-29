@@ -1,6 +1,8 @@
 #ifndef DOMAIN_HPP
 #define DOMAIN_HPP
 
+#include <iostream>
+
 
 /**
    \file domain.hpp
@@ -161,6 +163,9 @@ int domain::rewrap_position_component( double x[3] ) const
 	double x1 = xhi[coord];
 	double  L = x1 - x0;
 	double &xx = x[coord];
+
+	std::cerr << "[xlo,xhi] = " << x0 << ", " << x1 << ".\n";
+
 
 	if( xx > x1 ){
 		xx -= L;

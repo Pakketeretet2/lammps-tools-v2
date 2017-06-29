@@ -39,6 +39,7 @@ class xyz_array_acessor:
         """ Returns the length of the arrays. """
         return len(self.x)
 
+
 class domain_data:
     """ Some basic info about the simulation domain """
     def __init__( self, xlo, xhi, periodic ):
@@ -73,6 +74,7 @@ class domain_data:
         dist = np.linalg.norm(r)
 
         return dist, r
+
 
 class block_meta:
     """ Some block metadata """

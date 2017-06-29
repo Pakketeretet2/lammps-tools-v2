@@ -4,13 +4,19 @@
 #include <cmath>
 #include <vector>
 
+namespace lammps_tools {
+
+namespace fast_math {
+
+static constexpr const double pi =
+	3.1415926535897932384626433832795028841971693993751058209749446;
+static constexpr const double pi2 = 2*pi;
+
+
+
 struct lut_sin_cos
 {
 	static constexpr const bool interpolate = false; // true;
-	static constexpr const double pi =
-		3.1415926535897932384626433832795028841971693993751058209749446;
-	static constexpr const double pi2 = 2*pi;
-
 	explicit lut_sin_cos( int N ) : dt( pi2 / static_cast<double>(N) ),
 	                                hdt( 0.5*dt ),
 	                                sin_tab(N+1), cos_tab(N+1)
@@ -53,5 +59,8 @@ struct lut_sin_cos
 	std::vector<double> sin_tab, cos_tab;
 };
 
+} // namespace fast_math
+
+} // namespace lammps_tools
 
 #endif // SINCOS_LOOKUP_HPP

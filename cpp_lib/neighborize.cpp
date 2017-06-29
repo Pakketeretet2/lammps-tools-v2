@@ -1,3 +1,4 @@
+#include "block_data_access.hpp"
 #include "data_field.hpp"
 #include "neighborize.hpp"
 #include "neighborize_nsq.hpp"
@@ -16,8 +17,8 @@ namespace lammps_tools {
 
 namespace neighborize {
 
-neighborizer::neighborizer( const block_data &b, const std::list<int> &s1,
-                            const std::list<int> &s2, int dims )
+neighborizer::neighborizer( const block_data &b, const std::vector<int> &s1,
+                            const std::vector<int> &s2, int dims )
 	: dims(dims), periodic(b.dom.periodic), b(b),
 	  xlo{b.dom.xlo[0], b.dom.xlo[1], b.dom.xlo[2]},
 	  xhi{b.dom.xhi[0], b.dom.xhi[1], b.dom.xhi[2]}, n_atoms(0),
@@ -189,7 +190,7 @@ double make_list_dist( neigh_list &neighs,
                        bool quiet )
 {
 
-	std::list<int> s1, s2;
+	std::vector<int> s1, s2;
 	const std::vector<int> &type = data_as<int>(
 		b.get_special_field( block_data::TYPE ) );
 
@@ -205,8 +206,23 @@ double make_list_dist( neigh_list &neighs,
 		}
 	}
 
-	if( !quiet ) std::cerr << "  ....Calculating neighbours of " << s1.size()
-	                       << " atoms from " << s2.size() << " atoms.\n";
+	return make_list_dist_indexed( neighs, b, s1, s2, method, dims, rc,
+	                               mol_policy, bond_policy, quiet );
+}
+
+double make_list_dist_indexed( neigh_list &neighs,
+                               const block_data &b,
+                               const std::vector<int> &ilist,
+                               const std::vector<int> &jlist,
+                               int method, int dims,
+                               double rc,
+                               int mol_policy,
+                               int bond_policy,
+                               bool quiet )
+{
+	if( !quiet ) std::cerr << "  ....Calculating neighbours of "
+	                       << ilist.size() << " atoms from "
+	                       << jlist.size() << " atoms.\n";
 
 	for( std::vector<int> &ni : neighs ){
 		ni.clear();
@@ -214,8 +230,8 @@ double make_list_dist( neigh_list &neighs,
 	neighs.resize( b.N );
 
 	if( method == DIST_NSQ ){
-		dist_criterion d( rc );
-		neighborizer_nsq n( b, s1, s2, dims );
+		dist_criterion d( rc, dims );
+		neighborizer_nsq n( b, ilist, jlist, dims );
 
 		n.quiet = quiet;
 		n.mol_policy = mol_policy;
@@ -223,8 +239,8 @@ double make_list_dist( neigh_list &neighs,
 
 		return n.build_list( neighs, d );
 	}else if( method == DIST_BIN ){
-		dist_criterion d( rc );
-		neighborizer_bin n( b, s1, s2, dims, rc );
+		dist_criterion d( rc, dims );
+		neighborizer_bin n( b, ilist, jlist, dims, rc );
 
 		n.quiet = quiet;
 		n.mol_policy = mol_policy;
@@ -236,9 +252,20 @@ double make_list_dist( neigh_list &neighs,
 		                "Unknown dist neighbouring method!" );
 	}
 
-	return 0.0;
-}
+	double avg_neighs = 0.0;
+	double norm = 0.0;
+	id_map im( get_id(b) );
+	for( int idx : ilist ){
+		int i = im[idx];
+		avg_neighs += neighs[i].size();
 
+		norm += 1.0;
+	}
+
+
+	return avg_neighs / norm;
+
+}
 
 
 neigh_list nearest_neighs( const block_data &b,
@@ -247,8 +274,9 @@ neigh_list nearest_neighs( const block_data &b,
                            int mol_policy, int bond_policy, bool quiet )
 {
 	neigh_list neighs;
-	make_list_dist( neighs, b, itype, jtype, method, dims, rc,
-	                mol_policy, bond_policy, quiet );
+	double avg = make_list_dist( neighs, b, itype, jtype, method, dims, rc,
+	                             mol_policy, bond_policy, quiet );
+	std::cerr << "Average # of neighs = " << avg << "\n";
 	return neighs;
 }
 
@@ -320,9 +348,13 @@ bool dist_criterion::operator()( const block_data &b, int i, int j ) const
 	const std::vector<double> &x = data_as<double>( d_x );
 	const std::vector<double> &y = data_as<double>( d_y );
 	const std::vector<double> &z = data_as<double>( d_z );
-
-	double xi[3] = { x[i], y[i], z[i] };
-	double xj[3] = { x[j], y[j], z[j] };
+	double zi = z[i];
+	double zj = z[j];
+	if( dims == 2 ){
+		zi = zj = 0.0;
+	}
+	double xi[3] = { x[i], y[i], zi };
+	double xj[3] = { x[j], y[j], zj };
 	double r[3];
 	double r2 = b.dom.dist_2( xi, xj, r );
 
@@ -330,6 +362,35 @@ bool dist_criterion::operator()( const block_data &b, int i, int j ) const
 	else           return true;
 }
 
+
+std::vector<bond> neigh_list_to_bonds( const block_data &b,
+                                       const neighborize::neigh_list &neighs,
+                                       int btype )
+{
+
+	std::vector<bond> bonds;
+	bigint bc = 1;
+	const std::vector<int> &id = get_id(b);
+	for( std::size_t i = 0; i < neighs.size(); ++i ){
+		for( int j : neighs[i] ){
+			if( id[i] >= id[j] ) continue;
+
+			std::cerr << "Adding bond " << bc << ": " << i
+			          << " <--> " << j << ".\n";
+
+			bond bb;
+			bb.id = bc;
+			bb.type = btype;
+			bb.particle1 = i;
+			bb.particle2 = j;
+			bonds.push_back( bb );
+			++bc;
+		}
+	}
+	my_assert( __FILE__, __LINE__, bc == bonds.size() + 1,
+	           "Incorrect bond count!" );
+	return bonds;
+}
 
 
 

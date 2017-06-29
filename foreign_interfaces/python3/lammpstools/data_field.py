@@ -57,7 +57,7 @@ class data_field:
         else:
             raise RuntimeError("Unknown data type encountered!")
 
-    def __iadd(self, index, number):
+    def __iadd__(self, index, number):
         """ In/decrements internal data. """
         if index < 0 or index >= self.size():
             raise RuntimeError("Index out of bounds!")

@@ -24,8 +24,8 @@ class neighborizer_bin : public neighborizer
 {
 public:
 
-	neighborizer_bin( const block_data &b, const std::list<int> &s1,
-	                  const std::list<int> &s2, int dims, double rc )
+	neighborizer_bin( const block_data &b, const std::vector<int> &s1,
+	                  const std::vector<int> &s2, int dims, double rc )
 		: neighborizer( b, s1, s2, dims ), atom_to_bin(), bins(),
 		  rc(rc), n_neighs(0), Nx(0), Ny(0), Nz(0),
 		  Nbins(0), bin_size(0.0)
@@ -53,7 +53,7 @@ private:
 	void setup_bins();
 	void bin_atoms();
 
-	void add_bin_neighs( int i, const std::list<int> &bin,
+	void add_bin_neighs( int i, const std::vector<int> &bin,
 	                     neigh_list &neighs,
 	                     const are_neighbours &criterion );
 
@@ -68,7 +68,7 @@ private:
 
 	// members:
 	std::vector<int> atom_to_bin;
-	std::vector<std::list<int> > bins;
+	std::vector<std::vector<int> > bins;
 
 
 	double rc;

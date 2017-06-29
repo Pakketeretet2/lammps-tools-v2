@@ -14,11 +14,11 @@
 
 namespace lammps_tools {
 
-#ifdef NDEBUG
-constexpr const bool no_debug = true;
-#else
+#ifdef LT_DEBUG
 constexpr const bool no_debug = false;
-#endif // NDEBUG
+#else
+constexpr const bool no_debug = true;
+#endif // LT_DEBUG
 
 
 #ifdef USE_EXCEPTIONS
@@ -84,7 +84,7 @@ inline void my_runtime_error_except( const std::string &file, int line,
 
 /**
    \brief asserts that test is true, and if not, terminates.
-          Does nothing if NDEBUG is defined.
+          Does nothing if LT_DEBUG is defined.
 
    \param file  File name (use __FILE__ macro)
    \param line  Line number (use __LINE__ macro(

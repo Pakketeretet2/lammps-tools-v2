@@ -6,6 +6,8 @@
 
 #include "my_assert.hpp"
 
+#include <vector>
+
 namespace lammps_tools {
 
 /**
@@ -16,6 +18,7 @@ struct point
 	point() : x(0), y(0), z(0) {}
 	point(const double *v) : x(v[0]), y(v[1]), z(v[2]) {}
 	point(double x, double y, double z) : x(x), y(y), z(z) {}
+	point(const std::vector<double> &v) : x(v[0]), y(v[1]), z(v[2]) {}
 
 
 	point &operator=( double *v )
@@ -277,7 +280,27 @@ quat  quat::operator/( double f ) const
 	return n;
 }
 
+// Expand the namespace util with these dot products:
+namespace util {
 
+inline double dot( const point &p1, const point &p2 )
+{
+	return p1.x * p2.x + p1.y * p2.y + p1.z*p2.z;
+}
+
+inline double dot( const quat &q1, const quat &q2 )
+{
+	return q1.a*q2.a + q1.b*q2.b + q1.c*q2.c + q1.d*q2.d;
+}
+
+inline point cross( const point &p1, const point &p2 )
+{
+	return point( p1.y*p2.z - p1.z*p2.y,
+	              p1.z*p2.x - p1.z*p2.z,
+	              p1.x*p2.y - p1.y*p2.x );
+}
+
+}
 
 
 

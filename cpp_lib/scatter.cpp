@@ -12,9 +12,6 @@ namespace lammps_tools {
 
 namespace scatter {
 
-
-// size of 512 should fit in L1 cache.
-static lut_sin_cos sincos(1024);
 constexpr const bool use_lut = true;
 //constexpr const bool use_lut = false;
 

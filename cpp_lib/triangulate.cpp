@@ -70,7 +70,7 @@ void triangulate_block( const block_data &b, double rc, int periodic,
 	bigint N = b.N;
 
 	const std::vector<int> &id = get_id( b );
-	std::list<int> all( id.begin(), id.end() );
+	std::vector<int> all( id.begin(), id.end() );
 
 	const std::vector<double> &x = get_x(b);
 	const std::vector<double> &y = get_y(b);

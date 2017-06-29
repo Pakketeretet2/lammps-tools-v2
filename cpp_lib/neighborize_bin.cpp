@@ -28,7 +28,11 @@ void neighborizer_bin::bin_index_to_xyz_index( int bin, int &ix,
 {
 	ix = bin % Nx;
 	iy = ( (bin - ix) % (Nx*Ny) ) / Nx;
-	iz = (bin - ix - iy*Nx) / (Nx*Ny);
+	if( dims == 3 ){
+		iz = (bin - ix - iy*Nx) / (Nx*Ny);
+	}else{
+		iz = 0;
+	}
 }
 
 void neighborizer_bin::position_to_xyz_index( double x, double y, double z,
@@ -46,6 +50,8 @@ void neighborizer_bin::position_to_xyz_index( double x, double y, double z,
 	if     ( iz >= Nz ) iz -= Nz;
 	else if( iz <   0 ) iz += Nz;
 
+	if( dims == 2 ) iz = 0;
+
 	if( ix >= Nx || iy >= Ny || iz >= Nz ||
 	    ix < 0 || iy < 0 || iz < 0 ){
 		std::cerr << "  Bin index for particle at ( " << x << ", " << y
@@ -62,7 +68,11 @@ int neighborizer_bin::position_to_bin_index( double x, double y, double z )
 {
 	int ix, iy, iz;
 	position_to_xyz_index( x, y, z, ix, iy, iz );
-	return ix + iy*Nx + iz*Nx*Ny;
+	if( dims == 3 ){
+		return ix + iy*Nx + iz*Nx*Ny;
+	}else{
+		return ix + iy*Nx;
+	}
 }
 
 
@@ -91,6 +101,7 @@ int neighborizer_bin::shift_bin_index( int bin, int xinc, int yinc, int zinc )
 		           (ix < Nx) && (iy < Ny) && (iz < Nz),
 		           "Illegal bin index after correction!" );
 	}
+	if( dims == 2 ) iz = 0;
 
 	return xyz_index_to_bin_index( ix, iy, iz );
 }
@@ -116,8 +127,11 @@ void neighborizer_bin::setup_bins()
 		Ny = 3;
 	}
 	if( (Nz < 3) && (dims == 3) ){
-		Nx = 3;
+		Nz = 3;
+	}else if( dims == 2 ){
+		Nz = 1;
 	}
+
 	Nbins = Nx*Ny*Nz;
 
 	// Reset the bin size so that it matches exactly:
@@ -204,7 +218,7 @@ void neighborizer_bin::bin_atoms(  )
 }
 
 // Adds to the neighbour list of i the atoms in bin that are in range.
-void neighborizer_bin::add_bin_neighs( int i, const std::list<int> &bin,
+void neighborizer_bin::add_bin_neighs( int i, const std::vector<int> &bin,
                                        neigh_list &neighs,
                                        const are_neighbours &criterion )
 {
@@ -266,7 +280,7 @@ void neighborizer_bin::add_neighs_from_bin_2d( int i, neigh_list &neighs,
 				                "Illegal bin index!" );
 			}
 		}
-		const std::list<int> &bin = bins[bin_index];
+		const std::vector<int> &bin = bins[bin_index];
 		if( !quiet ){
 			std::cerr << "  ....Checking bins of atom " << i
 			          << " ( id = " << id[i] << ", bin "
@@ -333,7 +347,7 @@ void neighborizer_bin::add_neighs_from_bin_3d( int i, neigh_list &neighs,
 				                "Illegal bin index!" );
 			}
 		}
-		const std::list<int> &bin = bins[bin_index];
+		const std::vector<int> &bin = bins[bin_index];
 		if( !quiet ){
 			int ix, iy, iz;
 			bin_index_to_xyz_index( bin_index, ix, iy, iz );

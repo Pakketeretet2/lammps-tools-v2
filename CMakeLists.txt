@@ -10,6 +10,7 @@ set(CXX_STANDARD_REQUIRED "11")
 add_library(lammpstools SHARED
   cpp_lib/atom_type_info.cpp
   cpp_lib/block_data.cpp
+  cpp_lib/bond_order.cpp
   cpp_lib/center_of_mass.cpp
   cpp_lib/cluster_finder.cpp
   cpp_lib/data_field.cpp
@@ -21,6 +22,7 @@ add_library(lammpstools SHARED
   cpp_lib/dump_reader_lammps_gzip.cpp
   cpp_lib/dump_reader_lammps_plain.cpp
   cpp_lib/markov_state_model.cpp
+  cpp_lib/msd.cpp
   cpp_lib/neighborize_bin.cpp
   cpp_lib/neighborize.cpp
   cpp_lib/neighborize_nsq.cpp
@@ -47,6 +49,13 @@ option(USE_GSD         "Use GSD for reading HOOMD-Blue GSD files."    OFF)
 option(USE_BOOST_GZIP  "Use boost for reading in GZIP files."         OFF)
 option(USE_EXCEPTIONS  "Use C++ exceptions for error handling."       ON)
 option(LEGACY_COMPILER "Disable some features for ancient compilers." OFF)
+option(USE_ASSERTIONS  "Compile library with assertions enabled."     ON)
+
+if(ENABLE_MY_ASSERT)
+  add_definitions(-DLT_DEBUG=1)
+else()
+  add_definitions(-DLT_DEBUG=0)
+endif()
 
 # Compiler settings:
 set(CXX_STANDARD_REQUIRED "11")

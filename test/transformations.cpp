@@ -6,9 +6,18 @@
 #include "block_data_access.hpp"
 #include "data_field.hpp"
 #include "dump_reader_lammps_bin.hpp"
+#include "enums.hpp"
 #include "geometry.hpp"
+#include "readers.hpp"
 #include "transformations.hpp"
 #include "writers.hpp"
+
+#include "lt_block_data.h"
+#include "lt_block_writers.h"
+#include "lt_dump_reader.h"
+#include "lt_transformations.h"
+
+
 
 
 TEST_CASE( "Tests if transformations work.", "[transformations]" ){
@@ -208,4 +217,78 @@ TEST_CASE( "Tests if transformations work.", "[transformations]" ){
 		                          std::ios::binary );
 		writers::block_to_lammps_dump( center_out, b_center, FILE_FORMAT_BIN );
 	}
+
+	SECTION( "Tests if destructive rotate works." ){
+		using namespace lammps_tools;
+
+		using transformations::shift;
+		using transformations::shift_all;
+
+
+		point origin( 0.5*( b.dom.xhi[0] + b.dom.xlo[0] ),
+		              0.5*( b.dom.xhi[1] + b.dom.xlo[1] ),
+		              0.5*( b.dom.xhi[2] + b.dom.xlo[2] ) );
+		transformations::center_box_on( &b, origin );
+
+		std::ofstream center_out( "lammps_dump_file_test_center_out_destructive.dump.bin",
+		                          std::ios::binary );
+		writers::block_to_lammps_dump( center_out, b, FILE_FORMAT_BIN );
+	}
+}
+
+
+
+
+TEST_CASE( "Tests if transformations work through C interface.", "[transformations_c]" ){
+	const char *dname = "lammps_dump_file_test.dump.bin";
+	int ff = lammps_tools::FILE_FORMAT_BIN;
+	int df = lammps_tools::DUMP_FORMAT_LAMMPS;
+	lt_dump_reader_handle drh = lt_new_dump_reader( dname, ff, df );
+	lt_block_data_handle  bdh;
+
+	std::vector<std::string> headers = { "id", "type", "x", "y", "z", "c_pe" };
+	std::vector<int> types = { 0, 2, 3, 4, 5 };
+	for( int i = 0; i < headers.size(); ++i ){
+		lt_set_col_header( drh, i, headers[i].c_str() );
+		if( i < types.size() ){
+			lt_set_column_header_as_special( drh, headers[i].c_str(), types[i] );
+		}
+	}
+
+	int status = lt_get_next_block( drh, &bdh );
+	REQUIRE( status == 0 );
+	std::cerr << "Got " << bdh.n_atoms() << " atoms at t = "
+	          << bdh.time_step() << "\n";
+
+	double axis[3] = { 0, 0, 1.0 };
+	double origin[3] = { 0.0, 0.0, 0.0 };
+
+	double angle = 3.1415927 / 4.0;
+	lt_transformations_rotate_all( &bdh, axis, origin, angle );
+
+	const char *dname2 = "lammps_dump_file_test_rotate_c.dump.bin";
+	status = lt_block_writers_lammps_dump( dname2, "wb", bdh );
+	REQUIRE( status == 0 );
+
+	double angle2 = 3.1415927 / 2.0;
+	lt_transformations_rotate_all( &bdh, axis, origin, angle2 );
+	status = lt_block_writers_lammps_dump( dname2, "ab", bdh );
+	REQUIRE( status == 0 );
+
+
+}
+
+
+TEST_CASE( "Tests if unfold transformation works.", "[transformations_unfold]" ){
+	using namespace lammps_tools;
+
+	std::string dname = "lammps_triangle_remap_test.data";
+	int status = 0;
+	block_data b = readers::block_data_from_lammps_data( dname, status );
+	REQUIRE( status == 0 );
+
+	std::cerr << "Got " << b.N << " atoms.\n";
+	transformations::unfold_mols( &b );
+	std::string dname2 = "lammps_triangle_remap_test_out.data";
+	writers::block_to_lammps_data( dname2, b );
 }
