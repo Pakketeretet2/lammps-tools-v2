@@ -164,9 +164,6 @@ int domain::rewrap_position_component( double x[3] ) const
 	double  L = x1 - x0;
 	double &xx = x[coord];
 
-	std::cerr << "[xlo,xhi] = " << x0 << ", " << x1 << ".\n";
-
-
 	if( xx > x1 ){
 		xx -= L;
 		return 1;

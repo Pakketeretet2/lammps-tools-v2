@@ -375,9 +375,6 @@ std::vector<bond> neigh_list_to_bonds( const block_data &b,
 		for( int j : neighs[i] ){
 			if( id[i] >= id[j] ) continue;
 
-			std::cerr << "Adding bond " << bc << ": " << i
-			          << " <--> " << j << ".\n";
-
 			bond bb;
 			bb.id = bc;
 			bb.type = btype;

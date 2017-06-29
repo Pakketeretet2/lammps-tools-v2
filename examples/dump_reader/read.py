@@ -9,10 +9,10 @@ import sys
 d = dump_reader.dump_reader( "../common_dump_files/polymer.dump",
                             file_format = "PLAIN", dump_format = "LAMMPS" )
 
-dl = dump_reader.dump_reader( "../common_dump_files/bondinfo.dump",
-                              file_format = "PLAIN", dump_format = "LAMMPS",
+dl = dump_reader.dump_reader( "bondinfo.dump.bin",
+                              file_format = "BIN", dump_format = "LAMMPS",
                               is_local = True )
-
+dl.set_column_headers( ['c_bonds[1]', 'c_bonds[2]', 'c_bonds[3]'] )
 # We know all cols in bondinfo.dump are ints, so set the default type:
 dl.set_default_column_type( "int" )
 # Specify the headers for atom dump file up front: dump_reader

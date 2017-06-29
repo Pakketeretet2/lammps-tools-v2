@@ -7,6 +7,10 @@ LAMMPS data file via lammps-tools
 0 33.5919 ylo yhi
 0 33.5919 zlo zhi
 
+Masses
+
+1 1
+
 Atoms # atomic
 
 45 1 1.49129 0.377483 0.422044 0 0 0
