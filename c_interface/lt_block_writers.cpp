@@ -1,12 +1,13 @@
 #include "lt_block_writers.h"
 
+#include "../cpp_lib/enums.hpp"
+
 #include <iostream>
 #include <string>
 #include <cstring>
 
-
-int lt_block_writers_lammps_data( const char *fname, const char *w_mode,
-                                  lt_block_data_handle bdh )
+int lt_block_writers_lammps_data_file( const char *fname, const char *w_mode,
+                                       const lt_block_data_handle *bdh )
 {
 	std::ofstream out;
 	std::ios_base::openmode wmode = std::ios_base::out;
@@ -22,13 +23,30 @@ int lt_block_writers_lammps_data( const char *fname, const char *w_mode,
 		return -1;
 	}
 
-	std::cerr << "Writing " << bdh.bd->N_types << " types to " << fname << "\n";
-	lammps_tools::writers::block_to_lammps_data( out, *bdh.bd );
+	std::cerr << "Writing " << bdh->bd->N_types << " types to " << fname << "\n";
+	lammps_tools::writers::block_to_lammps_data( out, *bdh->bd );
 	return 0;
 }
 
-int lt_block_writers_lammps_dump( const char *fname, const char *w_mode,
-                                  lt_block_data_handle bdh )
+int lt_block_writers_lammps_data_stdout( const lt_block_data_handle *bdh )
+{
+	lammps_tools::writers::block_to_lammps_data( std::cout, *bdh->bd );
+	return 0;
+}
+
+int lt_block_writers_lammps_data( const char *fname, const char *w_mode,
+                                  const lt_block_data_handle * bdh )
+{
+	if( std::strcmp( fname, "-" ) != 0 ){
+		return lt_block_writers_lammps_data_file( fname, w_mode, bdh );
+	}else{
+		return lt_block_writers_lammps_data_stdout( bdh );
+	}
+	return 0;
+}
+
+int lt_block_writers_lammps_dump_file( const char *fname, const char *w_mode,
+                                       const lt_block_data_handle * bdh )
 {
 	std::ofstream out;
 	std::ios_base::openmode wmode = std::ios_base::out;
@@ -50,7 +68,27 @@ int lt_block_writers_lammps_dump( const char *fname, const char *w_mode,
 		return -1;
 	}
 
-	lammps_tools::writers::block_to_lammps_dump( out, *bdh.bd, fformat );
+	lammps_tools::writers::block_to_lammps_dump( out, *bdh->bd, fformat );
+	return 0;
+
+}
+
+int lt_block_writers_lammps_dump_stdout( const lt_block_data_handle *bdh )
+{
+	int fformat = lammps_tools::FILE_FORMAT_PLAIN;
+	lammps_tools::writers::block_to_lammps_dump( std::cout, *bdh->bd,
+	                                             fformat );
+	return 0;
+}
+
+int lt_block_writers_lammps_dump( const char *fname, const char *w_mode,
+                                  const lt_block_data_handle * bdh )
+{
+	if( std::strcmp( fname, "-" ) != 0 ){
+		return lt_block_writers_lammps_dump_file( fname, w_mode, bdh );
+	}else{
+		return lt_block_writers_lammps_dump_stdout( bdh );
+	}
 	return 0;
 }
 

@@ -128,6 +128,12 @@ public:
 	data_field *get_data_rw( const std::string &name );
 
 	/**
+	   \brief Get data by index.
+	   \overloads get_data_rw.
+	*/
+	data_field *get_data_rw( int index );
+
+	/**
 	   Returns a pointer to an underlying data field.
 
 	   \warning It is _your_ responsibility to make sure the data
@@ -159,7 +165,7 @@ public:
 	   \param[in]  name           the name of the data field to remove
 	   \param[out] special_field  the special_field type of data
 
-	   \returns a shared pointer to the data field, or nullptr if not found
+	   \returns a pointer to the data field, or nullptr if not found
 	*/
 	data_field *remove_field( const std::string &name, int &special_field );
 

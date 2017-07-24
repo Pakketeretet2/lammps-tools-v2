@@ -24,8 +24,10 @@ PYBIND11_PLUGIN(block_data_) {
 		.def("n_atoms", &lt_block_data_handle::n_atoms)
 		.def("n_types", &lt_block_data_handle::n_types)
 		.def("get_const_ref", &lt_block_data_handle::get_const_ref)
-		.def("get_ptr", &lt_block_data_handle::get_ptr);
-
+		.def("get_ptr", &lt_block_data_handle::get_ptr)
+		.def("set_n_atoms", &lt_block_data_handle::set_n_atoms)
+		.def("set_n_types", &lt_block_data_handle::set_n_types)
+		.def("set_atom_style", &lt_block_data_handle::set_atom_style);
 
 	// m.def("get_data", &lt_get_data, "Get block data from dump reader handle" );
 	m.def("has_special_field", &lt_has_special_field,
@@ -47,6 +49,21 @@ PYBIND11_PLUGIN(block_data_) {
 	      "Adds a data field to given block_data.");
 	m.def("add_special_field", &lt_block_data_add_special_field,
 	      "Adds a data field as special field to given block_data.");
+
+	m.def("set_meta", &lt_block_data_set_meta,
+	      "Sets the meta-data of the block_data.");
+	m.def("set_domain", &lt_block_data_set_domain,
+	      "Sets the domain of the block_data.");
+
+
+	// And to mutate them:
+	m.def("swap_fields", &lt_block_data_swap_fields);
+	m.def("remove_field", &lt_block_data_remove_field);
+
+
+	// Some debug stuff:
+	m.def("print_stats", &lt_block_data_print_stats,
+	      "Prints info about the C++-side of block_data");
 
 
 	pybind11::enum_<lammps_tools::block_data::special_fields>(m, "SPECIAL_COLS")

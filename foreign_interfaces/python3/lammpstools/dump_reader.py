@@ -107,6 +107,7 @@ class dump_reader:
             if self.local:
                 b = block_data.block_data_local( bh )
             else:
+                block_data_.print_stats( bh )
                 b = block_data.block_data_custom.init_from_handle(
                     bh, self.no_block_data_copy )
             return b

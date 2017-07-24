@@ -4,7 +4,7 @@
 
 lt_data_field_handle::lt_data_field_handle( const char *name,
                                             int type, int size )
-	: df(df_), df_(nullptr)
+	: df(df_), df_(nullptr), df_rw(nullptr)
 {
 	switch( type ){
 		case DATA_FIELD_DOUBLE:
@@ -20,12 +20,28 @@ lt_data_field_handle::lt_data_field_handle( const char *name,
 			std::terminate();
 	}
 	df = df_;
+	df_rw = df_;
+	clean_up = true;
 }
+
+lt_data_field_handle::lt_data_field_handle( const lammps_tools::data_field *df )
+	: df_(nullptr), df(df), df_rw(nullptr), clean_up(false)
+{}
+
+lt_data_field_handle::lt_data_field_handle( lammps_tools::data_field *df )
+	: df_(nullptr), df(df), df_rw(df), clean_up(false)
+{}
 
 lt_data_field_handle::~lt_data_field_handle()
 {
 	// Leave df dangling, but delete df_ if it was allocated:
-	if( df_ ) delete df_;
+	if( clean_up && df_ ){
+		/*
+		std::cerr << "This is lt_data_field_handle at " << this
+		          << ", cleaning up data_field at " << df_ << "\n";
+		*/
+		delete df_;
+	}
 }
 
 
@@ -45,16 +61,16 @@ lt_data_field_handle *lt_new_data_field( const char *name, int dtype, int size )
 
 int lt_data_field_size( const lt_data_field_handle *d )
 {
-	return d->df->size();
+	return d->get()->size();
 }
 
 const double *lt_data_as_double( const lt_data_field_handle *d )
 {
 	using dfd = lammps_tools::data_field_double;
-	if( d->df->type() != lammps_tools::data_field::DOUBLE ){
+	if( d->get()->type() != lammps_tools::data_field::DOUBLE ){
 		return nullptr;
 	}else{
-		const dfd* dd = static_cast<const dfd*>( d->df );
+		const dfd* dd = static_cast<const dfd*>( d->get() );
 		return dd->get_data_ptr();
 	}
 }
@@ -62,22 +78,22 @@ const double *lt_data_as_double( const lt_data_field_handle *d )
 const int *lt_data_as_int( const lt_data_field_handle *d )
 {
 	using dfi = lammps_tools::data_field_int;
-	if( d->df->type() != lammps_tools::data_field::INT ){
+	if( d->get()->type() != lammps_tools::data_field::INT ){
 		return nullptr;
 	}else{
-		const dfi* dd = static_cast<const dfi*>( d->df );
+		const dfi* dd = static_cast<const dfi*>( d->get() );
 		return dd->get_data_ptr();
 	}
 }
 
 int lt_data_field_type( const lt_data_field_handle *d )
 {
-	return d->df->type();
+	return d->get()->type();
 }
 
 const char *lt_data_field_name( const lt_data_field_handle *d )
 {
-	return d->df->name.c_str();
+	return d->get()->name.c_str();
 }
 
 
@@ -85,7 +101,7 @@ const std::vector<double> &lt_data_as_double_vec ( const lt_data_field_handle *d
 {
 	try{
 		const std::vector<double> &dvec =
-			lammps_tools::data_as<double>( d->df );
+			lammps_tools::data_as<double>( d->get() );
 		return dvec;
 	}catch( std::runtime_error &e ){
 		std::cerr << "Error occured in lt_data_as_double_vec! "
@@ -98,7 +114,7 @@ const std::vector<int> &lt_data_as_int_vec ( const lt_data_field_handle *d )
 {
 	try{
 		const std::vector<int> &dvec =
-			lammps_tools::data_as<int>( d->df );
+			lammps_tools::data_as<int>( d->get() );
 		return dvec;
 	}catch( std::runtime_error &e ){
 		std::cerr << "Error occured in lt_data_as_int_vec! "
@@ -110,35 +126,89 @@ const std::vector<int> &lt_data_as_int_vec ( const lt_data_field_handle *d )
 
 void lt_data_field_set_size( lt_data_field_handle *d, int size )
 {
-	d->df_rw()->resize( size );
+	d->get()->resize( size );
 }
 
 void lt_data_field_set_name( lt_data_field_handle *d, const char *name )
 {
-	d->df_rw()->name = name;
+	d->get()->name = name;
 }
 
+
+
+template <typename T>
+int lt_data_field_set_indexed_data( lt_data_field_handle *d,
+                                    int index, T val )
+{
+	if( !d->is_rw() ){
+		std::cerr << "Cannot mutate data in const data_field!\n";
+		return -1;
+	}
+
+	lammps_tools::data_field *df = d->get();
+	if( !df ){
+		std::cerr << "Failed to grab data from handle @ " << d << "!\n";
+		return -2;
+	}
+
+	constexpr const int TYPE = lammps_tools::data_field_type_id<T>::TYPE;
+	typedef lammps_tools::data_field_der<T, TYPE> der_type;
+	der_type *dfd = static_cast<der_type*> ( df );
+	dfd->set_val_by_index( index, val );
+	return 0;
+}
+
+template <typename T>
+T lt_data_field_get_indexed_data( const lt_data_field_handle *d, int index )
+{
+	return lammps_tools::data_as<T>( d->get() )[index];
+}
 
 int lt_data_field_get_indexed_int_data( const lt_data_field_handle *d,
                                         int index )
 {
-	return lammps_tools::data_as<int>( d->df )[index];
+	return lt_data_field_get_indexed_data<int>( d, index );
 }
 
-void lt_data_field_set_indexed_int_data( lt_data_field_handle *d,
-                                         int index, int val )
+
+int lt_data_field_set_indexed_int_data( lt_data_field_handle *d,
+                                        int index, int val )
 {
-	lammps_tools::data_as_rw<int>( d->df_rw() )[index] = val;
+	return lt_data_field_set_indexed_data<int>( d, index, val );
 }
 
 double lt_data_field_get_indexed_double_data( const lt_data_field_handle *d,
                                               int index )
 {
-	return lammps_tools::data_as<double>( d->df )[index];
+	return lt_data_field_get_indexed_data<double>( d, index );
 }
 
-void lt_data_field_set_indexed_double_data( lt_data_field_handle *d,
+int lt_data_field_set_indexed_double_data( lt_data_field_handle *d,
                                             int index, double val )
 {
-	lammps_tools::data_as_rw<double>( d->df_rw() )[index] = val;
+	return lt_data_field_set_indexed_data<double>( d, index, val );
+}
+
+double *lt_data_as_double_rw( lt_data_field_handle *d )
+{
+	using dfd = lammps_tools::data_field_double;
+	if( d->get()->type() != lammps_tools::data_field::DOUBLE ){
+		return nullptr;
+	}else{
+		dfd* dd = static_cast<dfd*>( d->get() );
+		std::vector<double> &vec = dd->get_data_rw();
+		return vec.data();
+	}
+}
+
+int *lt_data_as_int_rw( lt_data_field_handle *d )
+{
+	using dfi = lammps_tools::data_field_int;
+	if( d->get()->type() != lammps_tools::data_field::INT ){
+		return nullptr;
+	}else{
+		dfi* dd = static_cast<dfi*>( d->get() );
+		std::vector<int> &vec = dd->get_data_rw();
+		return vec.data();
+	}
 }

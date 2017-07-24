@@ -40,8 +40,14 @@ namespace writers {
 
 void block_to_lammps_data( const std::string &fname, const block_data &b )
 {
-	std::ofstream out( fname );
-	block_to_lammps_data( out, b );
+	if( fname == "-" ){
+		std::cerr << "Writing to stdout.\n";
+		block_to_lammps_data( std::cout, b );
+	}else{
+		std::cerr << "Writing to file " << fname << ".\n";
+		std::ofstream out( fname );
+		block_to_lammps_data( out, b );
+	}
 }
 
 
@@ -140,24 +146,40 @@ void block_to_lammps_dump( const std::string &fname,
 			my_runtime_error(__FILE__, __LINE__,
 			                 "Unknown file format!" );
 		case FILE_FORMAT_PLAIN: {
-			std::ofstream out( fname );
-			block_to_lammps_dump_text( out, b, is_local );
+			if( fname == "-" ){
+				block_to_lammps_dump_text( std::cout, b,
+				                           is_local );
+			}else{
+				std::ofstream out( fname );
+				block_to_lammps_dump_text( out, b, is_local );
+			}
 			break;
 		}
 		case FILE_FORMAT_BIN:{
-			std::ofstream out( fname, std::ios::binary );
-			block_to_lammps_dump_bin( out, b );
+			if( fname == "-" ){
+				block_to_lammps_dump_bin( std::cout, b );
+			}else{
+				std::ofstream out( fname, std::ios::binary );
+				block_to_lammps_dump_bin( out, b );
+			}
 			break;
 		}
 		case FILE_FORMAT_GZIP:{
 #ifdef HAVE_BOOST_GZIP
 			using namespace boost::iostreams;
-
-			std::ofstream in(fname);
-			filtering_stream<output> out;
-			out.push(gzip_compressor());
-			out.push(in);
-			block_to_lammps_dump_text( out, b, is_local );
+			if( fname == "-" ){
+				std::ostream &in = std::cout;
+				filtering_stream<output> out;
+				out.push(gzip_compressor());
+				out.push(in);
+				block_to_lammps_dump_text( out, b, is_local );
+			}else{
+				std::ofstream in(fname);
+				filtering_stream<output> out;
+				out.push(gzip_compressor());
+				out.push(in);
+				block_to_lammps_dump_text( out, b, is_local );
+			}
 			break;
 #else
 			my_runtime_error( __FILE__, __LINE__,

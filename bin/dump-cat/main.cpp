@@ -25,6 +25,7 @@ int main( int argc, char **argv )
 	std::string headers;
 	std::string out_file = "-";
 	bool to_local = false;
+	bool silent = false;
 
 	int i = 1;
 	while( i < argc ){
@@ -42,6 +43,9 @@ int main( int argc, char **argv )
 			}else if( a == "-h" || a == "--help" ){
 				print_usage();
 				return 1;
+			}else if( a == "-s" || a == "--silent" ){
+				silent = true;
+				i += 1;
 			}
 		}else{
 			dumps.push_back( a );
@@ -86,6 +90,13 @@ int main( int argc, char **argv )
 		}
 	}
 
+	int n_writes = 0;
+	auto status_print = [&n_writes, silent]	{
+		if( !silent && n_writes > 0  && n_writes % 50 == 0 ){
+			std::cerr << "At block " << n_writes << "...\n";
+		}
+		n_writes++; };
+
 	if( read_stdin ){
 		std::istream &in( std::cin );
 		int fformat = FILE_FORMAT_PLAIN;
@@ -96,6 +107,7 @@ int main( int argc, char **argv )
 			d->set_column_headers( util::split( headers ) );
 			while( d->next_block(b) == 0 ){
 				writers::block_to_lammps_dump( *out, b, out_fformat, to_local );
+				status_print();
 			}
 		}else{
 			std::unique_ptr<readers::dump_reader_lammps> d(
@@ -103,6 +115,7 @@ int main( int argc, char **argv )
 			d->set_column_headers( util::split( headers ) );
 			while( d->next_block(b) == 0 ){
 				writers::block_to_lammps_dump( *out, b, out_fformat, to_local );
+				status_print();
 			}
 		}
 
@@ -124,6 +137,7 @@ int main( int argc, char **argv )
 					writers::block_to_lammps_dump( *out, b,
 					                               out_fformat,
 					                               to_local );
+					status_print();
 				}
 			}else{
 				std::unique_ptr<readers::dump_reader_lammps> d(
@@ -133,6 +147,7 @@ int main( int argc, char **argv )
 					writers::block_to_lammps_dump( *out, b,
 					                               out_fformat,
 					                               to_local );
+					status_print();
 				}
 			}
 

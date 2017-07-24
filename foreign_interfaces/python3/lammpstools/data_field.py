@@ -49,13 +49,15 @@ class data_field:
         """ Indexes internal data. """
         if index < 0 or index >= self.size():
             raise RuntimeError("Index out of bounds!")
-
+        s = 0
         if self.data_type == DATA_TYPE_INT:
-            data_field_.set_indexed_int_data(self.handle, index, value)
+            s = data_field_.set_indexed_int_data(self.handle, index, value)
         elif self.data_type == DATA_TYPE_DOUBLE:
-            data_field_.set_indexed_double_data(self.handle, index, value)
+            s = data_field_.set_indexed_double_data(self.handle, index, value)
         else:
             raise RuntimeError("Unknown data type encountered!")
+        if s != 0:
+            raise RuntimeError("Attempted to modify data in const data_field!")
 
     def __iadd__(self, index, number):
         """ In/decrements internal data. """
@@ -72,10 +74,6 @@ class data_field:
             data_field_.set_indexed_double_data(self.handle, index, new_val)
         else:
             raise RuntimeError("Unknown data type encountered!")
-
-def leak_data_field(name, dtype, size):
-    this_is_a_test = data_field_.new_data_field( name, dtype, size )
-    return this_is_a_test
 
 def new_data_field(name, dtype, size):
     """ Makes a freshly instantiated data_field and returns a handle. """

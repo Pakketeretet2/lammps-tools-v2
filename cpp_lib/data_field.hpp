@@ -54,6 +54,20 @@ struct data_field
 
 const char *pretty_type( int type );
 
+template <typename T>
+struct data_field_type_id{};
+
+template <>
+struct data_field_type_id<int>
+{
+	enum { TYPE = data_field::INT };
+};
+
+template <>
+struct data_field_type_id<double>
+{
+	enum { TYPE = data_field::DOUBLE };
+};
 
 
 /**
@@ -209,6 +223,13 @@ struct data_field_der : public data_field
 	*/
 	virtual const T* get_data_ptr() const { return data.data(); }
 
+	/**
+	   Sets indexed value.
+	*/
+	void set_val_by_index( int index, T val )
+	{
+		data[index] = val;
+	}
 
 	/**
 	   Actual implementation of swap for each type.
@@ -289,6 +310,8 @@ std::vector<double> &data_as_rw<double>( data_field *df )
 	           "Type mismatch in cast in data_as<double>!" );
 
 	dfd *df_c = static_cast<dfd*>( df );
+	my_assert( __FILE__, __LINE__, df_c,
+	           "Data field type cast failed!" );
 	return df_c->get_data_rw();
 }
 
@@ -301,6 +324,8 @@ std::vector<int> &data_as_rw<int>( data_field *df )
 	           "Type mismatch in cast in data_as<int>!" );
 
 	dfi *df_c = static_cast<dfi*>( df );
+	my_assert( __FILE__, __LINE__, df_c,
+	           "Data field type cast failed!" );
 	return df_c->get_data_rw();
 }
 

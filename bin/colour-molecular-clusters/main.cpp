@@ -13,10 +13,11 @@
 #include "writers.hpp"
 
 using namespace lammps_tools;
-using neighborize::make_list_dist;
+using neighborize::make_list_dist_indexed;
 
 std::string out_file;
 std::list<std::string> dumps;
+int n_patches;
 
 int parse_args( int argc, char **argv )
 {
@@ -25,6 +26,9 @@ int parse_args( int argc, char **argv )
 		std::string arg = argv[i];
 		if( arg == "-o" || arg == "--output" ){
 			out_file = argv[i+1];
+			i += 2;
+		}else if( arg == "-np" || arg == "--n-patches" ){
+			n_patches  = std::atoi( argv[i+1] );
 			i += 2;
 		}else{
 			dumps.push_back( arg );
@@ -66,13 +70,24 @@ void colour_blocks( readers::dump_reader_lammps *d,
 		int policy_include = neighborize::neighborizer::INCLUDE;
 		int policy_ignore  = neighborize::neighborizer::IGNORE;
 
+		std::vector<int> first, second;
+		for( int i = 0; i < b.N; ++i ){
+			if( type[i] > 1 ){
+				first.push_back(i);
+				second.push_back(i);
+			}
+		}
 
-		double avg_neighs = make_list_dist( neighs, b, 2, 3, method,
-		                                    dims, rc,
-		                                    policy_include,
-		                                    policy_ignore );
-		make_list_dist( neighs_patches_only, b, 2, 3, method, dims, rc,
-		                policy_ignore, policy_ignore );
+		double avg_neighs = make_list_dist_indexed( neighs, b,
+		                                            first,
+		                                            second,
+		                                            method,
+		                                            dims, rc,
+		                                            policy_include,
+		                                            policy_ignore );
+		make_list_dist_indexed( neighs_patches_only, b, first, second,
+		                        method, dims, rc,
+		                        policy_ignore, policy_ignore );
 
 		neighborize::neigh_list conns;
 		std::list<std::list<int> > networks;
@@ -120,7 +135,7 @@ void colour_blocks( readers::dump_reader_lammps *d,
 		}
 
 		for( int i = 0; i < b.N; ++i ){
-			if( type[i] == 2 || type[i] == 3 ){
+			if( type[i] > 1 ){
 				int mol_id = mol[i];
 				mol_to_patches[mol_id].push_back(i);
 			}
@@ -130,7 +145,7 @@ void colour_blocks( readers::dump_reader_lammps *d,
 		for( int mol_id = 1; mol_id <= max_mol; ++mol_id ){
 			int connections = 0;
 			my_assert( __FILE__, __LINE__,
-			           mol_to_patches[mol_id].size() == 6,
+			           mol_to_patches[mol_id].size() == n_patches,
 			           "Failed to find all patches in mol!" );
 
 			for( int patch_idx : mol_to_patches[mol_id] ){
@@ -196,7 +211,7 @@ int main( int argc, char **argv )
 {
 	std::ostream *out;
 	std::unique_ptr<std::ofstream> of;
-
+	n_patches = 6;
 
 	out_file = "";
 	if( parse_args( argc, argv ) ){

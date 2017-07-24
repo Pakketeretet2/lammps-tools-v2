@@ -142,33 +142,6 @@ std::size_t block_data::n_data_fields() const
 	return data.size();
 }
 
-/*
-void block_data::copy_meta( const block_data &o )
-{
-	tstep = o.tstep;
-	N = o.N;
-	N_types = o.N_types;
-	atom_style = o.atom_style;
-	dom = o.dom;
-	top = o.top;
-	ati = o.ati;
-
-	for( int spec_field = block_data::ID;
-	     spec_field < N_SPECIAL_FIELDS; ++spec_field ){
-		const data_field *df = o.get_special_field( spec_field );
-		if( !df ) continue;
-
-		for( std::size_t i = 0; i < o.n_data_fields(); ++i ){
-			const std::string name = o[i].name;
-			if( name == df->name ){
-				special_fields_by_name[spec_field]  = df->name;
-				special_fields_by_index[spec_field] = i;
-				break;
-			}
-		}
-	}
-}
-*/
 
 void block_data::set_natoms( std::size_t new_size )
 {
@@ -282,6 +255,11 @@ data_field &block_data::operator[]( int i )
 }
 
 
+data_field *block_data::get_data_rw( int index )
+{
+	return data[index];
+}
+
 
 // ******************   Non-member functions:    ************************
 void swap( block_data &f, block_data &s )
@@ -359,6 +337,7 @@ bool is_special_field_int( int special_field )
 	}
 
 }
+
 
 
 bool is_legal_special_field( int special_field )

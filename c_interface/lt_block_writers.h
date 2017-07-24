@@ -16,10 +16,10 @@ extern "C" {
    \param[in] bdh    block_data_handle to write
 */
 int lt_block_writers_lammps_data( const char *fname, const char *w_mode,
-                                  lt_block_data_handle bdh );
+                                  const lt_block_data_handle *bdh );
 
 int lt_block_writers_lammps_dump( const char *fname, const char *w_mode,
-                                   lt_block_data_handle bdh );
+                                  const lt_block_data_handle *bdh );
 
 
 } // extern "C"

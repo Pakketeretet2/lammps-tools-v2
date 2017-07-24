@@ -267,12 +267,12 @@ TEST_CASE( "Tests if transformations work through C interface.", "[transformatio
 	lt_transformations_rotate_all( &bdh, axis, origin, angle );
 
 	const char *dname2 = "lammps_dump_file_test_rotate_c.dump.bin";
-	status = lt_block_writers_lammps_dump( dname2, "wb", bdh );
+	status = lt_block_writers_lammps_dump( dname2, "wb", &bdh );
 	REQUIRE( status == 0 );
 
 	double angle2 = 3.1415927 / 2.0;
 	lt_transformations_rotate_all( &bdh, axis, origin, angle2 );
-	status = lt_block_writers_lammps_dump( dname2, "ab", bdh );
+	status = lt_block_writers_lammps_dump( dname2, "ab", &bdh );
 	REQUIRE( status == 0 );
 
 

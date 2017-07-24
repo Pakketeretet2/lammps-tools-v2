@@ -58,6 +58,12 @@ struct lt_block_data_handle
 	lammps_tools::bigint n_atoms() const
 	{ return bd->N; }
 
+	void set_n_atoms( lammps_tools::bigint N )
+	{ bd->set_natoms( N ); }
+
+	void set_atom_style( int atom_style )
+	{ bd->atom_style = atom_style; }
+
 	int n_atom_types() const
 	{ return bd->tstep; }
 
@@ -66,6 +72,9 @@ struct lt_block_data_handle
 
 	int n_types() const
 	{ return bd->N_types; }
+
+	void set_n_types( int N )
+	{ bd->set_ntypes( N ); }
 
 	const lammps_tools::block_data &get_const_ref() const
 	{ return *bd; }
@@ -125,6 +134,32 @@ void lt_block_data_add_special_field( lt_block_data_handle *bdh,
                                       const lt_data_field_handle *dfh,
                                       int type );
 
+/**
+   \brief Sets the meta-data for the block_data.
+
+*/
+void lt_block_data_set_meta( lt_block_data_handle *bdh,
+                             lammps_tools::bigint tstep,
+                             lammps_tools::bigint natoms,
+                             double xlo, double xhi,
+                             double ylo, double yhi,
+                             double zlo, double zhi,
+                             int periodic_bits, int atom_style );
+
+void lt_block_data_set_domain( lt_block_data_handle *bdh,
+                               double xlo, double xhi,
+                               double ylo, double yhi,
+                               double zlo, double zhi,
+                               int periodic_bits );
+
+
+void lt_block_data_print_stats( lt_block_data_handle *bdh );
+
+void lt_block_data_remove_field( lt_block_data_handle *bdh, const char *name );
+void lt_block_data_swap_fields( lt_block_data_handle *bdh, const char *name,
+                                const lt_data_field_handle *df );
+
+
 } // extern "C"
 
 /**
@@ -145,8 +180,6 @@ const std::vector<double> &lt_special_field_double( lt_block_data_handle *bdh,
 */
 const std::vector<int> &lt_special_field_int( lt_block_data_handle *bdh,
                                               int special_field );
-
-
 
 
 
