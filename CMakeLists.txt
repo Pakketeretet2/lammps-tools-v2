@@ -21,6 +21,7 @@ add_library(lammpstools SHARED
   cpp_lib/dump_reader_lammps_bin.cpp
   cpp_lib/dump_reader_lammps_gzip.cpp
   cpp_lib/dump_reader_lammps_plain.cpp
+  cpp_lib/dump_reader_xyz.cpp
   cpp_lib/markov_state_model.cpp
   cpp_lib/msd.cpp
   cpp_lib/neighborize_bin.cpp

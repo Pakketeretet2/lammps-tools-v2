@@ -7,7 +7,6 @@
 
 #include "neighborize.hpp"
 
-#include <list>
 #include <vector>
 
 namespace lammps_tools {
@@ -30,18 +29,14 @@ namespace neighborize {
 */
 void find_molecular_networks( const block_data &b, const neigh_list &neighs,
                               neigh_list &conns,
-                              std::list<std::list<int> > &networks );
+                              neigh_list &networks );
 
-/**
-   Determines the size of the cluster each molecule belongs to.
+neigh_list get_molecular_connections( const block_data &b,
+                                      const neigh_list &neighs );
 
-   \param b        Block data to use molecular info from
-   \param neighs   Neighbour list to construct network from.
-   \returns a  vector containing the cluster sizes, indexed by mol id.
-*/
-void find_molecular_networks( const block_data &b, const neigh_list &neighs,
-                              neigh_list &conns,
-                              std::list<std::list<int> > &networks );
+neigh_list make_molecular_networks( const block_data &b,
+                                    const neigh_list &neighs,
+                                    const neigh_list &conns );
 
 
 

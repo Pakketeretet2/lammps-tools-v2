@@ -158,7 +158,9 @@ void lt_block_data_print_stats( lt_block_data_handle *bdh );
 void lt_block_data_remove_field( lt_block_data_handle *bdh, const char *name );
 void lt_block_data_swap_fields( lt_block_data_handle *bdh, const char *name,
                                 const lt_data_field_handle *df );
-
+int lt_block_data_get_domain_periodic( const lt_block_data_handle *bdh );
+const double *lt_block_data_get_domain_xlo( const lt_block_data_handle *bdh );
+const double *lt_block_data_get_domain_xhi( const lt_block_data_handle *bdh );
 
 } // extern "C"
 
@@ -180,6 +182,13 @@ const std::vector<double> &lt_special_field_double( lt_block_data_handle *bdh,
 */
 const std::vector<int> &lt_special_field_int( lt_block_data_handle *bdh,
                                               int special_field );
+
+const std::vector<double>
+lt_block_data_get_domain_xlo_vec( const lt_block_data_handle *bdh );
+
+const std::vector<double>
+lt_block_data_get_domain_xhi_vec( const lt_block_data_handle *bdh );
+
 
 
 

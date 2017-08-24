@@ -4,6 +4,7 @@
 #include "dump_reader_lammps_bin.hpp"
 #include "dump_reader_lammps_gzip.hpp"
 #include "dump_reader_lammps_plain.hpp"
+#include "dump_reader_xyz.hpp"
 
 #include <memory> // Smart pointers.
 
@@ -87,7 +88,12 @@ dump_reader *make_dump_reader( const std::string &fname,
 		if( fformat == FILE_FORMAT_BIN ){
 			// reader = dump_reader_namd_dcd( fname );
 		}
+	}else if( dformat == DUMP_FORMAT_XYZ ){
+		if( fformat == FILE_FORMAT_PLAIN ){
+			reader = new dump_reader_xyz( fname );
+		}
 	}
+
 	if( !reader ){
 		std::string msg = "Failed to construct reader; file format = ";
 		msg += fformat_to_str(fformat);
@@ -112,7 +118,12 @@ dump_reader *make_dump_reader( std::istream &input,
 		if( fformat == FILE_FORMAT_PLAIN ){
 			reader = make_dump_reader_lammps( input, dump_reader_lammps::LOCAL );
 		}
+	}else if( dformat == DUMP_FORMAT_XYZ ){
+		if( fformat == FILE_FORMAT_PLAIN ){
+			reader = new dump_reader_xyz( input );
+		}
 	}
+
 
 	if( !reader ){
 		std::string msg = "Failed to construct reader; file format = ";

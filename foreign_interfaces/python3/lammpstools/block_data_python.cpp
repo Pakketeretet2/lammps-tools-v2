@@ -55,6 +55,13 @@ PYBIND11_PLUGIN(block_data_) {
 	m.def("set_domain", &lt_block_data_set_domain,
 	      "Sets the domain of the block_data.");
 
+	m.def("get_domain_xlo", &lt_block_data_get_domain_xlo_vec,
+	      "Returns the xlo of the domain.");
+	m.def("get_domain_xhi", &lt_block_data_get_domain_xhi_vec,
+	      "Returns the xhi of the domain.");
+
+	m.def("get_domain_periodic", &lt_block_data_get_domain_periodic,
+	      "Returns the periodic bits.");
 
 	// And to mutate them:
 	m.def("swap_fields", &lt_block_data_swap_fields);

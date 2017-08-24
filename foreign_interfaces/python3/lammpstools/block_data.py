@@ -201,8 +201,6 @@ class block_data:
         if data_field.data_field(test_data_field).name() != d.name():
             raise RuntimeError("Data field mismatch!")
 
-        print("I just added a field named", d.name())
-
         # Reset name_mapping to force this to be in sync:
         self.store_name_mapping()
 
@@ -227,7 +225,46 @@ class block_data:
                                self.meta.domain.xlo[2], self.meta.domain.xhi[2],
                                self.meta.domain.periodic)
 
+def get_arrays_from_handle( handle, no_copy = False ):
+    """ Constructs data arrays from block_data_handle and returns them. """
+    xlo = block_data_.get_domain_xlo( handle )
+    xhi = block_data_.get_domain_xhi( handle )
+    per = block_data_.get_domain_periodic( handle )
 
+    dom = domain_data( np.array( [0.0,0.0,0.0] ),
+                       np.array( [0.0,0.0,0.0] ), 0 )
+    dom.xlo[0] = xlo[0]
+    dom.xlo[1] = xlo[1]
+    dom.xlo[2] = xlo[2]
+    dom.xhi[0] = xhi[0]
+    dom.xhi[1] = xhi[1]
+    dom.xhi[2] = xhi[2]
+    dom.periodic = per
+
+
+    # Read domain frm handle...
+
+    meta = block_meta( handle.time_step(), handle.n_atoms(), dom )
+
+    N = handle.n_atoms()
+    ids   = block_data_.special_field_int( handle, 0 )
+    types = block_data_.special_field_int( handle, 1 )
+    mol   = None
+    x = block_data_.special_field_double( handle, 3 )
+    y = block_data_.special_field_double( handle, 4 )
+    z = block_data_.special_field_double( handle, 5 )
+
+    if no_copy:
+        X = xyz_array_acessor( x, y, z )
+    else:
+        X = np.empty( [ N, 3], dtype = float )
+        X[:,0] = x
+        X[:,1] = y
+        X[:,2] = z
+
+    if( block_data_.has_special_field( handle, 2 ) ):
+        mol = block_data_.special_field_int( handle, 2 )
+    return meta, ids, types, X, mol
 
 class block_data_custom(block_data):
     """ The actual block data for atoms: """
@@ -242,30 +279,19 @@ class block_data_custom(block_data):
     @classmethod
     def init_from_handle(cls, handle, no_copy = False):
         """ Initialises from a block_data_handle. """
-        dom = domain_data( np.array( [0.0,0.0,0.0] ),
-                           np.array( [0.0,0.0,0.0] ), 0 )
-        meta = block_meta( handle.time_step(), handle.n_atoms(), dom )
-
-        N = handle.n_atoms()
-        ids   = block_data_.special_field_int( handle, 0 )
-        types = block_data_.special_field_int( handle, 1 )
-        mol   = None
-        x = block_data_.special_field_double( handle, 3 )
-        y = block_data_.special_field_double( handle, 4 )
-        z = block_data_.special_field_double( handle, 5 )
-
-        if no_copy:
-            X = xyz_array_acessor( x, y, z )
-        else:
-            X = np.empty( [ N, 3], dtype = float )
-            X[:,0] = x
-            X[:,1] = y
-            X[:,2] = z
-
-        if( block_data_.has_special_field( handle, 2 ) ):
-            mol = block_data_.special_field_int( handle, 2 )
+        meta, ids, types, X, mol = get_arrays_from_handle( handle )
         return cls(meta, ids, types, X, mol, handle)
 
+
+    def replace_data_field(self, name, new_data_field):
+        """ Replaces given data field from block data. """
+        block_data_.swap_fields( self.handle, name, new_data_field.handle )
+
+        meta, ids, types, x, mol = get_arrays_from_handle( self.handle )
+        if self.handle is None:
+            self.init_from_arrays(meta,ids,types,x,mol, True)
+        else:
+            self.init_from_arrays(meta,ids,types,x,mol, False)
 
     def init_from_arrays(self,meta,ids,types, x, mol = None,
                          add_fields_to_handle = False):

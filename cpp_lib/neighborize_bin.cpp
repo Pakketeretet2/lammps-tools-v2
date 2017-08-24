@@ -165,6 +165,7 @@ void neighborizer_bin::bin_atoms(  )
 		b.get_special_field( block_data::Y ) );
 	const std::vector<double> &z = data_as<double>(
 		b.get_special_field( block_data::Z ) );
+	// std::cerr << "x[3] = " << x[3] << ", " << y[3] << ", " << z[3] << "\n";
 
 	// Bin only the atoms in the second group. This way, you can
 	//    later loop over the first group, get their bin on-the-fly,

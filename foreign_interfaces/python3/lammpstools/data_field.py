@@ -12,6 +12,21 @@ class data_field:
     def size(self):
         return data_field_.get_size( self.handle )
 
+    def __len__(self):
+        return self.size()
+
+    def __iter__(self):
+        self.internal_iter_counter = 0
+        return self
+
+    def __next__(self):
+        if self.internal_iter_counter >= self.size():
+            raise StopIteration
+        
+        value = self.__getitem__(self.internal_iter_counter)
+        self.internal_iter_counter += 1
+        return value
+
     def type(self):
         return data_field_.get_type( self.handle )
 

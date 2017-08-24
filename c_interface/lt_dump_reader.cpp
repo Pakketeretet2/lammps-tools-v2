@@ -44,6 +44,8 @@ const char *lt_pretty_dump_format( int dformat )
 			return "hoomd";
 		case lammps_tools::DUMP_FORMAT_NAMD:
 			return "namd";
+		case lammps_tools::DUMP_FORMAT_XYZ:
+			return "XYZ";
 	}
 }
 

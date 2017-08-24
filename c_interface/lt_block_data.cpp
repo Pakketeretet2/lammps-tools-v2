@@ -137,6 +137,9 @@ void lt_block_data_set_domain( lt_block_data_handle *bdh,
 	bdh->bd->dom.xhi[2] = zhi;
 
 	bdh->bd->dom.periodic = periodic_bits;
+	double *nxlo = bdh->bd->dom.xlo;
+	double *nxhi = bdh->bd->dom.xlo;
+
 }
 
 
@@ -242,10 +245,49 @@ void lt_block_data_swap_fields( lt_block_data_handle *bdh, const char *name,
 	int spec_type = lammps_tools::block_data::special_fields::UNKNOWN;
 	lammps_tools::data_field *df = bdh->bd->remove_field( name, spec_type );
 
+	using dfd = lammps_tools::data_field_double;
+	const dfd *oldd = static_cast<const dfd*>( df );
+	const dfd *newd = static_cast<const dfd*>( new_df->get() );
+
 	if( spec_type != lammps_tools::block_data::special_fields::UNKNOWN ){
 		lt_block_data_add_special_field( bdh, new_df, spec_type );
 	}else{
 		lt_block_data_add_data_field( bdh, new_df );
 	}
 	delete df;
+}
+
+const std::vector<double>
+lt_block_data_get_domain_xlo_vec( const lt_block_data_handle *bdh )
+{
+	std::vector<double> xlo(3);
+	xlo[0] = bdh->bd->dom.xlo[0];
+	xlo[1] = bdh->bd->dom.xlo[1];
+	xlo[2] = bdh->bd->dom.xlo[2];
+	return xlo;
+}
+
+const std::vector<double>
+lt_block_data_get_domain_xhi_vec( const lt_block_data_handle *bdh )
+{
+	std::vector<double> xhi(3);
+	xhi[0] = bdh->bd->dom.xhi[0];
+	xhi[1] = bdh->bd->dom.xhi[1];
+	xhi[2] = bdh->bd->dom.xhi[2];
+	return xhi;
+}
+
+const double *lt_block_data_get_domain_xlo( const lt_block_data_handle *bdh )
+{
+	return bdh->bd->dom.xlo;
+}
+
+const double *lt_block_data_get_domain_xhi( const lt_block_data_handle *bdh )
+{
+	return bdh->bd->dom.xhi;
+}
+
+int lt_block_data_get_domain_periodic( const lt_block_data_handle *bdh )
+{
+	return bdh->bd->dom.periodic;
 }

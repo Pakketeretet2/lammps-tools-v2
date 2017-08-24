@@ -50,6 +50,7 @@ PYBIND11_PLUGIN(dump_reader_) {
 		.value("LAMMPS_LOCAL", DUMP_FORMAT_LAMMPS_LOCAL)
 		.value("HOOMD",  DUMP_FORMAT_HOOMD)
 		.value("NAMD",   DUMP_FORMAT_NAMD)
+		.value("XYZ",    DUMP_FORMAT_XYZ)
 		.value("UNSET",  DUMP_FORMAT_UNSET);
 
 	return m.ptr();

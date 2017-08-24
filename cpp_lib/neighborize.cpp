@@ -32,7 +32,6 @@ double neighborizer::build_list( neigh_list &neighs,
 	double avg_neighs = 0.0;
 	build( neighs, criterion );
 
-
 	switch( mol_policy ){
 		default:
 		case IGNORE:
@@ -262,7 +261,6 @@ double make_list_dist_indexed( neigh_list &neighs,
 		norm += 1.0;
 	}
 
-
 	return avg_neighs / norm;
 
 }
@@ -276,10 +274,24 @@ neigh_list nearest_neighs( const block_data &b,
 	neigh_list neighs;
 	double avg = make_list_dist( neighs, b, itype, jtype, method, dims, rc,
 	                             mol_policy, bond_policy, quiet );
-	std::cerr << "Average # of neighs = " << avg << "\n";
+	if( !quiet ) std::cerr << "Average # of neighs = " << avg << "\n";
 	return neighs;
 }
 
+
+
+neigh_list nearest_neighs_indexed( const block_data &b,
+                                   const std::vector<int> &ilist,
+                                   const std::vector<int> &jlist,
+                                   int method, int dims, double rc,
+                                   int mol_policy, int bond_policy, bool quiet )
+{
+	neigh_list neighs;
+	double avg = make_list_dist_indexed( neighs, b, ilist, jlist, method, dims, rc,
+	                                     mol_policy, bond_policy, quiet );
+	if( !quiet ) std::cerr << "Average # of neighs = " << avg << "\n";
+	return neighs;
+}
 
 
 void verify_unique( int i, int j, const neigh_list &neighs )

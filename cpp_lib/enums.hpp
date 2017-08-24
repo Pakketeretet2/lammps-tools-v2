@@ -34,7 +34,8 @@ enum LT_DUMP_READER_DUMP_FORMATS {
 	DUMP_FORMAT_LAMMPS = 0,    ///< LAMMPS dump file
 	DUMP_FORMAT_LAMMPS_LOCAL,  ///< LAMMPS dump file
 	DUMP_FORMAT_HOOMD,         ///< HOOMD-blue GSD dump file
-	DUMP_FORMAT_NAMD           ///< NAMD style DCD format
+	DUMP_FORMAT_NAMD,          ///< NAMD style DCD format
+	DUMP_FORMAT_XYZ            ///< Standard XYZ dump file.
 };
 
 }

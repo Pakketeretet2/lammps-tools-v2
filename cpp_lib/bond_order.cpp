@@ -14,10 +14,21 @@ double angle_2pi( const point &v1, const point &v2 )
 	point c = util::cross( v1, v2 );
 	double v1n = util::dot( v1, v1 );
 	double v2n = util::dot( v2, v2 );
-	my_assert( __FILE__, __LINE__, fabs( v1n - 1.0 ) < 1e-12,
-	           "v1 is not a unit vector!" );
-	my_assert( __FILE__, __LINE__, fabs( v2n - 1.0 ) < 1e-12,
-	           "v2 is not a unit vector!" );
+
+	bool v1_unit = fabs( v1n - 1.0 ) < 1e-12;
+	bool v2_unit = fabs( v2n - 1.0 ) < 1e-12;
+
+	if( !v1_unit ){
+		std::cerr << "v1 is not a unit vector but ( "
+		          << v1[0] << " " << v1[1] << " " << v1[2] << ")!\n";
+	}
+	if( !v2_unit ){
+		std::cerr << "v2 is not a unit vector but ( "
+		          << v2[0] << " " << v2[1] << " " << v2[2] << ")!\n";
+	}
+
+	my_assert( __FILE__, __LINE__, v1_unit && v2_unit,
+	           "v1 and/or v2 is not a unit vector!" );
 
 	double a = std::acos(d);
 
@@ -54,7 +65,6 @@ double compute_psi_n( const block_data &b,
 	std::vector<double> bond_counts( b.N, 0.0 );
 
 	// 2
-	std::cerr << "Gonna calculate stuff for " << bonds.size() << " bonds.\n";
 	for( std::size_t ii = 0; ii < bonds.size(); ++ii ){
 		const bond &bb = bonds[ii];
 		double angle = angles[ii];
@@ -82,6 +92,8 @@ double compute_psi_n( const block_data &b,
 	double psi_imag_avg = 0.0;
 	double psi_real_avg = 0.0;
 	for( int i = 0; i < b.N; ++i ){
+		if( bond_counts[i] == 0 ) continue;
+
 		psi_n_real[i] /= bond_counts[i];
 		psi_n_imag[i] /= bond_counts[i];
 
@@ -93,10 +105,6 @@ double compute_psi_n( const block_data &b,
 	int idx = im[ 1 ];
 	double psi_abs = std::sqrt( psi_n_real[idx]*psi_n_real[idx] +
 	                            psi_n_imag[idx]*psi_n_imag[idx] );
-	std::cerr << "psi for particle 1 is " << psi_n_real[idx]
-	          << " + " << psi_n_imag[idx] << "i, |psi| = "
-	          << psi_abs << "\n";
-
 
 	double inv_N = 1.0 / b.N;
 	psi_real_avg *= inv_N;
@@ -104,7 +112,7 @@ double compute_psi_n( const block_data &b,
 
 	double abs_psi = psi_real_avg*psi_real_avg + psi_imag_avg*psi_imag_avg;
 
-	return std::sqrt( abs_psi ) * inv_N;
+	return std::sqrt( abs_psi );
 }
 
 void relative_bond_angles( const block_data &b,

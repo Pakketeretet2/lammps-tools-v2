@@ -95,13 +95,6 @@ void block_data::add_field( const data_field &data_f, int special_field)
 	           "Atom number mismatch on add_field! Call set_natoms first!");
 	// Check if this name is already in block or not.
 	if( get_data( data_f.name ) != nullptr ){
-		std::cerr << "Name " << data_f.name << " was already "
-		          << "in block_data!\n";
-		for( std::size_t i = 0; i < n_data_fields(); ++i ){
-			const std::string &s = data[i]->name;
-			std::cerr << s << " ";
-		}
-		std::cerr << "\n";
 		my_runtime_error( __FILE__, __LINE__,
 		                  "Named data already in block_data" );
 	}
@@ -110,20 +103,40 @@ void block_data::add_field( const data_field &data_f, int special_field)
 	int index = data.size();
 	data.push_back( cp );
 
+
 	// std::cerr << "Now block_data has " << data.size() << " data fields.\n";
 	// Ignore some keys that are not unique for example:
 	if( !is_legal_special_field( special_field ) ){
+		// print_internal_state();
 		return;
 	}
-
 	my_assert( __FILE__, __LINE__,
 	           special_fields_by_index[special_field] == -1,
 	           "Special field already set!" );
 
 	special_fields_by_name[special_field]  = data_f.name;
 	special_fields_by_index[special_field] = index;
+
+	// print_internal_state();
 }
 
+void block_data::print_internal_state()
+{
+	std::cerr << " *** my " << data.size() << " fields are:";
+	for( const data_field *df : data ){
+		std::cerr << " " << df->name;
+	}
+	std::cerr << "\n";
+	std::cerr << " *** special_fields_by_name is\n        ";
+	for( const std::string &s : special_fields_by_name ){
+		std::cerr << " " << s;
+	}
+	std::cerr << "\n *** special_fields_by_index is\n        ";
+	for( int i : special_fields_by_index ){
+		std::cerr << " " << i;
+	}
+	std::cerr << "\n\n";
+}
 
 block_data &block_data::operator=( block_data o )
 {
@@ -189,10 +202,18 @@ std::string block_data::get_special_field_name( int field ) const
 data_field *block_data::remove_field( const std::string &name,
                                       int &special_field )
 {
-	data_field *df = get_data_rw( name );
+	// Delete the ptr from all vectors and maps.
+	int index = 0;
+	data_field *df = nullptr;
+	for( data_field *d : data ){
+		if( d->name == name ){
+			df = d;
+			break;
+		}
+		++index;
+	}
 	if( !df ) return nullptr;
 
-	// Delete the ptr from all vectors and maps.
 	data.erase( std::find(data.begin(), data.end(), df) );
 	bool found = false;
 
@@ -206,7 +227,16 @@ data_field *block_data::remove_field( const std::string &name,
 	if( found ){
 		special_fields_by_name[ special_field ] = "";
 		special_fields_by_index[ special_field ] = -1;
+
+		for( int &i : special_fields_by_index ){
+			if( i > index ){
+				--i;
+			}
+		}
 	}
+
+	// Check if this leaves the internal state correct:
+	// print_internal_state();
 	return df;
 }
 

@@ -50,15 +50,17 @@ class dump_reader:
 
         if dump_format == "LAMMPS":
             dformat = dump_reader_.DUMP_FORMATS.LAMMPS
+        elif dump_format == "XYZ":
+            dformat = dump_reader_.DUMP_FORMATS.XYZ
 
         if (fformat == dump_reader_.FILE_FORMATS.UNSET or
             dformat == dump_reader_.FILE_FORMATS.UNSET):
             raise RuntimeError("Dump or file format not recognised!")
 
-        #if is_local:
-        #    if fformat != dump_reader_.FILE_FORMATS.PLAIN:
-        #        raise RuntimeError("Dump style local only works for " +
-        #                           "plain text format!")
+        if is_local:
+            if fformat != dump_reader_.FILE_FORMATS.PLAIN:
+                raise RuntimeError("Dump style local only works for " +
+                                   "plain text format!")
 
         if self.local:
             # dformat = dump_reader_.DUMP_FORMATS.LAMMPS_LOCAL
@@ -107,7 +109,7 @@ class dump_reader:
             if self.local:
                 b = block_data.block_data_local( bh )
             else:
-                block_data_.print_stats( bh )
+                #block_data_.print_stats( bh )
                 b = block_data.block_data_custom.init_from_handle(
                     bh, self.no_block_data_copy )
             return b

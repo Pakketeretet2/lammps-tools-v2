@@ -236,6 +236,9 @@ private:
 
 	/// Contains a mapping of "special" fields to their respective indices
 	std::vector<int> special_fields_by_index;
+
+	/// Prints internal state of block_data
+	void print_internal_state();
 };
 
 

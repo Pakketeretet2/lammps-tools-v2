@@ -9,7 +9,6 @@
 #include "util.hpp"
 #include "writers.hpp"
 
-#include <list>
 #include <fstream>
 #include <vector>
 
@@ -116,7 +115,7 @@ TEST_CASE( "Cluster analysis on triangles", "[cluster_triangles]" ) {
 		                                    2, 3, DIST_BIN, dims, rc,
 		                                    mol_policy, bond_policy );
 		neigh_list conns;
-		std::list<std::list<int> > networks;
+		std::vector<std::vector<int> > networks;
 
 		find_molecular_networks ( b, neighs, conns, networks );
 		if( b.tstep == 0 ){
