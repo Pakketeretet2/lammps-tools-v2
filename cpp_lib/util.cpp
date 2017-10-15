@@ -1,8 +1,14 @@
 #include "util.hpp"
 
-#include <vector>
+
+#include <cstdio>
+#include <cstdlib>
 #include <string>
 #include <sstream>
+#include <vector>
+#include <unistd.h>
+
+#include "gsd.h"
 
 using namespace lammps_tools;
 
@@ -20,6 +26,9 @@ std::vector<std::string> split( std::string line )
 
 	return words;
 }
+
+
+
 
 } // namespace util
 

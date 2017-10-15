@@ -9,6 +9,6 @@
 
 
 #include "writers_lammps.hpp"
-
+#include "writers_hoomd.hpp"
 
 #endif // WRITERS_HPP

@@ -21,6 +21,9 @@ int lt_block_writers_lammps_data( const char *fname, const char *w_mode,
 int lt_block_writers_lammps_dump( const char *fname, const char *w_mode,
                                   const lt_block_data_handle *bdh );
 
+int lt_block_writers_hoomd_gsd( const char *fname, const char *w_mode,
+                                const lt_block_data_handle *bdh );
+
 
 } // extern "C"
 

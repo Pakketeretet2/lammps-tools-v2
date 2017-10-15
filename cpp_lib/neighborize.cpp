@@ -381,7 +381,7 @@ std::vector<bond> neigh_list_to_bonds( const block_data &b,
 {
 
 	std::vector<bond> bonds;
-	bigint bc = 1;
+	std::size_t bc = 1;
 	const std::vector<int> &id = get_id(b);
 	for( std::size_t i = 0; i < neighs.size(); ++i ){
 		for( int j : neighs[i] ){

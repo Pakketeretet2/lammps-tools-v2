@@ -15,10 +15,15 @@
 #include <sstream>
 #include <vector>
 
+#include "types.hpp"
 #include "zip.hpp"
 
-namespace lammps_tools {
 
+// Forward-declare for some utils.
+struct gsd_handle;
+
+
+namespace lammps_tools {
 
 /**
    \brief Wraps useful functions in a namespace to prevent name clashes.
@@ -404,7 +409,85 @@ double dot( const double *c1, const double *c2 )
 	return ddot;
 }
 
-// Iterates
+
+/**
+   \brief extracts next UTF-16 char from char stream
+
+   \param stream The stream to read
+   \param c      The extracted UTF character
+
+   \returns the number of bytes the character actually is, or 0 on error.
+*/
+inline
+int next_utf16_char( const char *stream, utf16_char &c, int size )
+{
+	utf16_char tmp;
+	for( int i = 0; i < 4 && i < size; ++i ){
+		tmp.c[i] = stream[i];
+	}
+	c.c[0] = c.c[1] = c.c[2] = c.c[3] = 0;
+
+	if( tmp.c[0] < 0x80 ){
+		// One bit suffices, this is a normal ASCII char.
+		c.c[0] = tmp.c[0];
+		return 1;
+	}
+
+	// If still here, if might be UTF-8.
+	utf8_char utf8;
+	utf8.c[0] = tmp.c[0];
+	utf8.c[1] = tmp.c[1];
+	if( utf8.d < 0x800 ){
+		// It was indeed UTF-8.
+		c.c[0] = utf8.c[0];
+		c.c[1] = utf8.c[1];
+		return 2;
+	}
+
+	// If still here, it might be UTF-16.
+	utf16_char utf16;
+	utf16.c[0] = tmp.c[0];
+	utf16.c[1] = tmp.c[1];
+	utf16.c[2] = tmp.c[1];
+
+	if( utf16.d < 0x10000 ){
+		// It was indeed UTF-8.
+		c.c[0] = utf16.c[0];
+		c.c[1] = utf16.c[1];
+		c.c[2] = utf16.c[2];
+		return 3;
+	}
+
+	// From here on out I don't support yet.
+	return 0;
+}
+
+
+/**
+   \brief "downcasts" a utf16 to a utf8 character.
+
+   \param src  The char to downcast
+   \param dest The destination to cast to.
+
+   If the downcast could not be made without information loss,
+   dest shall be unchanged.
+
+   \returns 0 if the utf16 could be cast without info loss, -1 otherwise.
+*/
+inline
+int down_cast_utf16_char( const utf16_char &src, utf8_char &dest )
+{
+	if( src.d < 0x800 ){
+		// Was utf.
+		dest.c[0] = src.c[0];
+		dest.c[1] = src.c[1];
+		return 0;
+	}else{
+		return -1;
+	}
+}
+
+
 
 } // namespace util
 

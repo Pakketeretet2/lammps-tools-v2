@@ -1,5 +1,6 @@
 #include "dump_reader.hpp"
 
+#include "dump_reader_hoomd_gsd.hpp"
 #include "dump_reader_lammps.hpp"
 #include "dump_reader_lammps_bin.hpp"
 #include "dump_reader_lammps_gzip.hpp"
@@ -12,11 +13,35 @@ namespace lammps_tools {
 
 namespace readers {
 
+/**
+   \brief adds type names that reflect the integer types of the particles.
+
+   \param block The block to modify.
+*/
+
+void set_type_names_to_type( block_data &block )
+{
+	block.ati.type_names[0] = "__UNUSED__";
+	for( std::size_t i = 1; i < block.ati.type_names.size(); ++i ){
+		block.ati.type_names[i] = std::to_string( i );
+	}
+}
+
 
 int dump_reader::next_block( block_data &block, bool warn_if_no_special )
 {
 	int status = get_next_block( block );
-	if( status ) return status;
+	if( status ){
+		if( check_eof() ){
+			std::cerr << "Reached EOF.\n";
+		}else{
+			std::cerr << "Encountered status = " << status
+			          << " in next_block!\n";
+			my_warning( __FILE__, __LINE__,
+			            "Status != 0 while getting block" );
+		}
+		return status;
+	}
 
 	if( warn_if_no_special && (block.n_special_fields() == 0) ){
 		dump_reader_lammps *drl;
@@ -26,17 +51,20 @@ int dump_reader::next_block( block_data &block, bool warn_if_no_special )
 			my_warning( __FILE__, __LINE__,
 			            "Block has no special fields!" );
 		}
-
 	}
-
 
 	// You might have read in atom types. In this case, make sure
 	// the block data knows that.
 	if( auto df = block.get_special_field( block_data::TYPE ) ){
 		const std::vector<int> &types = data_as<int>( df );
 		int ntypes = *std::max_element( types.begin(), types.end() );
+		bool fix_names = false;
+		if( block.ati.type_names.empty() ) fix_names = true;
+
 		block.set_ntypes( ntypes );
+		if( fix_names ) set_type_names_to_type( block );
 	}
+
 	return status;
 }
 
@@ -82,7 +110,7 @@ dump_reader *make_dump_reader( const std::string &fname,
 		reader = make_dump_reader_lammps( fname, fformat, dump_reader_lammps::LOCAL );
 	}else if( dformat == DUMP_FORMAT_HOOMD ){
 		if( fformat == FILE_FORMAT_BIN ){
-			// reader = dump_reader_hoomd_gsd( fname );
+			reader = new dump_reader_hoomd_gsd( fname );
 		}
 	}else if( dformat == DUMP_FORMAT_NAMD ){
 		if( fformat == FILE_FORMAT_BIN ){

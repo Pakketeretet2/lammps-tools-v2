@@ -58,11 +58,11 @@ double compute_psi_n( const block_data &b,
 
 	// 1
 	relative_bond_angles( b, neighs, axis, bonds, angles );
+	std::size_t N = b.N;
+	if( psi_n_real.size() != N ) psi_n_real.resize( N );
+	if( psi_n_imag.size() != N ) psi_n_imag.resize( N );
 
-	if( psi_n_real.size() != b.N ) psi_n_real.resize( b.N );
-	if( psi_n_imag.size() != b.N ) psi_n_imag.resize( b.N );
-
-	std::vector<double> bond_counts( b.N, 0.0 );
+	std::vector<double> bond_counts( N, 0.0 );
 
 	// 2
 	for( std::size_t ii = 0; ii < bonds.size(); ++ii ){
@@ -91,7 +91,7 @@ double compute_psi_n( const block_data &b,
 	// 3:
 	double psi_imag_avg = 0.0;
 	double psi_real_avg = 0.0;
-	for( int i = 0; i < b.N; ++i ){
+	for( std::size_t i = 0; i < N; ++i ){
 		if( bond_counts[i] == 0 ) continue;
 
 		psi_n_real[i] /= bond_counts[i];
@@ -101,12 +101,7 @@ double compute_psi_n( const block_data &b,
 		psi_real_avg += psi_n_real[i];
 	}
 
-	id_map im( id );
-	int idx = im[ 1 ];
-	double psi_abs = std::sqrt( psi_n_real[idx]*psi_n_real[idx] +
-	                            psi_n_imag[idx]*psi_n_imag[idx] );
-
-	double inv_N = 1.0 / b.N;
+	double inv_N = 1.0 / N;
 	psi_real_avg *= inv_N;
 	psi_imag_avg *= inv_N;
 
@@ -125,7 +120,7 @@ void relative_bond_angles( const block_data &b,
 	const std::vector<double> &x = get_x(b);
 	const std::vector<double> &y = get_y(b);
 	const std::vector<double> &z = get_z(b);
-	const std::vector<int> &id = get_id(b);
+
 
 	double ax_norm2 = util::dot( axis, axis );
 	double inv_ax_norm  = 1.0 / std::sqrt( ax_norm2 );

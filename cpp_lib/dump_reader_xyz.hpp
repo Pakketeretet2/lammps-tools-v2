@@ -1,6 +1,13 @@
 #ifndef DUMP_READER_XYZ_HPP
 #define DUMP_READER_XYZ_HPP
 
+/**
+   \file dump_reader_xyz.hpp
+
+   Contains declaration for a dump reader for XYZ files.
+*/
+
+
 #include "dump_reader.hpp"
 #include "block_data.hpp"
 
@@ -20,9 +27,11 @@ namespace readers {
 class dump_reader_xyz : public dump_reader
 {
 public:
+	/// Constructor that takes file name
 	dump_reader_xyz( const std::string &fname );
+	/// Constructor that takes input stream
 	dump_reader_xyz( std::istream &istream );
-
+	/// Empty destructor
 	virtual ~dump_reader_xyz();
 
 private:

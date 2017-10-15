@@ -16,7 +16,7 @@ void add_conns_to_network( const neigh_list &conns, neigh_list &networks )
 			mol_out[i] = true;
 			network.push_back( i );
 
-			for( int it = 0; it < network.size(); ++it ){
+			for( std::size_t it = 0; it < network.size(); ++it ){
 				int j = network[it];
 				const std::vector<int> &j_neighs = conns[j];
 				for( int o_mol : j_neighs ){
@@ -46,16 +46,17 @@ neigh_list get_molecular_connections( const block_data &b,
 {
 	const std::vector<int> &mol = data_as<int>(
 		b.get_special_field( block_data::MOL ) );
-	const std::vector<int> &id = data_as<int>(
-		b.get_special_field( block_data::ID ) );
 
 	int max_mol = *std::max_element( mol.begin(), mol.end() );
 	neigh_list conns( max_mol + 1 );
+	const std::vector<int> &type = data_as<int>(
+		b.get_special_field( block_data::TYPE ) );
+
 	for( std::size_t i = 0; i < neighs.size(); ++i ){
 		int mol_i = mol[i];
+
 		for( int j : neighs[i] ){
 			int mol_j = mol[j];
-
 			if( mol_i == mol_j ) continue;
 
 			if( util::contains( conns[mol_i], mol_j ) ||
@@ -67,7 +68,7 @@ neigh_list get_molecular_connections( const block_data &b,
 	}
 
 	std::ofstream ct( "conn.test" );
-	for( int i = 1; i < conns.size(); ++i ){
+	for( std::size_t i = 1; i < conns.size(); ++i ){
 		ct << i << " ";
 		for( int j : conns[i] ){
 			ct << " " << j;

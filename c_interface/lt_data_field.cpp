@@ -4,7 +4,7 @@
 
 lt_data_field_handle::lt_data_field_handle( const char *name,
                                             int type, int size )
-	: df(df_), df_(nullptr), df_rw(nullptr)
+	: df_(nullptr), df(df_), df_rw(nullptr), clean_up(false)
 {
 	switch( type ){
 		case DATA_FIELD_DOUBLE:

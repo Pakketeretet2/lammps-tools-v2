@@ -1,6 +1,8 @@
 #ifndef ENUMS_HPP
 #define ENUMS_HPP
 
+#include <limits.h> // For CHAR_BIT
+
 /**
    \file enums.hpp
 
@@ -37,6 +39,16 @@ enum LT_DUMP_READER_DUMP_FORMATS {
 	DUMP_FORMAT_NAMD,          ///< NAMD style DCD format
 	DUMP_FORMAT_XYZ            ///< Standard XYZ dump file.
 };
+
+/**
+   \brief Buffer size for GSD files:
+*/
+namespace gsd {
+
+enum { TYPE_BUFFER_SIZE = 64 };
+
+
+} // namespace gsd
 
 }
 

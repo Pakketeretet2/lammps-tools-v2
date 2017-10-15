@@ -8,6 +8,7 @@
 */
 
 #include <algorithm>
+#include <string>
 #include <vector>
 
 namespace lammps_tools {
@@ -18,6 +19,7 @@ namespace lammps_tools {
 struct atom_type_info
 {
 	std::vector<double> mass;
+	std::vector<std::string> type_names;
 
 	atom_type_info();
 	explicit atom_type_info( int n_types );

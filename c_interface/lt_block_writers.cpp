@@ -2,9 +2,11 @@
 
 #include "../cpp_lib/enums.hpp"
 
-#include <iostream>
-#include <string>
 #include <cstring>
+#include <iostream>
+#include <fstream>
+#include <string>
+
 
 int lt_block_writers_lammps_data_file( const char *fname, const char *w_mode,
                                        const lt_block_data_handle *bdh )
@@ -92,6 +94,23 @@ int lt_block_writers_lammps_dump( const char *fname, const char *w_mode,
 	return 0;
 }
 
+
+int lt_block_writers_hoomd_gsd( const char *fname, const char *w_mode,
+                                const lt_block_data_handle * bdh )
+{
+
+	if( std::strcmp( fname, "-" ) == 0 ){
+		std::cerr << "Writing HOOMD to stdout is not supported!\n";
+		return -1;
+	}
+
+
+	return lammps_tools::writers::block_to_hoomd_gsd( fname, *bdh->bd,
+	                                                  w_mode );
+}
+
+
+
 int c_like_open_out_file( const char *fname, const char *w_mode,
                           std::ofstream &out, std::ios_base::openmode &wmode )
 {
@@ -139,7 +158,7 @@ int c_like_open_out_file( const char *fname, const char *w_mode,
 				break;
 		}
 	}
-
-	out = std::ofstream( fname, wmode );
+	out.open( fname, wmode );
+	// out = std::ofstream( fname, wmode );
 	return 0;
 }

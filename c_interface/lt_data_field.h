@@ -23,13 +23,12 @@ struct lt_data_field_handle
 {
 private:
 	lammps_tools::data_field *df_;
-
 	const lammps_tools::data_field *df;
 	lammps_tools::data_field *df_rw;
 	bool clean_up;
 public:
 	lt_data_field_handle() :
-		df_(nullptr), clean_up(false), df(df_), df_rw(nullptr){}
+		df_(nullptr), df(df_), df_rw(nullptr), clean_up(false) {}
 
 	explicit lt_data_field_handle( const lammps_tools::data_field *df );
 	explicit lt_data_field_handle( lammps_tools::data_field *df );

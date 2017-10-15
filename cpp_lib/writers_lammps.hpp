@@ -9,10 +9,10 @@
 
 #include <string>
 #include <iosfwd>
-#include "block_data.hpp"
-#include "dump_reader.hpp"
 
 namespace lammps_tools {
+
+class block_data;
 
 /// \brief Contains functions for writing data.
 namespace writers {

@@ -16,6 +16,18 @@ namespace lammps_tools {
 
 typedef int64_t       bigint;    ///< signed long of guaranteed size (64 bits)
 
+/// Use a union to easily read specific data from binary:
+template <typename data_type>
+union data_char_templ {
+	data_type d;
+	char c[sizeof(data_type)];
+};
+
+
+typedef data_char_templ<int32_t> utf32_char;
+typedef data_char_templ<int16_t> utf16_char;
+typedef data_char_templ<int8_t> utf8_char;
+typedef data_char_templ<char> ascii_char;
 
 
 

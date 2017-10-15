@@ -137,9 +137,6 @@ void lt_block_data_set_domain( lt_block_data_handle *bdh,
 	bdh->bd->dom.xhi[2] = zhi;
 
 	bdh->bd->dom.periodic = periodic_bits;
-	double *nxlo = bdh->bd->dom.xlo;
-	double *nxhi = bdh->bd->dom.xlo;
-
 }
 
 
@@ -169,7 +166,7 @@ void lt_block_data_set_data_impl( lt_block_data_handle *bdh,
 	}
 
 	std::cerr << "Field is " << field << ", dfh = " << dfh.get() << "\n";
-	for( int i = 0; i < data.size(); ++i ){
+	for( std::size_t i = 0; i < data.size(); ++i ){
 		(*field)[i] = data[i];
 	}
 
@@ -210,7 +207,7 @@ void lt_block_data_print_stats( lt_block_data_handle *bdh )
 	std::cerr << "  " << bdh->n_types() << " types\n";
 	std::cerr << "  " << b->n_data_fields() << " data fields:\n";
 
-	for( int i = 0; i < b->n_data_fields(); ++i ){
+	for( uint i = 0; i < b->n_data_fields(); ++i ){
 		std::cerr << "    " << (*b)[i].name << "\n";
 	}
 	std::cerr << "  " << b->n_special_fields() << " special fields:\n";
@@ -244,10 +241,6 @@ void lt_block_data_swap_fields( lt_block_data_handle *bdh, const char *name,
 {
 	int spec_type = lammps_tools::block_data::special_fields::UNKNOWN;
 	lammps_tools::data_field *df = bdh->bd->remove_field( name, spec_type );
-
-	using dfd = lammps_tools::data_field_double;
-	const dfd *oldd = static_cast<const dfd*>( df );
-	const dfd *newd = static_cast<const dfd*>( new_df->get() );
 
 	if( spec_type != lammps_tools::block_data::special_fields::UNKNOWN ){
 		lt_block_data_add_special_field( bdh, new_df, spec_type );
