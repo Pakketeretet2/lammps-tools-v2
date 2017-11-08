@@ -19,6 +19,11 @@ void compute_rdf( const block_data &b, int Nbins, double r0, double r1,
 	compute_rdf_with_neighs( b, Nbins, r0, r1, dims, neighs, rdf, coord );
 }
 
+void test_indentation( double x )
+{
+	std::cerr << "poop!\n";
+}
+
 void compute_rdf_with_neighs( const block_data &b, int Nbins,
                               double r0, double r1, int dims,
                               const neigh_list &neighs,
@@ -27,7 +32,6 @@ void compute_rdf_with_neighs( const block_data &b, int Nbins,
 {
 	rdf.resize( Nbins );
 	coord.resize( Nbins );
-
 	double dr = ( r1 - r0 ) / ( Nbins - 1 );
 	for( int i = 0; i < Nbins; ++i ){
 		rdf[i] = coord[i] = 0.0;

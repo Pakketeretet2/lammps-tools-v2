@@ -17,6 +17,7 @@ add_library(lammpstools SHARED
   cpp_lib/data_reader_lammps.cpp
   cpp_lib/domain.cpp
   cpp_lib/dump_reader.cpp
+  cpp_lib/dump_reader_hoomd_gsd.cpp
   cpp_lib/dump_reader_lammps.cpp
   cpp_lib/dump_reader_lammps_bin.cpp
   cpp_lib/dump_reader_lammps_gzip.cpp
@@ -34,6 +35,7 @@ add_library(lammpstools SHARED
   cpp_lib/transformations.cpp
   cpp_lib/triangulate.cpp
   cpp_lib/util.cpp
+  cpp_lib/writers_hoomd.cpp
   cpp_lib/writers_lammps.cpp
   c_interface/lt_block_data.cpp
   c_interface/lt_block_writers.cpp
@@ -96,7 +98,7 @@ endif(USE_ARMADILLO)
 
 
 if(USE_GSD)
-  set(GSD_DIR "dependencies/gsd/")
+  set(GSD_DIR "../dependencies/gsd/")
   set(GSD_C_SOURCE "${GSD_DIR}/gsd.c")
   target_sources(lammpstools PRIVATE ${GSD_C_SOURCE})
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -DHAVE_GSD -I${GSD_DIR}")
@@ -122,3 +124,7 @@ endif(LEGACY_COMPILER)
 if(USE_EXCEPTIONS)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_EXCEPTIONS")
 endif(USE_EXCEPTIONS)
+
+
+message("CMAKE_CXX_FLAGS is ${CMAKE_CXX_FLAGS}")
+message("target_sources are ${target_sources}")
