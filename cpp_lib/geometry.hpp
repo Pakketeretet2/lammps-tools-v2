@@ -73,9 +73,88 @@ struct point
 		return -1.337;
 	}
 
+	double norm2() const
+	{ return x*x + y*y + z*z; }
+
+	double norm() const
+	{ return sqrt(norm2()); }
+
+
+	point &operator+=( const point &o )
+	{
+		x += o.x;
+		y += o.y;
+		z += o.z;
+		return *this;
+	}
+
+	point &operator-=( const point &o )
+	{
+		x -= o.x;
+		y -= o.y;
+		z -= o.z;
+		return *this;
+	}
+
+	point &operator*=( double f )
+	{
+		x *= f;
+		y *= f;
+		z *= f;
+		return *this;
+	}
+
+	point &operator/=( double f )
+	{
+		double invf = 1.0 / f;
+		(*this) *= invf;
+		return *this;
+	}
+
+	operator const double* () const
+	{ return &x; }
 
 	double x, y, z;
 };
+
+inline
+point operator+( point p, point o )
+{
+	p += o;
+	return p;
+}
+
+inline
+point operator-( point p, point o )
+{
+	p -= o;
+	return p;
+}
+
+inline
+point operator*( point p, double f )
+{
+	p *= f;
+	return p;
+}
+
+inline
+point operator*( double f, point p )
+{
+	p *= f;
+	return p;
+}
+
+
+inline
+point operator/( point p, double f )
+{
+	p /= f;
+	return p;
+}
+
+
+
 
 /**
    \brief A quaternion.

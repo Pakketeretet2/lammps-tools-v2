@@ -10,13 +10,14 @@ def neigh_list_dist( block_data, itype, jtype, method, dims, rc,
     else:
         raise RuntimeError("Unknown method",method,"!")
 
-    return neighborize_.nearest_neighbours_dist( block_data.get_ref_(),
-                                                 itype, jtype,
-                                                 mmethod, dims, rc,
-                                                 mol_policy,
-                                                 bond_policy, quiet )
+    return neighborize_.nearest_neighbors_dist( block_data.get_ref_(),
+                                                itype, jtype,
+                                                mmethod, dims, rc,
+                                                mol_policy,
+                                                bond_policy, quiet )
 
-def neigh_list_dist_indexed( block_data, itype, jtype, method, dims, rc,
+
+def neigh_list_dist_indexed( block_data, i_idxs, j_idxs, method, dims, rc,
                              mol_policy = 0, bond_policy = 0, quiet = True ):
     if method == "BIN":
         mmethod = 1
@@ -25,23 +26,23 @@ def neigh_list_dist_indexed( block_data, itype, jtype, method, dims, rc,
     else:
         raise RuntimeError("Unknown method",method,"!")
 
-    itype_vec = block_data_.VectorInt(itype)
-    jtype_vec = block_data_.VectorInt(jtype)
+    i_idx_vec = block_data_.VectorInt(i_idxs)
+    j_idx_vec = block_data_.VectorInt(j_idxs)
 
-    return neighborize_.nearest_neighbours_dist_indexed( block_data.get_ref_(),
-                                                         itype_vec, jtype_vec,
-                                                         mmethod, dims, rc,
-                                                         mol_policy,
-                                                         bond_policy, quiet )
+    return neighborize_.nearest_neighbors_dist_indexed( block_data.get_ref_(),
+                                                        i_idx_vec, j_idx_vec,
+                                                        mmethod, dims, rc,
+                                                        mol_policy,
+                                                        bond_policy, quiet )
 
 
 
-def neighbour_strain( block_data, r0, itype, jtype, method, dims, rc ):
-    return neighborize_.neighbour_strain( block_data.get_ref_(), r0,
-                                          itype, jtype, method, dims, rc )
+def neighbor_strain( block_data, r0, itype, jtype, method, dims, rc ):
+    return neighborize_.neighbor_strain( block_data.get_ref_(), r0,
+                                         itype, jtype, method, dims, rc )
 
 def molecular_connections( b, neighs ):
     return neighborize_.molecular_connections( b.get_ref_(), neighs )
 
-def molecular_network( b, neighs, conns ):
-    return neighborize_.molecular_network( b.get_ref_(), neighs, conns )
+def get_empty_neighbor_list():
+    return neighborize_.get_empty_neighbor_list()

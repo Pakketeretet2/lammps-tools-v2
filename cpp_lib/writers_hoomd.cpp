@@ -18,7 +18,7 @@ namespace writers {
 
 
 int block_to_hoomd_gsd( const std::string &fname, const block_data &b,
-                         const std::string &write_mode )
+                        const std::string &write_mode )
 {
 #ifndef HAVE_GSD
 	my_runtime_error( __FILE__, __LINE__,

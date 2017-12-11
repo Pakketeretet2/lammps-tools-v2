@@ -8,6 +8,18 @@
 PYBIND11_MAKE_OPAQUE(std::vector<int>)
 PYBIND11_MAKE_OPAQUE(std::vector<double>)
 
+const void *vector_int_to_cptr( const std::vector<int> &v )
+{
+	return v.data();
+}
+
+const void *vector_double_to_cptr( const std::vector<double> &v )
+{
+	return v.data();
+}
+
+
+
 PYBIND11_PLUGIN(block_data_) {
 	pybind11::module m("block_data_", "Exposes block_data through pybind11");
 
@@ -44,6 +56,16 @@ PYBIND11_PLUGIN(block_data_) {
 	m.def("data_by_name", &lt_data_by_name,
 	      "Get data field by name");
 
+	// Allow grabbing the raw pointer of VectorInt and VectorDouble,
+	// but make sure Python does not delete stuff.
+	m.def("get_vector_int_ptr", &vector_int_to_cptr,
+	      pybind11::return_value_policy::reference,
+	      "Exposes the pointer to the raw data in a VectorInt");
+	m.def("get_vector_double_ptr", &vector_double_to_cptr,
+	      pybind11::return_value_policy::reference,
+	      "Exposes the pointer to the raw data in a VectorInt");
+
+
 	// Some options to add data fields:
 	m.def("add_data_field", &lt_block_data_add_data_field,
 	      "Adds a data field to given block_data.");
@@ -72,6 +94,16 @@ PYBIND11_PLUGIN(block_data_) {
 	m.def("print_stats", &lt_block_data_print_stats,
 	      "Prints info about the C++-side of block_data");
 
+	// To filter:
+	m.def("filter_block_data", &lt_block_data_filter,
+	      "Filters block_data based on indices." );
+
+	// To create handles for new blocks:
+	m.def( "new_block_data", &lt_new_block_data_handle,
+	       "Creates a new block_data_handle." );
+	m.def("delete_block_data", &lt_delete_block_data_handle,
+	      "To delete a dynamically-created block_data_handle." );
+
 
 	pybind11::enum_<lammps_tools::block_data::special_fields>(m, "SPECIAL_COLS")
 		.value("ID", lammps_tools::block_data::ID)
@@ -85,7 +117,11 @@ PYBIND11_PLUGIN(block_data_) {
 		.value("VZ", lammps_tools::block_data::VZ)
 		.value("IX", lammps_tools::block_data::IX)
 		.value("IY", lammps_tools::block_data::IY)
-		.value("IZ", lammps_tools::block_data::IZ);
+		.value("IZ", lammps_tools::block_data::IZ)
+		.value("ORIENT_X", lammps_tools::block_data::ORIENT_X)
+		.value("ORIENT_Y", lammps_tools::block_data::ORIENT_Y)
+		.value("ORIENT_Z", lammps_tools::block_data::ORIENT_Z)
+		.value("ORIENT_W", lammps_tools::block_data::ORIENT_W);
 
 
 	return m.ptr();

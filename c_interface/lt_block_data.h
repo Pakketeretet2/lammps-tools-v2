@@ -26,7 +26,6 @@ struct lt_block_data_handle
 {
 	lt_block_data_handle() : bd(nullptr)
 	{
-		using lammps_tools::util::make_unique;
 		bd = new lammps_tools::block_data;
 	}
 
@@ -49,6 +48,10 @@ struct lt_block_data_handle
 
 	~lt_block_data_handle()
 	{
+		/*
+		std::cerr << "This is the destructor of " << this
+		          << ", I am going to delete data @" << bd << "\n";
+		*/
 		if( bd ) delete bd;
 	}
 
@@ -182,6 +185,27 @@ const std::vector<double> &lt_special_field_double( lt_block_data_handle *bdh,
 */
 const std::vector<int> &lt_special_field_int( lt_block_data_handle *bdh,
                                               int special_field );
+
+/**
+   \brief Creates a new, empty block_data_handle.
+*/
+lt_block_data_handle *lt_new_block_data_handle();
+
+/**
+   \brief Deletes a block_data_handle
+*/
+void lt_delete_block_data_handle( lt_block_data_handle *bdh );
+
+
+/**
+   \brief Stores filtered block_data in given handle.
+
+   \warning This function deletes whatever was in the old handle!
+*/
+void lt_block_data_filter( lt_block_data_handle *dest, int size, const void *ids,
+                           const lt_block_data_handle *src );
+
+
 
 const std::vector<double>
 lt_block_data_get_domain_xlo_vec( const lt_block_data_handle *bdh );

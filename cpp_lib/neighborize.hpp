@@ -106,6 +106,7 @@ public:
 	int bond_policy;
 
 	const std::vector<int> &s1, &s2;
+
 private:
 
 	int append_particles_in_mol( neigh_list &neighs );
@@ -174,8 +175,7 @@ double make_list_dist( neigh_list &neighs,
    \param rc             Consider atoms less than this apart as neighbour
    \param mol_policy     Specifies how to take molecule ID into account.
    \param bond_policy    Specifies how to take bond topology into account.
-   \param filter         Add only particles with filter(particle_ID) == true
-   \param neigh_est      A guess for the number of neighbours.
+   \param quiet          If true, don't output a lot of info.
 
    \returns The average number of neighbours per particle.
 */
@@ -270,6 +270,16 @@ std::vector<bond> neigh_list_to_bonds( const block_data &b,
                                        const neighborize::neigh_list &neighs,
                                        int btype = 1);
 
+/**
+   \brief Converts neighbour list into a connectivity network.
+*/
+neigh_list neigh_list_to_network( const neigh_list &neighs, int min_idx = 0 );
+
+
+/**
+   \brief Returns an empty neighbor list.
+*/
+neigh_list get_empty_neigh_list();
 
 
 } // namespace neighborize

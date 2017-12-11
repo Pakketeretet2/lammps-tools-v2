@@ -295,10 +295,12 @@ int dump_reader_hoomd_gsd::add_optional_data( block_data &b, T &data, uint n_fie
                                               const std::vector<std::string> &names )
 {
 	// If the data could not be found this block, we defaulted
-	// to store_data. If the data was _never_ encountered, store_data
-	// is empty, and hence, so will the data. Therefore, we can check
-	// data.empty() to make sure this optional data is not present at all.
-	if( data.empty() ) return 1;
+	// to store_data. If the data was _not_ in the first run encountered,
+	// store_data is empty, and hence, so will the data. Therefore, we can
+	// check data.empty() to make sure this optional data is not present at all.
+	if( data.empty() ){
+		data.resize( n_fields * b.N );
+	}
 
 	std::size_t stride = names.size();
 
@@ -388,6 +390,7 @@ int dump_reader_hoomd_gsd::get_next_block( block_data &block )
 
 	status = get_chunk_data( "particles/N", &N, 1, &store_N );
 	if( status != 0 && status != 2 ) return status;
+
 
 	tmp.tstep = tstep;
 	tmp.dom.xlo[0] = -0.5*box[0];
@@ -484,32 +487,36 @@ int dump_reader_hoomd_gsd::get_next_block( block_data &block )
 	std::vector<float> v( 3*N );
 	status = get_chunk_data( "particles/velocity", v, store_v );
 	if( status != 0 && status != 2 ) return status;
-	if( status == 2 ) optional_data_found[VELOCITY] = 1;
+	if( status == 0 ) optional_data_found[VELOCITY] = 1;
 
 	std::vector<float> o( 4*N );
 	status = get_chunk_data( "particles/orientation", o, store_orient );
 	if( status != 0 && status != 2 ) return status;
-	if( status == 2 ) optional_data_found[ORIENTATION] = 1;
+	if( status == 0 ) optional_data_found[ORIENTATION] = 1;
 
 	std::vector<float> moment_inertia(3*N);
 	status = get_chunk_data( "particles/moment_inertia", moment_inertia,
 	                         store_moment_inertia );
 	if( status != 0 && status != 2 ) return status;
-	if( status == 2 ) optional_data_found[MOMENT_INERTIA] = 1;
-
+	if( status == 0 ) optional_data_found[MOMENT_INERTIA] = 1;
 
 	constexpr const int double_type = data_field::DOUBLE;
 	constexpr const int int_type = data_field::INT;
 
-	add_optional_data<double_type>( tmp, v, 3, { "v.x", "v.y", "vz" } );
+	if( optional_data_found[VELOCITY] ){
+		add_optional_data<double_type>( tmp, v, 3, { "v.x", "v.y", "vz" } );
+	}
 
-	add_optional_data<double_type>( tmp, o, 4,
-	                                { "orientation.x", "orientation.y",
-	                                  "orientation.z", "orientation.w" } );
-
-	add_optional_data<double_type>( tmp, moment_inertia, 3,
-	                                { "mom_inertia.x", "mom_inertia.y",
-	                                  "mom_inertia.z" } );
+	if( optional_data_found[ORIENTATION] ){
+		add_optional_data<double_type>( tmp, o, 4,
+		                                { "orientation.x", "orientation.y",
+	                                          "orientation.z", "orientation.w" } );
+	}
+	if( optional_data_found[MOMENT_INERTIA] ){
+		add_optional_data<double_type>( tmp, moment_inertia, 3,
+		                                { "mom_inertia.x", "mom_inertia.y",
+		                                  "mom_inertia.z" } );
+	}
 
 	block = tmp;
 

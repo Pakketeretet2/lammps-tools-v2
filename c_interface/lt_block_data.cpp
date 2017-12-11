@@ -5,11 +5,16 @@
 
 #include "../cpp_lib/data_field.hpp"
 
-lt_block_data_handle lt_empty_block_data_handle()
+
+lt_block_data_handle *lt_new_block_data_handle()
 {
-	// Cannot throw:
-	lt_block_data_handle b;
-	return b;
+	lt_block_data_handle *bdh = new lt_block_data_handle;
+	return bdh;
+}
+
+void lt_delete_block_data_handle( lt_block_data_handle *bdh )
+{
+	delete bdh;
 }
 
 bool lt_has_special_field( lt_block_data_handle *bdh, int special_field )
@@ -283,4 +288,20 @@ const double *lt_block_data_get_domain_xhi( const lt_block_data_handle *bdh )
 int lt_block_data_get_domain_periodic( const lt_block_data_handle *bdh )
 {
 	return bdh->bd->dom.periodic;
+}
+
+
+void lt_block_data_filter( lt_block_data_handle *dest, int size, const void *ids,
+                           const lt_block_data_handle *src )
+{
+	const int *id = static_cast<const int*>( ids );
+	std::vector<int> id_vec( id, id + size );
+	// Make sure the old storage is properly deleted.
+
+	if( dest->bd ){
+		delete dest->bd;
+	}
+	lammps_tools::block_data temp_b =
+		lammps_tools::filter_block( src->get_const_ref(), id_vec );
+	dest->bd = new lammps_tools::block_data( temp_b );
 }

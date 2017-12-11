@@ -52,6 +52,8 @@ class dump_reader:
             dformat = dump_reader_.DUMP_FORMATS.LAMMPS
         elif dump_format == "XYZ":
             dformat = dump_reader_.DUMP_FORMATS.XYZ
+        elif dump_format == "HOOMD":
+            dformat = dump_reader_.DUMP_FORMATS.HOOMD
 
         if (fformat == dump_reader_.FILE_FORMATS.UNSET or
             dformat == dump_reader_.FILE_FORMATS.UNSET):

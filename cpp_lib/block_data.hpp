@@ -53,6 +53,10 @@ public:
 	                      IX,	        ///< x image flag
 	                      IY,	        ///< y image flag
 	                      IZ,	        ///< z image flag
+	                      ORIENT_X,         ///< real part of orientation
+	                      ORIENT_Y,         ///< x-component of orientation
+	                      ORIENT_Z,         ///< y-component of orientation
+	                      ORIENT_W,         ///< z-component of orientation
 
 	                      /// Fake entry, counts number of special fields.
 	                      N_SPECIAL_FIELDS
@@ -83,6 +87,11 @@ public:
 	   Copy constructor.
 	*/
 	block_data( const block_data &o );
+
+	/**
+	   Clears all data in the block_data.
+	*/
+	void clear();
 
 	/**
 	   Destructor. Makes sure contents of data are properly deleted.
@@ -146,6 +155,7 @@ public:
 	*/
 	const data_field *get_data( const std::string &name ) const;
 
+
 	/**
 	   Adds a data field to the data fields.
 
@@ -193,6 +203,18 @@ public:
 	void set_special_field( const std::string &name, int field );
 
 	/**
+	   Returns the special field type of data field.
+	*/
+	int get_special_field_type( int idx ) const;
+
+	/**
+	   Returns the special field type of data field.
+	*/
+	int get_special_field_type( const std::string &name ) const;
+
+
+
+	/**
 	   Get name of given special field, or empty string if it is not set.
 
 	   \param field  Identifier of the special field (see special_fields)
@@ -227,6 +249,9 @@ public:
 	/// Grab fields by index:
 	data_field &operator[]( int i );
 
+	std::size_t name2index( const std::string &name ) const;
+
+
 private:
 	/// A vector containing pointers to all data fields.
 	std::vector<data_field*> data;
@@ -237,13 +262,35 @@ private:
 	/// Contains a mapping of "special" fields to their respective indices
 	std::vector<int> special_fields_by_index;
 
+	/// Contains a mapping from data field index to special field type.
+	std::vector<int> field_to_special_field_type;
+
 	/// Prints internal state of block_data
 	void print_internal_state();
 };
 
 
+/**
+   \brief Filters out the given ids from given block_data.
+
+   In principle a lot of functionality can be achieved by looping over indices,
+   but filtering might improve cache optimality, especially when a lot of
+   particles are to be ignored.
+
+   \note this _copies_ data from b and return it. b is not modified.
+
+   \param b     Block to filter
+   \param ids   Indices to filter out.
+
+   \returns the filtered block.
+*/
+block_data filter_block( const block_data &b, const std::vector<int> &ids );
 
 
+
+/**
+   \brief Sorts given block along given header.
+*/
 inline
 void block_data::sort_along( const std::string &header )
 {
@@ -251,6 +298,9 @@ void block_data::sort_along( const std::string &header )
 	sort_along( header, comp );
 }
 
+/**
+   \brief Sorts given block along given header, with custom comparator.
+*/
 template <typename comparator> inline
 void block_data::sort_along( const std::string &header, const comparator &comp )
 {

@@ -7,3 +7,7 @@ def to_lammps_data( fname, wmode, b ):
 def to_lammps_dump( fname, wmode, b ):
     """ Writes given block_data to lammps dump file. """
     return block_writers_.to_lammps_dump( fname, wmode, b.handle )
+
+def to_hoomd_gsd( fname, wmode, b ):
+    """ Writes given block_data to hoomd GSD file. """
+    return block_writers_.to_hoomd_gsd( fname, wmode, b.handle )

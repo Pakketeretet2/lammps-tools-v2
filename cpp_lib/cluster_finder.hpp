@@ -27,16 +27,10 @@ namespace neighborize {
    \param networks Contains a list of lists with networks, that is, all
                    molecule ids that are directly or indirectly connected.
 */
-void find_molecular_networks( const block_data &b, const neigh_list &neighs,
-                              neigh_list &conns,
-                              neigh_list &networks );
+void add_conns_to_network( const neigh_list &conns, neigh_list &networks );
 
 neigh_list get_molecular_connections( const block_data &b,
                                       const neigh_list &neighs );
-
-neigh_list make_molecular_networks( const block_data &b,
-                                    const neigh_list &neighs,
-                                    const neigh_list &conns );
 
 
 

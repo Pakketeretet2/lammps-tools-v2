@@ -10,6 +10,8 @@ PYBIND11_PLUGIN(block_writers_) {
 	       "Writes given block data to a LAMMPS data file." );
 	m.def( "to_lammps_dump", &lt_block_writers_lammps_dump,
 	       "Writes given block data to a LAMMPS dump file." );
+	m.def( "to_hoomd_gsd", &lt_block_writers_hoomd_gsd,
+	       "Writes given block data to a HOOMD GSD file." );
 
 	return m.ptr();
 }

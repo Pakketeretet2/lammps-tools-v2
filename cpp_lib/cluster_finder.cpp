@@ -26,19 +26,13 @@ void add_conns_to_network( const neigh_list &conns, neigh_list &networks )
 					network.push_back(o_mol);
 				}
 			}
+
 			networks.push_back( network );
 		}
 	}
 
 }
 
-
-void find_molecular_networks ( const block_data &b, const neigh_list &neighs,
-                               neigh_list &conns, neigh_list &networks )
-{
-	conns = get_molecular_connections( b, neighs );
-	networks = make_molecular_networks( b, neighs, conns );
-}
 
 
 neigh_list get_molecular_connections( const block_data &b,
@@ -54,8 +48,7 @@ neigh_list get_molecular_connections( const block_data &b,
 
 	for( std::size_t i = 0; i < neighs.size(); ++i ){
 		int mol_i = mol[i];
-
-		for( int j : neighs[i] ){
+		for( int j : neighs[mol_i] ){
 			int mol_j = mol[j];
 			if( mol_i == mol_j ) continue;
 
@@ -67,27 +60,9 @@ neigh_list get_molecular_connections( const block_data &b,
 		}
 	}
 
-	std::ofstream ct( "conn.test" );
-	for( std::size_t i = 1; i < conns.size(); ++i ){
-		ct << i << " ";
-		for( int j : conns[i] ){
-			ct << " " << j;
-		}
-		ct << "\n";
-	}
-
 	return conns;
 }
 
-neigh_list make_molecular_networks( const block_data &b,
-                                    const neigh_list &neighs,
-                                    const neigh_list &conns )
-{
-	// Reduce mol connections into networks:
-	neigh_list network;
-	add_conns_to_network( conns, network );
-	return network;
-}
 
 
 } // namespace neighborize

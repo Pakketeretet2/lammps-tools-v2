@@ -84,7 +84,7 @@ std::vector<double> get_insideness( const class block_data &b,
 
 	// Stategy: Recursively loop over all points in network. Those that
 	// are not yet determined to be anywhere are assigned the lowest value
-	// of their neighbouring insideness plus one.
+	// of their neighboring insideness plus one.
 	id_map im( ids );
 	bool assigned_one = false;
 	double current_val = 0.0;
@@ -253,7 +253,7 @@ void skeletonize_alg1( const block_data &b, std::vector<int> &skeleton,
 {
 	// Algorithm:
 	// 0. Find point with largest distance map, i
-	// 1. Find neighbour of that point j for which
+	// 1. Find neighbor of that point j for which
 	//    (DM(i) - DM(j)) / (xi - xj) is minimal.
 
 
@@ -287,7 +287,7 @@ void skeletonize_alg1( const block_data &b, std::vector<int> &skeleton,
 
 	bool got_one_in = false;
 	do{
-		// Check the particles in the neighbourhood of i
+		// Check the particles in the neighborhood of i
 		// that are not yet out, and find the one that has
 		// the most positive gradient in EDT.
 		for( int j : neighs[i] ){
@@ -378,9 +378,9 @@ std::vector<double> get_ribbon_widths( const block_data &b,
 }
 
 
-std::vector<double> neighbour_strain( block_data &b, double r0,
-                                      int itype, int jtype, int method,
-                                      int dims, double rc )
+std::vector<double> neighbor_strain( block_data &b, double r0,
+                                     int itype, int jtype, int method,
+                                     int dims, double rc )
 {
 	const std::vector<double> &x = get_x( b );
 	const std::vector<double> &y = get_y( b );

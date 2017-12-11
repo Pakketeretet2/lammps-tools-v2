@@ -402,6 +402,38 @@ std::vector<bond> neigh_list_to_bonds( const block_data &b,
 }
 
 
+neigh_list neigh_list_to_network( const neigh_list &neighs, int min_idx )
+{
+	int N_parts = neighs.size();
+	std::vector<bool> part_out( N_parts, false );
+	neigh_list networks;
+	for( std::size_t i = min_idx; i < part_out.size(); ++i ){
+		if( !part_out[i] ){
+			std::vector<int> network;
+			part_out[i] = true;
+			network.push_back( i );
+
+			for( std::size_t it = 0; it < network.size(); ++it ){
+				int j = network[it];
+				const std::vector<int> &j_neighs = neighs[j];
+				for( int o_part : j_neighs ){
+					if( part_out[o_part] ) continue;
+					part_out[o_part] = true;
+					network.push_back(o_part);
+				}
+			}
+			networks.push_back( network );
+		}
+	}
+	return networks;
+}
+
+
+neigh_list get_empty_neigh_list()
+{
+	neigh_list nl;
+	return nl;
+}
 
 } // namespace lammps_tools
 

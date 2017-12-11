@@ -54,6 +54,7 @@ foreach(SRC_FILE
     lammpstools/conversions_python.cpp
     lammpstools/dump_reader_python.cpp
     lammpstools/data_field_python.cpp
+    lammpstools/icosahedra_python.cpp
     lammpstools/neighborize_python.cpp
     lammpstools/scatter_python.cpp
     lammpstools/transformations_python.cpp)

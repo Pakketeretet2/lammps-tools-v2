@@ -62,9 +62,9 @@ void get_local_maxima( const std::vector<std::vector<int> > & neighs,
 
 void get_ribbon_data( class block_data &b, ribbon_data &r_data );
 
-std::vector<double> neighbour_strain( class block_data &b, double r0,
-                                      int itype, int jtype, int method,
-                                      int dims, double rc );
+std::vector<double> neighbor_strain( class block_data &b, double r0,
+                                     int itype, int jtype, int method,
+                                     int dims, double rc );
 
 
 } // namespace skeletonize

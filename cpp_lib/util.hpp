@@ -487,7 +487,144 @@ int down_cast_utf16_char( const utf16_char &src, utf8_char &dest )
 	}
 }
 
+/**
+   \brief merges two std containers.
+*/
+template <typename container1, typename container2> inline
+container1 merge( const container1 &c1, const container2 &c2 )
+{
+	container1 c3;
+	c3.reserve( c1.size() + c2.size() );
+	c3.insert( c3.end(), c1.begin(), c1.end() );
+	c3.insert( c3.end(), c2.begin(), c2.end() );
+	return c3;
+}
 
+
+/**
+   \brief inserts element in such a way that the container remains sorted.
+*/
+template <typename container, typename val_type, typename comp_func> inline
+typename container::iterator insert_sorted( container &c,
+                                            typename container::iterator it,
+                                            typename container::iterator end,
+                                            val_type v, const comp_func &comp )
+{
+	my_assert( __FILE__, __LINE__, it <= end, "Invalid begin iterator!" );
+	while( it != end && comp( *it, v ) ){
+		++it;
+	}
+	return c.insert( it, v );
+}
+
+/**
+   \brief inserts element in such a way that the container remains sorted and
+          only if element is not in container yet
+
+   This defaults to < as comparator.
+   \overload insert_sorted.
+*/
+template <typename container, typename val_type, typename comp_func> inline
+typename container::iterator insert_sorted_unique( container &c,
+                                                   typename container::iterator it,
+                                                   typename container::iterator end,
+                                                   val_type v, const comp_func &comp )
+{
+	my_assert( __FILE__, __LINE__, it <= end, "Invalid begin iterator!" );
+	while( it != end && comp( *it, v ) ){
+		++it;
+	}
+	if( it == end || *it != v ){
+		c.insert( it, v );
+	}
+	return it;
+}
+
+
+
+
+/**
+   \brief inserts element in such a way that the container remains sorted.
+*/
+template <typename container, typename val_type, typename comp_func> inline
+typename container::iterator insert_sorted( container &c, val_type val,
+                                            const comp_func &comp )
+{
+	return insert_sorted( c, c.begin(), c.end(), val, comp );
+}
+
+
+/**
+   \brief inserts element in such a way that the container remains sorted and
+          only if element is not in container yet
+
+   This defaults to < as comparator.
+   \overload insert_sorted.
+*/
+template <typename container, typename val_type, typename comp_func> inline
+typename container::iterator insert_sorted_unique( container &c, val_type val,
+                                                   const comp_func &comp )
+{
+	return insert_sorted_unique( c, c.begin(), c.end(), val, comp );
+}
+
+
+
+/**
+   \brief inserts element in such a way that the container remains sorted.
+
+   This defaults to < as comparator.
+   \overload insert_sorted.
+*/
+template <typename container, typename val_type> inline
+typename container::iterator insert_sorted( container &c, val_type val )
+{
+	auto comp = []( val_type v1, val_type v2 ){ return v1 < v2; };
+	return insert_sorted( c, val, comp );
+}
+
+
+/**
+   \brief inserts element in such a way that the container remains sorted and
+          only if element is not in container yet
+
+   This defaults to < as comparator.
+   \overload insert_sorted_unique.
+*/
+template <typename container, typename val_type> inline
+typename container::iterator insert_sorted_unique( container &c, val_type val )
+{
+	auto comp = []( val_type v1, val_type v2 ){ return v1 < v2; };
+	return insert_sorted_unique( c, val, comp );
+}
+
+
+/**
+   \brief finds the arg max.
+*/
+template <typename container> inline
+typename container::const_iterator arg_max( const container &c )
+{
+	auto it = c.begin();
+	auto max_it = it;
+	while( it != c.end() ){
+		if( *it > *max_it ) max_it = it;
+		++it;
+	}
+	return max_it;
+}
+
+template <typename container> inline
+typename container::const_iterator arg_min( const container &c )
+{
+	auto it = c.begin();
+	auto min_it = it;
+	while( it != c.end() ){
+		if( *it < *min_it ) min_it = it;
+		++it;
+	}
+	return min_it;
+}
 
 } // namespace util
 

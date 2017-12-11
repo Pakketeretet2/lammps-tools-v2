@@ -93,3 +93,4 @@ class data_field:
 def new_data_field(name, dtype, size):
     """ Makes a freshly instantiated data_field and returns a handle. """
     return data_field( data_field_.new_data_field( name, dtype, size ), dtype )
+

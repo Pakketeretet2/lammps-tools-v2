@@ -19,6 +19,10 @@ SPECIAL_COLS_IX   = block_data_.SPECIAL_COLS.IX
 SPECIAL_COLS_IY   = block_data_.SPECIAL_COLS.IY
 SPECIAL_COLS_IZ   = block_data_.SPECIAL_COLS.IZ
 
+SPECIAL_COLS_ORIENT_X  = block_data_.SPECIAL_COLS.ORIENT_X
+SPECIAL_COLS_ORIENT_Y  = block_data_.SPECIAL_COLS.ORIENT_Y
+SPECIAL_COLS_ORIENT_Z  = block_data_.SPECIAL_COLS.ORIENT_Z
+SPECIAL_COLS_ORIENT_W  = block_data_.SPECIAL_COLS.ORIENT_W
 
 class xyz_array_acessor:
     """ Provides an abstraction to indexing the xyz array in block data. """
@@ -345,7 +349,9 @@ class block_data_custom(block_data):
 
             if mol is not None:
                 d_mol = data_field.new_data_field( "mol", int_type, meta.N )
-                data_field.copy_to_data_field( mol, d_mol )
+                # data_field.copy_to_data_field( mol, d_mol )
+                for i in range(0, meta.N):
+                    d_mol[i] = mol[i]
                 self.add_data_field( d_mol, SPECIAL_COLS_MOL )
                 self.meta.atom_style = "molecular"
 
@@ -374,3 +380,22 @@ class block_data_local(block_data):
         self.dom = domain_data( np.array( [0,0,0] ), np.array( [0,0,0] ), 0 )
         self.meta = block_meta( handle.time_step(), handle.n_atoms(), self.dom )
         self.store_name_mapping()
+
+def new_block_data():
+    """ Creates a new block_data_handle. """
+    b = block_data_.new_block_data()
+    return b
+
+def delete_block_data(b):
+    """ Deletes block_data. """
+    block_data_.delete_block_data( b.get_ref_() )
+
+
+def filter_block(b, ids):
+    """ Filters block given ids. """
+    bh = block_data_.new_block_data()
+    id_size = len(ids)
+    ids_ptr = block_data_.get_vector_int_ptr( ids )
+    block_data_.filter_block_data( bh, id_size, ids_ptr, b.handle )
+    bn = block_data( bh )
+    return bn
