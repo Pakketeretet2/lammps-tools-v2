@@ -18,15 +18,15 @@ namespace writers {
 
 
 int block_to_hoomd_gsd( const std::string &fname, const block_data &b,
-                        const std::string &write_mode )
+                        const std::string &write_mode, uint props )
 {
 #ifndef HAVE_GSD
 	my_runtime_error( __FILE__, __LINE__,
 	                  "Lammps-tools not compiled with GSD support! "
 	                  "Cannot write to GSD format!" );
 	return -1;
-
 #else
+
 
 	gsd_handle gh;
 	uint32_t schema_version = gsd_make_version( 1, 1 );
@@ -92,7 +92,7 @@ int block_to_hoomd_gsd( const std::string &fname, const block_data &b,
 		std::cerr << "An error occured creating GSD file!\n";
 		return status;
 	}else{
-		status = block_to_hoomd_gsd( &gh, b );
+		status = block_to_hoomd_gsd( &gh, b, props );
 	}
 	gsd_close( &gh );
 	if( status ){
@@ -127,8 +127,6 @@ int reconstruct_fields_as( T_to *dest, int n_arr, const block_data &b,
 	std::size_t N = b.N;
 	my_assert( __FILE__, __LINE__, n_arr == M,
 	           "Array count mismatch!" );
-
-
 
 	if( data_field_type == data_field::DOUBLE ){
 		std::vector<const dfd *> arr_from(n_arr, nullptr);
@@ -182,7 +180,8 @@ int reconstruct_fields_as( T_to *dest, int n_arr, const block_data &b,
 	return 0;
 }
 
-int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b )
+
+int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 {
 #ifndef HAVE_GSD
 	my_runtime_error( __FILE__, __LINE__,
@@ -206,39 +205,65 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b )
 	box[1] = L[1];
 	box[2] = L[2];
 
+	if( props & TIME_STEP ){
+		status = gsd_write_chunk( gh, "configuration/step",
+		                          GSD_TYPE_UINT64, 1, 1, 0, &step );
+		my_assert( __FILE__, __LINE__, status == 0,
+		           "Failed to write time step" );
+	}
 
-	status = gsd_write_chunk( gh, "configuration/step", GSD_TYPE_UINT64,
-	                          1, 1, 0, &step );
-	my_assert( __FILE__, __LINE__, status == 0,
-	           "Failed to write time step" );
-	status = gsd_write_chunk( gh, "configuration/dimensions", GSD_TYPE_UINT8,
-	                          1, 1, 0, &dims );
-	my_assert( __FILE__, __LINE__, status == 0,
-	           "Failed to write box dimensions" );
-	status = gsd_write_chunk( gh, "configuration/box", GSD_TYPE_FLOAT,
-	                          6, 1, 0, box );
-	my_assert( __FILE__, __LINE__, status == 0,
-	           "Failed to write domain info" );
-	status = gsd_write_chunk( gh, "particles/N", GSD_TYPE_UINT32,
-	                          1, 1, 0, &N );
-	my_assert( __FILE__, __LINE__, status == 0,
-	           "Failed to write particle number" );
+	if( props & DIMENSIONS ){
+		status = gsd_write_chunk( gh, "configuration/dimensions",
+		                          GSD_TYPE_UINT8, 1, 1, 0, &dims );
+		my_assert( __FILE__, __LINE__, status == 0,
+		           "Failed to write box dimensions" );
+	}
 
-	float    *xx    = new float[3*N];
-	uint32_t *types	= new uint32_t[N];
-	int n_types = 0;
+	if( props & BOX ){
+		status = gsd_write_chunk( gh, "configuration/box",
+		                          GSD_TYPE_FLOAT, 6, 1, 0, box );
+		my_assert( __FILE__, __LINE__, status == 0,
+		           "Failed to write domain info" );
+	}
 
-	const std::vector<int> &id = get_id(b);
+	if( props & PARTICLE_NUMBER ){
+		status = gsd_write_chunk( gh, "particles/N",
+		                          GSD_TYPE_UINT32, 1, 1, 0, &N );
+		my_assert( __FILE__, __LINE__, status == 0,
+		           "Failed to write particle number" );
+	}
+
+
+	const std::vector<int> &id   = get_id(b);
 	const std::vector<int> &type = get_type(b);
 
 	const std::vector<double> &x = get_x(b);
 	const std::vector<double> &y = get_y(b);
 	const std::vector<double> &z = get_z(b);
 
+	float *xx = nullptr;
+	uint32_t *types = nullptr;
+
+	if( props & POSITIONS ){
+		xx = new float[3*N];
+	}
+
+	types = new uint32_t[N];
+	int n_types = 0;
 
 	for( std::size_t i = 0; i < N; ++i ){
 		// Sort them along id:
 		int j = id[i] - 1;
+
+		// NOTE: n_types might be needed for types instead of typeid,
+		// so always generate it
+		int current_type = type[i];
+		types[j] = current_type - 1;
+		if( current_type > n_types ) n_types = current_type;
+
+		if( !(props & POSITIONS) ){
+			continue;
+		}
 
 		// Remap the positions to -0.5L and 0.5L.
 		double xi[3];
@@ -260,73 +285,85 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b )
 
 			// Check box bounds:
 			if( xi[d] > 0.5*L[d] || xi[d] < -0.5*L[d] ){
-				std::cerr << "Particle " << id[i] << " is "
-				          << "out of box bound in dim " << d
-				          << " ( " << -0.5*L[d] << ", "
+				std::cerr << "Particle " << id[i]
+				          << " is out of box bound in "
+				          << "dim " << d << " ( "
+				          << -0.5*L[d] << ", "
 				          << 0.5*L[d] << " ) with x = "
 				          << xi[d] << ".\n";
+				const char *msg = "Invalid particle position";
 				my_runtime_error( __FILE__, __LINE__,
-				                  "Invalid particle position" );
+				                  msg );
 			}
-
 			xx[3*j+d] = xi[d];
 		}
-		int current_type = type[i];
-		types[j] = current_type - 1;
-		if( current_type > n_types ) n_types = current_type;
-
 	}
-	status = gsd_write_chunk( gh, "particles/position", GSD_TYPE_FLOAT,
-	                          N, 3, 0, xx );
-	my_assert( __FILE__, __LINE__, status == 0,
-	           "Failed to write particle positions" );
-	status = gsd_write_chunk( gh, "particles/typeid", GSD_TYPE_UINT32,
-	                          N, 1, 0, types );
-	my_assert( __FILE__, __LINE__, status == 0,
-	           "Failed to write particle ids" );
 
 
-	// Write the actual type names.
-	const uint buff_size = gsd::TYPE_BUFFER_SIZE;
-	char *type_names = new char[buff_size * n_types];
+	if( props & POSITIONS ){
+		status = gsd_write_chunk( gh, "particles/position",
+		                          GSD_TYPE_FLOAT, N, 3, 0, xx );
+		my_assert( __FILE__, __LINE__, status == 0,
+		           "Failed to write particle positions" );
 
-	for( int t = 0; t < n_types; ++t ){
-		// Typenames are now stored:
-		char *current_name = type_names + t*buff_size;
-		// Remember the +1, lammps-tools doesn't use 0-indexed one.
-		std::string tname = b.ati.type_names[t+1];
+		delete [] xx;
+	}
 
-		std::size_t idx = 0;
-		for( idx = 0; idx < tname.length(); ++idx ){
-			current_name[idx] = tname[idx];
+	if( props & TYPEID ){
+		status = gsd_write_chunk( gh, "particles/typeid",
+		                          GSD_TYPE_UINT32, N, 1, 0, types );
+		my_assert( __FILE__, __LINE__, status == 0,
+		           "Failed to write particle ids" );
+
+
+		delete [] types;
+	}
+
+	if( props & TYPES ){
+		// Write the actual type names.
+		const uint buff_size = gsd::TYPE_BUFFER_SIZE;
+		char *type_names = new char[buff_size * n_types];
+
+		for( int t = 0; t < n_types; ++t ){
+			// Typenames are now stored:
+			char *current_name = type_names + t*buff_size;
+			// Remember the +1, lammps-tools doesn't use 0-indexed one.
+			std::string tname = b.ati.type_names[t+1];
+
+			std::size_t idx = 0;
+			for( idx = 0; idx < tname.length(); ++idx ){
+				current_name[idx] = tname[idx];
+			}
+			current_name[idx] = '\0';
 		}
-		current_name[idx] = '\0';
+
+		status = gsd_write_chunk( gh, "particles/types", GSD_TYPE_UINT8,
+		                          n_types, buff_size, 0, type_names );
+
+		my_assert( __FILE__, __LINE__, status == 0,
+		           "Failed to write particle types" );
+		delete [] type_names;
 	}
-	status = gsd_write_chunk( gh, "particles/types", GSD_TYPE_UINT8,
-	                          n_types, buff_size, 0, type_names );
-	my_assert( __FILE__, __LINE__, status == 0,
-	           "Failed to write particle types" );
 
-	float *orientation = new float[4*b.N];
+	if( props & ORIENTATION ) {
+		float *orient = new float[4*b.N];
+		constexpr const int double_type = data_field::DOUBLE;
 
-	constexpr const int double_type = data_field::DOUBLE;
-	// constexpr const int int_type = data_field::INT;
+		reconstruct_fields_as<double_type, float>( orient, 4, b,
+		                                           {"orientation.x",
+				                            "orientation.y",
+				                            "orientation.z",
+				                            "orientation.w"} );
 
-	reconstruct_fields_as<double_type, float>( orientation, 4, b,
-	                                          {"orientation.x", "orientation.y",
-	                                           "orientation.z", "orientation.w"} );
-
-	status = gsd_write_chunk( gh, "particles/orientation",
-	                          GSD_TYPE_FLOAT, b.N, 4, 0, orientation );
-	delete [] orientation;
+		status = gsd_write_chunk( gh, "particles/orientation",
+		                          GSD_TYPE_FLOAT, b.N, 4, 0, orient );
+		delete [] orient;
+	}
 
 
 
 	status = gsd_end_frame( gh );
 
-	delete [] xx;
-	delete [] types;
-	delete [] type_names;
 
 	return status;
 
