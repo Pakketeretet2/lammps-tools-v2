@@ -35,6 +35,12 @@ public:
 	/// Destructor:
 	virtual ~dump_reader_hoomd_gsd();
 
+	/// Returns the total number of frames:
+	uint64_t number_of_frames() const
+	{ return max_frame; }
+
+
+
 private:
 	virtual int  get_next_block( block_data &block );
 	virtual bool check_eof()  const;

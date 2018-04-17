@@ -123,6 +123,7 @@ dump_reader* make_dump_reader( std::istream &input,
 */
 std::size_t number_of_blocks( dump_reader &dr );
 
+
 } // namespace readers
 
 } // namespace lammps_tools

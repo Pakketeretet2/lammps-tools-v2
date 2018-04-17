@@ -501,7 +501,6 @@ int dump_reader_hoomd_gsd::get_next_block( block_data &block )
 	if( status == 0 ) optional_data_found[MOMENT_INERTIA] = 1;
 
 	constexpr const int double_type = data_field::DOUBLE;
-	constexpr const int int_type = data_field::INT;
 
 	if( optional_data_found[VELOCITY] ){
 		add_optional_data<double_type>( tmp, v, 3, { "v.x", "v.y", "vz" } );

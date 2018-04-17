@@ -15,22 +15,30 @@ namespace neighborize {
 
 
 /**
-   Finds which molecules are connected to which through given neighbour list.
+   \brief Converts a neighbor list to a list of clusters.
 
-   The information is stored as follows:
-   The vector<int> at index mol_id contains the ids of all the molecules
-   mol_id is connected to.
+   The neigh list clusters will contain nc neighbor lists, where nc is the
+   number of clusters, and will contain all the clusters, that is, a list of
+   all items in the neigh_list conns that are connected to each other.
 
-   \param b        Block data to use molecular info from
-   \param neighs   Neighbour list to construct network from.
-   \param conns    neigh_list that contains the connections between molecules.
-   \param networks Contains a list of lists with networks, that is, all
-                   molecule ids that are directly or indirectly connected.
-*/
-void add_conns_to_network( const neigh_list &conns, neigh_list &networks );
+   \param conns     The neighbor list to process
 
+   \returns a list of clusters.
+ */
+neigh_list neigh_list_to_clusters( const neigh_list &conns );
+
+
+/**
+   \brief Constructs a list of molecular connections from an atom neighbor list
+
+   \param b            Block data corresponding to the neighbor list
+   \param atom_neighs  Atom neighbor list
+   \param debug        If true, print some debug info to stderr
+
+ */
 neigh_list get_molecular_connections( const block_data &b,
-                                      const neigh_list &neighs );
+                                      const neigh_list &atom_neighs,
+                                      bool debug = false );
 
 
 

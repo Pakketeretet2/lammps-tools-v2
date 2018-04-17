@@ -125,6 +125,11 @@ void block_data::add_field( const data_field &data_f, int special_field )
 	special_fields_by_index[special_field] = index;
 	field_to_special_field_type[index] = special_field;
 
+	// If the field is molecule IDs, switch atom style to molecular:
+	if( special_field == block_data::special_fields::MOL ){
+		atom_style = ATOM_STYLE_MOLECULAR;
+	}
+
 	//print_internal_state();
 }
 
