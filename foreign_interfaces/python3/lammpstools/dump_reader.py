@@ -3,6 +3,8 @@ import data_field_
 import block_data_
 import block_data
 
+import time
+
 import sys, os
 
 class dump_reader:
@@ -118,6 +120,7 @@ class dump_reader:
         else:
             return None
 
+
     def set_column_headers(self, headers):
         """ Sets the column headers for the dump file. """
         if self.local:
@@ -206,3 +209,38 @@ def read_lammps_data( dname ):
     else:
         print( "Error reading data file ", dname, "!", file = sys.stderr )
         return None
+
+
+def get_all_blocks( d, stride = 1, first_block = 0, last_block = None ):
+    """ Grabs all blocks from given dump reader. """
+    print( "Reading all blocks from", d, ", this might take a lot of RAM!" )
+    start = time.time()
+    blocks = []
+    bc = 0
+    nb = 0;
+    grab = False
+
+    if first_block == 0:
+        grab = True
+
+
+
+    for b in d:
+        if last_block is not None:
+            if bc >= last_block:
+                break
+
+        if grab:
+            if (bc % stride) == 0:
+                nb += 1
+                blocks.append(b)
+
+        bc +=1
+        if bc % 100 == 0:
+            print( "At block", bc, file = sys.stderr )
+
+
+    end = timeit.timeit()
+    print( "Grabbed nb blocks in", end - start, file = sys.stderr )
+
+    return blocks

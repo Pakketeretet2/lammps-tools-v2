@@ -133,9 +133,11 @@ class block_data:
             self.name_to_col[ name ] = i
         self.stored_name_map = True
 
+
     def n_data_fields(self):
         """ Returns the number of data fields. """
         return block_data_.n_data_fields(self.handle)
+
 
     def name_of_data(self, index):
         """ Returns the name of given data index. """
@@ -145,6 +147,7 @@ class block_data:
         df = block_data_.data_by_index(self.handle, index)
         return data_field_.get_name(df)
 
+
     def data_by_name(self, name):
         """ Grab raw data by name. """
         # Lazy create name map:
@@ -153,6 +156,7 @@ class block_data:
 
         raw_data = self.data[ self.name_to_col[ name ] ]
         return raw_data
+
 
     def overwrite_data_by_name(self, name, data):
         """ Overwrites given data with new data. """
@@ -173,19 +177,23 @@ class block_data:
             # Apparently named data is not  there.
             return False
 
+
     def get_ref_(self):
         """ Returns a ref to the pointer contained. This eases some foreign
             function calling but shouldn't be used inside Python too much! """
         return self.handle.get_const_ref()
+
 
     def get_ptr_(self):
         """ Returns a ref to the pointer contained. This eases some foreign
             function calling but shouldn't be used inside Python too much! """
         return self.handle.get_ptr()
 
+
     def remove_data_field(self, name):
         """ Removes given data field from block data. """
         block_data_.remove_field( self.handle, name )
+
 
     def replace_data_field(self, name, new_data_field):
         """ Replaces given data field from block data. """
@@ -208,6 +216,7 @@ class block_data:
         # Reset name_mapping to force this to be in sync:
         self.store_name_mapping()
 
+
     def set_domain(self, xlo = None, xhi = None, periodic_bits = None):
         """ Sets domain info """
         if not xlo is None:
@@ -228,6 +237,7 @@ class block_data:
                                self.meta.domain.xlo[1], self.meta.domain.xhi[1],
                                self.meta.domain.xlo[2], self.meta.domain.xhi[2],
                                self.meta.domain.periodic)
+
 
 def get_arrays_from_handle( handle, no_copy = False ):
     """ Constructs data arrays from block_data_handle and returns them. """
@@ -386,16 +396,20 @@ def new_block_data():
     b = block_data_.new_block_data()
     return b
 
+
 def delete_block_data(b):
     """ Deletes block_data. """
     block_data_.delete_block_data( b.get_ref_() )
 
 
-def filter_block(b, ids):
-    """ Filters block given ids. """
-    bh = block_data_.new_block_data()
-    id_size = len(ids)
-    ids_ptr = block_data_.get_vector_int_ptr( ids )
-    block_data_.filter_block_data( bh, id_size, ids_ptr, b.handle )
-    bn = block_data( bh )
-    return bn
+
+
+
+def make_id_map(b):
+    """ Makes an ID map for given block. """
+    max_id = np.max( b.ids )
+    id_map = -np.ones( max_id+1, dtype = int )
+    for i in range(0,b.meta.N):
+        id_map[ b.ids[i] ] = i
+
+    return id_map
