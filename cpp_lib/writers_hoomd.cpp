@@ -384,6 +384,22 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 		}
 	}
 
+	if( props & MOM_INERTIA ){
+		float *mom_inertia = new float[3*b.N];
+		constexpr const int double_type = data_field::DOUBLE;
+
+		reconstruct_fields_as<double_type, float>( mom_inertia, 3, b,
+		                                           {"mom_inertia.x",
+				                            "mom_inertia.y",
+				                            "mom_inertia.z"} );
+
+		status = gsd_write_chunk( gh, "particles/orientation",
+		                          GSD_TYPE_FLOAT, b.N, 3, 0, mom_inertia );
+		delete [] mom_inertia;
+
+
+	}
+
 	if( props & POSITIONS ){
 		status = gsd_write_chunk( gh, "particles/position",
 		                          GSD_TYPE_FLOAT, N, 3, 0, xx );
