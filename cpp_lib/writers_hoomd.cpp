@@ -233,7 +233,6 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 		           "Failed to write particle number" );
 	}
 
-
 	const std::vector<int> &id   = get_id(b);
 	const std::vector<int> &type = get_type(b);
 
@@ -360,6 +359,31 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 		delete [] orient;
 	}
 
+
+	if( props & BODY ){
+		using namespace lammps_tools;
+		const data_field_int *mol_field;
+		const data_field *ptr;
+		ptr = b.get_special_field( block_data::MOL );
+		if( !ptr ){
+			std::cerr << "Cannot write MOL because block does not "
+			          << "have MOL field!\n";
+		}else{
+			mol_field = static_cast<const data_field_int *>(ptr);
+			int32_t *body = new int32_t[b.N];
+			constexpr const int int_type = data_field::INT;
+			for( std::size_t i = 0; i < b.N; ++i ){
+				int j = id[i] - 1;
+				body[j] = (*mol_field)[i];
+			}
+
+			status = gsd_write_chunk( gh, "particles/body",
+			                          GSD_TYPE_INT32, b.N, 1, 0,
+			                          body );
+			delete [] body;
+
+		}
+	}
 
 
 	status = gsd_end_frame( gh );

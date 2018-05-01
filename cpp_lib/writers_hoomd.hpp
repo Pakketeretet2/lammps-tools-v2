@@ -28,8 +28,9 @@ enum gsd_write_props {
 	TYPEID          = 1 << 5,
 	TYPES           = 1 << 6,
 	ORIENTATION     = 1 << 7,
+	BODY            = 1 << 8,
 
-	ALL_PROPS       = (1 << 8) - 1 // Dummy to encode for all.
+	ALL_PROPS       = (1 << 9) - 1 // Dummy to encode for all.
 };
 
 int block_to_hoomd_gsd( const std::string &fname, const block_data &b,

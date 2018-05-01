@@ -39,6 +39,8 @@ public:
 	uint64_t number_of_frames() const
 	{ return max_frame; }
 
+	/// File size in bytes:
+	int64_t file_size() const;
 
 
 private:

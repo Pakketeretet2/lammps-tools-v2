@@ -524,6 +524,13 @@ int dump_reader_hoomd_gsd::get_next_block( block_data &block )
 }
 
 
+int64_t dump_reader_hoomd_gsd::file_size() const
+{
+	return gh->file_size;
+}
+
+
+
 #endif // HAVE_GSD
 
 
