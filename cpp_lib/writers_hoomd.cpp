@@ -301,14 +301,17 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 
 	if( props & TYPES ){
 		// Write the actual type names.
-		const uint buff_size = n_types*gsd::TYPE_BUFFER_SIZE;
+		// const uint buff_size = n_types*gsd::TYPE_BUFFER_SIZE;
 		std::size_t longest_name = 0;
+		std::cerr << "Writing types...\n";
 		for( int t = 0; t < n_types; ++t ){
 			std::string name = b.ati.type_names[t+1];
 			longest_name = std::max( longest_name, name.length() );
 		}
 		std::cerr << "Longest name is " << longest_name << " long.\n";
 		std::size_t stride = longest_name + 1;
+
+		const uint buff_size = n_types * stride;
 		char *type_names = new char[buff_size]();
 
 		std::cerr << "The type names are:";
@@ -327,7 +330,7 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 		}
 
 		std::cerr << "\nWriting type names to a buffer of size "
-		          << buff_size << " times " << n_types << "\n";
+		          << n_types << " times " << stride << "\n";
 		/*
 		std::cerr << "That buffer is:\n";
 		for( int i = 0; i < buff_size; ++i ){
@@ -335,7 +338,7 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 		}
 		*/
 		status = gsd_write_chunk( gh, "particles/types", GSD_TYPE_INT8,
-		                          n_types, buff_size, 0, type_names );
+		                          n_types, stride, 0, type_names );
 
 		my_assert( __FILE__, __LINE__, status == 0,
 		           "Failed to write particle types" );

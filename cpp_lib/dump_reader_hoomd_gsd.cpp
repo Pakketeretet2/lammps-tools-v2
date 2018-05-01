@@ -123,11 +123,11 @@ int dump_reader_hoomd_gsd::get_chunk_data( const char *name, T *dest,
 	N = idx->N;
 	M = idx->M;
 	type = idx->type;
-
-	std::cerr << "Succesfully read chunk " << name << "! It is "
-	          << idx->N << "x" << idx->M << " big and of type "
-	          << static_cast<int>(idx->type) << ".\n";
-
+	if( !quiet ){
+		std::cerr << "Succesfully read chunk " << name << "! It is "
+		          << idx->N << "x" << idx->M << " big and of type "
+		          << static_cast<int>(idx->type) << ".\n";
+	}
 	// The chunk was definitely present, so try to read it:
 	int status = gsd_read_chunk( gh, dest, idx );
 	if( status == -1 )
@@ -222,9 +222,11 @@ int dump_reader_hoomd_gsd::get_type_names( std::vector<std::string> &type_names 
 {
 	std::size_t n_types = type_names.size() - 1;
 	int buff_size = n_types * gsd::TYPE_BUFFER_SIZE;
-	std::cerr << "Buffer size is " << buff_size << ", meaning it can hold "
-	          << n_types << " names of size "
-	          << gsd::TYPE_BUFFER_SIZE << "\n";
+	if( !quiet ){
+		std::cerr << "Buffer size is " << buff_size << ", meaning it can hold "
+		          << n_types << " names of size "
+		          << gsd::TYPE_BUFFER_SIZE << "\n";
+	}
 	char *type_names_buffer = new char[ buff_size ]();
 	char *type_names_stored = new char[ buff_size ](); // Make sure to 0!
 
@@ -262,18 +264,31 @@ int dump_reader_hoomd_gsd::get_type_names( std::vector<std::string> &type_names 
 	                             n_word_length, char_type );
 	if( status != 0 && status != 2 ) return status;
 
-	my_assert( __FILE__, __LINE__, n_types_buff == n_types,
-	           "Type buffer sizes mismatch!" );
-	word_len = n_word_length;
-	std::cerr << "The particle type chunk contains " << n_types
-	          << " types of length <= " << word_len << "\n";
+	if( status == 0 ){
+		my_assert( __FILE__, __LINE__, n_types_buff == n_types,
+		           "Type buffer sizes mismatch!" );
 
-	std::cerr << "These are the type names:";
-	for( std::size_t i = 0; i < n_types; ++i ){
-		int idx = i * word_len;
-		std::cerr << " " << type_names_buffer + idx;
+		word_len = n_word_length;
+		if( !quiet ){
+			std::cerr << "The particle type chunk contains " << n_types
+			          << " types of length <= " << word_len << "\n";
+
+			std::cerr << "These are the type names:";
+			for( std::size_t i = 0; i < n_types; ++i ){
+				int idx = i * word_len;
+				std::cerr << " " << type_names_buffer + idx;
+			}
+		}
+	}else{
+		uint longest_word_length = 0;
+		for( std::size_t i = 1; i < store_typenames.size(); ++i ){
+			const std::string &s = store_typenames[i];
+			std::size_t l = s.length();
+			if( l > longest_word_length )
+				longest_word_length = l;
+		}
+		word_len = longest_word_length + 1;
 	}
-
 
 	// If you get here, status was good.
 	uint current_name = 0;
