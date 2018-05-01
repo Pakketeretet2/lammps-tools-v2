@@ -308,16 +308,6 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 		delete [] xx;
 	}
 
-	if( props & TYPEID ){
-		status = gsd_write_chunk( gh, "particles/typeid",
-		                          GSD_TYPE_UINT32, N, 1, 0, types );
-		my_assert( __FILE__, __LINE__, status == 0,
-		           "Failed to write particle ids" );
-
-
-		delete [] types;
-	}
-
 	if( props & TYPES ){
 		// Write the actual type names.
 		const uint buff_size = gsd::TYPE_BUFFER_SIZE;
@@ -343,6 +333,22 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 		           "Failed to write particle types" );
 		delete [] type_names;
 	}
+
+
+	if( props & TYPEID ){
+		std::cerr << "Writing typeid\n";
+		for( std::size_t i = 0; i < N; ++i ){
+			std::cerr << types[i] << "\n";
+		}
+		status = gsd_write_chunk( gh, "particles/typeid",
+		                          GSD_TYPE_UINT32, N, 1, 0, types );
+		my_assert( __FILE__, __LINE__, status == 0,
+		           "Failed to write particle ids" );
+
+
+		delete [] types;
+	}
+
 
 	if( props & ORIENTATION ) {
 		float *orient = new float[4*b.N];
