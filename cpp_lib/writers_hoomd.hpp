@@ -10,11 +10,14 @@
 #include <string>
 #include <iosfwd>
 
+#include <vector>
+
 struct gsd_handle;
 
 namespace lammps_tools {
 
 class block_data;
+
 
 /// \brief Contains functions for writing data.
 namespace writers {
@@ -49,6 +52,26 @@ int block_to_hoomd_gsd( const std::string &fname, const block_data &b,
 */
 int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b,
                         uint props = ALL_PROPS );
+
+
+
+/**
+   \brief reconstructs GSD-style buffer from vectors of data_fields.
+
+   \param dest         Array to store the data into
+   \param n_arr        The number of arrays to read in.
+                       Should match field_names.size()
+   \param b            The block data
+   \param field_names  Names of the data fields to reconstruct
+
+
+   Assumes dest is allocated and the right size.
+*/
+template <int data_field_type, typename T_to>
+int reconstruct_fields_as_gsd( T_to *dest, int n_arr, const block_data &b,
+                               const std::vector<std::string> &field_names );
+
+
 
 } // namespace writers
 

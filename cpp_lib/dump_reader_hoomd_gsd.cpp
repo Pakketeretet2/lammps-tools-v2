@@ -8,6 +8,8 @@
 #include <cstring>
 #include <unistd.h> // For fdopen
 
+#include "writers_hoomd.hpp"
+
 using namespace lammps_tools;
 using namespace readers;
 
@@ -117,8 +119,14 @@ int dump_reader_hoomd_gsd::get_chunk_data( const char *name, T *dest,
 		// simulation information in the first frame only. Copy store
 		// to dest:
 		std::copy( store, store + size, dest );
+		if( !quiet ){
+			std::cerr << "Did not find " << name << " so loading "
+			          << "data in " << store << " of size "
+			          << size << "\n";
+		}
 		return 2;
 	}
+
 
 	N = idx->N;
 	M = idx->M;
@@ -180,8 +188,25 @@ int dump_reader_hoomd_gsd::get_chunk_data( const char *name, T &dest, T &store )
 		// simulation information in the first frame only. Copy store
 		// to dest:
 		dest = store;
+		if( !quiet ){
+			std::cerr << "Did not find " << name << " so loading "
+			          << "data in storage of size "
+			          << store.size() << "\n";
+		}
+
 		return 2;
 	}
+
+	int64_t N = idx->N;
+	int8_t  M = idx->M;
+	int8_t  type = idx->type;
+	if( !quiet ){
+		std::cerr << "Succesfully read chunk " << name << "! It is "
+		          << idx->N << "x" << idx->M << " big and of type "
+		          << static_cast<int>(idx->type) << ".\n";
+	}
+
+
 
 	// The chunk was definitely present, so try to read it:
 	my_assert( __FILE__, __LINE__, dest.size() > 0,
@@ -412,8 +437,13 @@ int dump_reader_hoomd_gsd::add_optional_data( block_data &b, T &data, uint n_fie
 				std::size_t index = stride*i + nf;
 				d[i] = data[index];
 			}
-
 			b.add_field( d );
+
+			if( !quiet ){
+				std::cerr << "Added field " << names[nf]
+				          << "...\n";
+			}
+
 		}
 	}else if( data_type == data_field::INT ){
 		for( std::size_t nf = 0; nf < n_fields; ++nf ){
@@ -423,6 +453,11 @@ int dump_reader_hoomd_gsd::add_optional_data( block_data &b, T &data, uint n_fie
 				d[i] = data[index];
 			}
 			b.add_field( d );
+
+			if( !quiet ){
+				std::cerr << "Added field " << names[nf]
+				          << "...\n";
+			}
 		}
 	}else{
 		my_logic_error( __FILE__, __LINE__,
@@ -444,7 +479,6 @@ int dump_reader_hoomd_gsd::get_next_block( block_data &block )
 		return 1;
 	}
 	optional_data_found = 0;
-
 	// const gsd_index_entry *entry;
 
 	// Read out all the chunks you want to add to your dumpfile.
@@ -571,6 +605,10 @@ int dump_reader_hoomd_gsd::get_next_block( block_data &block )
 
 
 	// ****    Check for additional fields that might be present:    ****
+	// For each of these fields, if they are not present now, check if
+	// they were present earlier and stored. If so, load that. If not,
+	// ignore.
+
 	std::vector<float> v( 3*N );
 	status = get_chunk_data( "particles/velocity", v, store_v );
 	if( status != 0 && status != 2 ) return status;
@@ -591,15 +629,30 @@ int dump_reader_hoomd_gsd::get_next_block( block_data &block )
 
 	if( optional_data_found[VELOCITY] ){
 		add_optional_data<double_type>( tmp, v, 3, { "v.x", "v.y", "vz" } );
+	}else if( !store_v.empty() ){
+		// Load the stored data into the block under the same names.
+		add_optional_data<double_type>( tmp, store_v, 3, { "v.x", "v.y", "vz" } );
 	}
 
 	if( optional_data_found[ORIENTATION] ){
 		add_optional_data<double_type>( tmp, o, 4,
 		                                { "orientation.x", "orientation.y",
 	                                          "orientation.z", "orientation.w" } );
+	}else if( !store_orient.empty() ){
+		// Load the stored data into the block under the same names.
+		add_optional_data<double_type>( tmp, store_orient, 4,
+		                                { "orientation.x", "orientation.y",
+		                                  "orientation.z", "orientation.w" } );
+
 	}
+
 	if( optional_data_found[MOMENT_INERTIA] ){
 		add_optional_data<double_type>( tmp, moment_inertia, 3,
+		                                { "mom_inertia.x", "mom_inertia.y",
+		                                  "mom_inertia.z" } );
+	}else if( !store_moment_inertia.empty() ){
+		// Load the stored data into the block under the same names.
+		add_optional_data<double_type>( tmp, store_moment_inertia, 3,
 		                                { "mom_inertia.x", "mom_inertia.y",
 		                                  "mom_inertia.z" } );
 	}

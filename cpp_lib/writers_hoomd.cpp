@@ -14,6 +14,7 @@
 
 namespace lammps_tools {
 
+
 namespace writers {
 
 
@@ -113,15 +114,13 @@ int block_to_hoomd_gsd( const std::string &fname, const block_data &b,
    Assumes dest is allocated and the right size.
 */
 template <int data_field_type, typename T_to>
-int reconstruct_fields_as( T_to *dest, int n_arr, const block_data &b,
-                           std::vector<std::string> field_names )
+int reconstruct_fields_as_gsd( T_to *dest, int n_arr, const block_data &b,
+                               const std::vector<std::string> &field_names )
 {
 	using dfi = data_field_int;
 	using dfd = data_field_double;
 
 	auto is_null = []( const void *ptr ){ return ptr == nullptr; };
-
-
 
 	std::size_t M = field_names.size();
 	std::size_t N = b.N;
@@ -138,10 +137,17 @@ int reconstruct_fields_as( T_to *dest, int n_arr, const block_data &b,
 				}
 			}
 		}
-		if( std::any_of( arr_from.begin(), arr_from.end(), is_null ) ){
-			// Abort!
-			return -1;
+		bool everything_ok = !std::any_of( arr_from.begin(),
+		                                   arr_from.end(), is_null );
+		std::cerr << "names (ptr) are:";
+		for( int i = 0; i < n_arr; ++i ){
+			const std::string &n = field_names[i];
+			std::cerr << " " << n << "(" << arr_from[i] << ")";
 		}
+		std::cerr << "\n";
+
+		my_assert( __FILE__, __LINE__, everything_ok,
+		           "Failed to properly map arrays!" );
 
 		for( std::size_t i = 0; i < N; ++i ){
 			for( int n = 0; n < n_arr; ++n ){
@@ -163,8 +169,14 @@ int reconstruct_fields_as( T_to *dest, int n_arr, const block_data &b,
 				}
 			}
 		}
-		bool everything_ok = std::any_of( arr_from.begin(),
-		                                  arr_from.end(), is_null );
+		bool everything_ok = !std::any_of( arr_from.begin(),
+		                                   arr_from.end(), is_null );
+		std::cerr << "names (ptr) are:";
+		for( int i = 0; i < n_arr; ++i ){
+			const std::string &n = field_names[i];
+			std::cerr << " " << n << "(" << arr_from[i] << ")";
+		}
+		std::cerr << "\n";
 		my_assert( __FILE__, __LINE__, everything_ok,
 		           "Failed to properly map arrays!" );
 
@@ -179,6 +191,10 @@ int reconstruct_fields_as( T_to *dest, int n_arr, const block_data &b,
 
 	return 0;
 }
+
+
+
+
 
 
 int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
@@ -385,15 +401,18 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 	}
 
 	if( props & MOM_INERTIA ){
+
+		std::cerr << "Writing moment of inertia!\n";
+
 		float *mom_inertia = new float[3*b.N];
 		constexpr const int double_type = data_field::DOUBLE;
 
-		reconstruct_fields_as<double_type, float>( mom_inertia, 3, b,
-		                                           {"mom_inertia.x",
-				                            "mom_inertia.y",
-				                            "mom_inertia.z"} );
+		reconstruct_fields_as_gsd<double_type, float>( mom_inertia, 3, b,
+		                                               {"mom_inertia.x",
+		                                                "mom_inertia.y",
+		                                                "mom_inertia.z"} );
 
-		status = gsd_write_chunk( gh, "particles/orientation",
+		status = gsd_write_chunk( gh, "particles/mom_inertia",
 		                          GSD_TYPE_FLOAT, b.N, 3, 0, mom_inertia );
 		delete [] mom_inertia;
 
@@ -415,7 +434,7 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 		float *orient = new float[4*b.N];
 		constexpr const int double_type = data_field::DOUBLE;
 
-		reconstruct_fields_as<double_type, float>( orient, 4, b,
+		reconstruct_fields_as_gsd<double_type, float>( orient, 4, b,
 		                                           {"orientation.x",
 				                            "orientation.y",
 				                            "orientation.z",
@@ -435,9 +454,9 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 	return status;
 
 #endif // HAVE_GSD
-
 }
 
 } // namespace writers
+
 
 } // namespace lammps_tools
