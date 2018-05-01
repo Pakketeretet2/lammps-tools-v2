@@ -64,15 +64,27 @@ private:
 	     -3: Invalid data file
 	     -4: A generic error.
 
-	   \param name  The name of the chunk to read
-	   \param dest  The destination to write to
-	   \param size  The size of the destination
-	   \param store If the chunk could not be found, default dest to this
+	   \param name   The name of the chunk to read
+	   \param dest   The destination to write to
+	   \param size   The size of the destination
+	   \param store  If the chunk could not be found, default dest to this
+	   \param N      Number of rows in the chunk
+	   \param M      Number of columns in the chunk
+	   \param type   Type of the chunk data.
 
 	   \returns a status code.
 	*/
 	template <typename T>
+	int get_chunk_data( const char *name, T *dest, uint size, T *store,
+	                    uint64_t &N, uint8_t &M, uint8_t &type );
+
+	/**
+	   \brief overloads get_chunk_data in case you don't want the metadata.
+	*/
+	template <typename T>
 	int get_chunk_data( const char *name, T *dest, uint size, T *store );
+
+
 
 	/**
 	   \brief overloads get_chunk_data for ref types.

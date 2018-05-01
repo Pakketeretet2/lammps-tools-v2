@@ -299,26 +299,26 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 	}
 
 
-	if( props & POSITIONS ){
-		status = gsd_write_chunk( gh, "particles/position",
-		                          GSD_TYPE_FLOAT, N, 3, 0, xx );
-		my_assert( __FILE__, __LINE__, status == 0,
-		           "Failed to write particle positions" );
-
-		delete [] xx;
-	}
-
 	if( props & TYPES ){
 		// Write the actual type names.
-		const uint buff_size = gsd::TYPE_BUFFER_SIZE;
-		char *type_names = new char[buff_size * n_types];
+		const uint buff_size = n_types*gsd::TYPE_BUFFER_SIZE;
+		std::size_t longest_name = 0;
+		for( int t = 0; t < n_types; ++t ){
+			std::string name = b.ati.type_names[t+1];
+			longest_name = std::max( longest_name, name.length() );
+		}
+		std::cerr << "Longest name is " << longest_name << " long.\n";
+		std::size_t stride = longest_name + 1;
+		char *type_names = new char[buff_size]();
+
+		std::cerr << "The type names are:";
 
 		for( int t = 0; t < n_types; ++t ){
 			// Typenames are now stored:
-			char *current_name = type_names + t*buff_size;
+			char *current_name = type_names + t*stride;
 			// Remember the +1, lammps-tools doesn't use 0-indexed one.
 			std::string tname = b.ati.type_names[t+1];
-
+			std::cerr << " " << tname;
 			std::size_t idx = 0;
 			for( idx = 0; idx < tname.length(); ++idx ){
 				current_name[idx] = tname[idx];
@@ -326,7 +326,15 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 			current_name[idx] = '\0';
 		}
 
-		status = gsd_write_chunk( gh, "particles/types", GSD_TYPE_UINT8,
+		std::cerr << "\nWriting type names to a buffer of size "
+		          << buff_size << " times " << n_types << "\n";
+		/*
+		std::cerr << "That buffer is:\n";
+		for( int i = 0; i < buff_size; ++i ){
+			std::cerr << type_names[i] << "\n";
+		}
+		*/
+		status = gsd_write_chunk( gh, "particles/types", GSD_TYPE_INT8,
 		                          n_types, buff_size, 0, type_names );
 
 		my_assert( __FILE__, __LINE__, status == 0,
@@ -336,10 +344,7 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 
 
 	if( props & TYPEID ){
-		std::cerr << "Writing typeid\n";
-		for( std::size_t i = 0; i < N; ++i ){
-			std::cerr << types[i] << "\n";
-		}
+		std::cerr << "Writing types to a buffer of size " << N << "\n";
 		status = gsd_write_chunk( gh, "particles/typeid",
 		                          GSD_TYPE_UINT32, N, 1, 0, types );
 		my_assert( __FILE__, __LINE__, status == 0,
@@ -349,21 +354,6 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 		delete [] types;
 	}
 
-
-	if( props & ORIENTATION ) {
-		float *orient = new float[4*b.N];
-		constexpr const int double_type = data_field::DOUBLE;
-
-		reconstruct_fields_as<double_type, float>( orient, 4, b,
-		                                           {"orientation.x",
-				                            "orientation.y",
-				                            "orientation.z",
-				                            "orientation.w"} );
-
-		status = gsd_write_chunk( gh, "particles/orientation",
-		                          GSD_TYPE_FLOAT, b.N, 4, 0, orient );
-		delete [] orient;
-	}
 
 
 	if( props & BODY ){
@@ -390,6 +380,34 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 
 		}
 	}
+
+	if( props & POSITIONS ){
+		status = gsd_write_chunk( gh, "particles/position",
+		                          GSD_TYPE_FLOAT, N, 3, 0, xx );
+		my_assert( __FILE__, __LINE__, status == 0,
+		           "Failed to write particle positions" );
+
+		delete [] xx;
+	}
+
+
+
+	if( props & ORIENTATION ) {
+		float *orient = new float[4*b.N];
+		constexpr const int double_type = data_field::DOUBLE;
+
+		reconstruct_fields_as<double_type, float>( orient, 4, b,
+		                                           {"orientation.x",
+				                            "orientation.y",
+				                            "orientation.z",
+				                            "orientation.w"} );
+
+		status = gsd_write_chunk( gh, "particles/orientation",
+		                          GSD_TYPE_FLOAT, b.N, 4, 0, orient );
+		delete [] orient;
+	}
+
+
 
 
 	status = gsd_end_frame( gh );

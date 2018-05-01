@@ -106,7 +106,9 @@ int dump_reader_hoomd_gsd::get_next_block( block_data &block )
 
 template <typename T>
 int dump_reader_hoomd_gsd::get_chunk_data( const char *name, T *dest,
-                                           uint size, T *store )
+                                           uint size, T *store,
+                                           uint64_t &N, uint8_t &M,
+                                           uint8_t &type )
 {
 	const gsd_index_entry *idx = gsd_find_chunk( gh, current_frame, name );
 
@@ -117,6 +119,14 @@ int dump_reader_hoomd_gsd::get_chunk_data( const char *name, T *dest,
 		std::copy( store, store + size, dest );
 		return 2;
 	}
+
+	N = idx->N;
+	M = idx->M;
+	type = idx->type;
+
+	std::cerr << "Succesfully read chunk " << name << "! It is "
+	          << idx->N << "x" << idx->M << " big and of type "
+	          << static_cast<int>(idx->type) << ".\n";
 
 	// The chunk was definitely present, so try to read it:
 	int status = gsd_read_chunk( gh, dest, idx );
@@ -145,6 +155,20 @@ int dump_reader_hoomd_gsd::get_chunk_data( const char *name, T *dest,
 		return status;
 	}
 }
+
+
+
+template <typename T>
+int dump_reader_hoomd_gsd::get_chunk_data( const char *name, T *dest,
+                                           uint size, T *store )
+{
+	uint64_t N;
+	uint8_t M;
+	uint8_t type;
+	return get_chunk_data( name, dest, size, store, N, M, type );
+
+}
+
 
 template <typename T>
 int dump_reader_hoomd_gsd::get_chunk_data( const char *name, T &dest, T &store )
@@ -197,10 +221,11 @@ int dump_reader_hoomd_gsd::get_chunk_data( const char *name, T &dest, T &store )
 int dump_reader_hoomd_gsd::get_type_names( std::vector<std::string> &type_names )
 {
 	std::size_t n_types = type_names.size() - 1;
-
-
 	int buff_size = n_types * gsd::TYPE_BUFFER_SIZE;
-	char *type_names_buffer = new char[ buff_size ];
+	std::cerr << "Buffer size is " << buff_size << ", meaning it can hold "
+	          << n_types << " names of size "
+	          << gsd::TYPE_BUFFER_SIZE << "\n";
+	char *type_names_buffer = new char[ buff_size ]();
 	char *type_names_stored = new char[ buff_size ](); // Make sure to 0!
 
 	if( ! (type_names_buffer && type_names_stored) ){
@@ -228,9 +253,27 @@ int dump_reader_hoomd_gsd::get_type_names( std::vector<std::string> &type_names 
 		}
 	}
 
+	uint64_t n_types_buff = 0;
+	uint8_t n_word_length = 0;
+	uint8_t char_type = 0;
+	int word_len = 0;
 	int status = get_chunk_data( "particles/types", type_names_buffer,
-	                             buff_size, type_names_stored );
+	                             buff_size, type_names_stored, n_types_buff,
+	                             n_word_length, char_type );
 	if( status != 0 && status != 2 ) return status;
+
+	my_assert( __FILE__, __LINE__, n_types_buff == n_types,
+	           "Type buffer sizes mismatch!" );
+	word_len = n_word_length;
+	std::cerr << "The particle type chunk contains " << n_types
+	          << " types of length <= " << word_len << "\n";
+
+	std::cerr << "These are the type names:";
+	for( std::size_t i = 0; i < n_types; ++i ){
+		int idx = i * word_len;
+		std::cerr << " " << type_names_buffer + idx;
+	}
+
 
 	// If you get here, status was good.
 	uint current_name = 0;
@@ -238,13 +281,33 @@ int dump_reader_hoomd_gsd::get_type_names( std::vector<std::string> &type_names 
 	int size_left = buff_size;
 
 	type_names[0] = "__UNUSED__";
+
+	for( int i = 0; i < n_types; ++i ){
+		int idx = i * word_len;
+		type_names[i+1] = type_names_buffer + idx;
+	}
+
+	/*
 	std::string next_name;
 	bool at_end_of_word = false;
 
+	if( !quiet ){
+		std::cerr << "Interpreting characters...\n";
+	}
 	while( current_name < n_types ){
 		utf16_char next_char;
 		next_char.d = 0;
 		int chars = util::next_utf16_char( name, next_char, size_left );
+		if( !quiet ){
+			std::cerr << "Next ";
+			if( chars == 1 ) std::cerr << "byte ";
+			else if( chars == 2 ) std::cerr << "UTF-8 ";
+			else if( chars == 4 ) std::cerr << "UTF-16 ";
+			else std::cerr << "!unknown! ";
+			std::cerr << "char is " << next_char.c[3]
+			          << next_char.c[2] << next_char.c[1]
+			          << next_char.c[0] << "\n";
+		}
 		my_assert( __FILE__, __LINE__, chars > 0,
 		           "Failed to read next utf16 char" );
 		if( chars == 1 ){
@@ -280,6 +343,15 @@ int dump_reader_hoomd_gsd::get_type_names( std::vector<std::string> &type_names 
 
 		size_left -= chars;
 		name += chars;
+	}
+	*/
+
+	if( !quiet ){
+		std::cerr << "Read in type names. They are:\n";
+		for( std::size_t i = 0; i < type_names.size(); ++i ){
+			std::cerr << " " << type_names[i];
+		}
+		std::cerr << "\n";
 	}
 
 	store_typenames = type_names;
