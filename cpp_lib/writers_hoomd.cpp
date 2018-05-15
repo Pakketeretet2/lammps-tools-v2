@@ -139,15 +139,20 @@ int reconstruct_fields_as_gsd( T_to *dest, int n_arr, const block_data &b,
 		}
 		bool everything_ok = !std::any_of( arr_from.begin(),
 		                                   arr_from.end(), is_null );
+		/*
 		std::cerr << "names (ptr) are:";
 		for( int i = 0; i < n_arr; ++i ){
 			const std::string &n = field_names[i];
 			std::cerr << " " << n << "(" << arr_from[i] << ")";
 		}
 		std::cerr << "\n";
-
+		*/
+		/*
 		my_assert( __FILE__, __LINE__, everything_ok,
 		           "Failed to properly map arrays!" );
+		*/
+		//If failed, ignore it instead.
+		if( !everything_ok ) return 1;
 
 		for( std::size_t i = 0; i < N; ++i ){
 			for( int n = 0; n < n_arr; ++n ){
@@ -171,12 +176,13 @@ int reconstruct_fields_as_gsd( T_to *dest, int n_arr, const block_data &b,
 		}
 		bool everything_ok = !std::any_of( arr_from.begin(),
 		                                   arr_from.end(), is_null );
-		std::cerr << "names (ptr) are:";
+		/*
 		for( int i = 0; i < n_arr; ++i ){
 			const std::string &n = field_names[i];
 			std::cerr << " " << n << "(" << arr_from[i] << ")";
 		}
 		std::cerr << "\n";
+		*/
 		my_assert( __FILE__, __LINE__, everything_ok,
 		           "Failed to properly map arrays!" );
 
@@ -401,8 +407,6 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 	}
 
 	if( props & MOM_INERTIA ){
-
-		std::cerr << "Writing moment of inertia!\n";
 
 		float *mom_inertia = new float[3*b.N];
 		constexpr const int double_type = data_field::DOUBLE;
