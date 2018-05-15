@@ -52,6 +52,7 @@ foreach(SRC_FILE
     lammpstools/block_writers_python.cpp
     lammpstools/bond_order_python.cpp
     lammpstools/conversions_python.cpp
+    lammpstools/center_of_mass_python.cpp
     lammpstools/dump_reader_python.cpp
     lammpstools/data_field_python.cpp
     lammpstools/icosahedra_python.cpp

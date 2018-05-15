@@ -16,7 +16,7 @@ for b in d:
     neighs = neighborize.neigh_list_dist( b, 0, 0, 0, 2, 1.35 )
 
 
-    psi = bond_order.compute_psi_n( b.get_ref_(), neighs, 6, [0,1,0], psi_n_real, psi_n_imag )
+    psi = bond_order.psi_n( b, neighs, 6, [0,1,0])
     psi_real = data_field.new_data_field( "psi_r", data_field.DATA_TYPE_DOUBLE, b.meta.N )
     psi_imag = data_field.new_data_field( "psi_i", data_field.DATA_TYPE_DOUBLE, b.meta.N )
     for i in range(0,b.meta.N):
