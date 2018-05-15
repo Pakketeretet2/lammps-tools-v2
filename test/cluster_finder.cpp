@@ -1,8 +1,11 @@
 #include <catch.hpp>
 
 #include "block_data.hpp"
+#include "block_data_access.hpp"
 #include "cluster_finder.hpp"
 #include "dump_reader_lammps.hpp"
+#include "dump_reader_hoomd_gsd.hpp"
+
 #include "my_timer.hpp"
 #include "neighborize.hpp"
 #include "readers.hpp"
@@ -117,7 +120,8 @@ TEST_CASE( "Cluster analysis on triangles", "[cluster_triangles]" ) {
 		neigh_list conns;
 		std::vector<std::vector<int> > networks;
 
-		find_molecular_networks ( b, neighs, conns, networks );
+		// find_molecular_networks ( b, neighs, conns, networks );
+		networks = get_molecular_connections( b, neighs, false );
 		if( b.tstep == 0 ){
 			for( int i = 0; i < b.N; ++i ){
 
@@ -161,5 +165,4 @@ TEST_CASE( "Cluster analysis on triangles", "[cluster_triangles]" ) {
 			REQUIRE( util::contains( mol_conns, 325 ) );
 		}
 	}
-
 }

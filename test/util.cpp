@@ -201,3 +201,54 @@ TEST_CASE( "Zip iterator works", "[util_zip]" ) {
 	c = 0;
 	zip_map( a, s, f3 );
 }
+
+
+TEST_CASE( "Sorted insert works", "[util_insert_sorted]" )
+{
+	std::vector<int> c = { 2, 4, 6, 8, 10 };
+	auto print_vec = []( const std::vector<int> &c ){
+		for( const auto &i : c ){
+			std::cout << i << " ";
+		}
+		std::cout << "\n";
+	};
+	using lammps_tools::util::insert_sorted;
+	using lammps_tools::util::insert_sorted_unique;
+
+	insert_sorted( c, 3 );
+	REQUIRE( c[1] == 3 );
+	REQUIRE( std::is_sorted( c.begin(), c.end() ) );
+
+	insert_sorted( c, 0 );
+	REQUIRE( c[0] == 0 );
+	REQUIRE( std::is_sorted( c.begin(), c.end() ) );
+
+	insert_sorted( c, 1234 );
+	REQUIRE( c[c.size()-1] == 1234 );
+	REQUIRE( std::is_sorted( c.begin(), c.end() ) );
+
+	insert_sorted_unique( c, 5 );
+	REQUIRE( c[4] == 5 );
+	REQUIRE( std::is_sorted( c.begin(), c.end() ) );
+
+	insert_sorted_unique( c, 7 );
+	REQUIRE( c[6] == 7 );
+	REQUIRE( std::is_sorted( c.begin(), c.end() ) );
+
+	std::size_t old_size = c.size();
+	insert_sorted_unique( c, 6 );
+	REQUIRE( c.size() == old_size );
+	REQUIRE( std::is_sorted( c.begin(), c.end() ) );
+
+	insert_sorted( c, 6 );
+	REQUIRE( c[5] == 6 );
+	REQUIRE( c[6] == 6 );
+	REQUIRE( c.size() == old_size + 1 );
+	REQUIRE( std::is_sorted( c.begin(), c.end() ) );
+
+
+
+
+	print_vec(c);
+
+}
