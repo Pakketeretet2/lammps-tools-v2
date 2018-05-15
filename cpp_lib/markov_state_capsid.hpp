@@ -49,7 +49,7 @@ public:
 	};
 
 
-	using neigh_list = lammps_tools::neighborize::neigh_list;
+	using neigh_list = neighborize::neigh_list;
 
 
 	/**
@@ -61,7 +61,10 @@ public:
 	                       from the graph before categorizing.
 	*/
 	msm_id_capsid( double dist_thresh, bool prune = false )
-		: dist_thresh(dist_thresh), prune(prune)  {}
+		: dist_thresh(dist_thresh), prune(prune)
+	{}
+
+	virtual ~msm_id_capsid() {}
 
 	/**
 	   \brief Convert a given block to a state following
@@ -71,11 +74,7 @@ public:
 
 	   \returns an integer that classifies the current state.
 	*/
-	virtual int to_markov_state( const lammps_tools::block_data &b );
-
-
-
-
+	virtual int to_markov_state( const block_data &b ) const;
 
 
 private:
@@ -98,7 +97,7 @@ private:
 	*/
 	void cluster2edges( std::vector<edge> &edges,
 	                    const std::vector<int> &cluster,
-	                    const neigh_list &mol_nlist );
+	                    const neigh_list &mol_nlist ) const;
 
 
 	/**
@@ -115,11 +114,11 @@ private:
 	   \return the shortest distance between a free molecule and
 	           the largest cluster.
 	*/
-	double shortest_cluster_dist( const lammps_tools::block_data &b,
+	double shortest_cluster_dist( const block_data &b,
 	                              const std::vector<int> &neighc,
 	                              const std::vector<int> &largest_cluster,
 	                              const std::vector<int> &not_in_cluster,
-	                              const std::vector<int> &mol2com );
+	                              const std::vector<int> &mol2com ) const;
 
 
 	/**
@@ -130,7 +129,7 @@ private:
 
             \returns the number of edges pruned.
 	*/
-	int prune_edges( std::vector<edge> &edges );
+	int prune_edges( std::vector<edge> &edges ) const;
 
 
 	/**
@@ -140,7 +139,7 @@ private:
 
 	   \returns the number of vertices in the graph.
 	*/
-	std::size_t vertex_count( const std::vector<edge> &ed );
+	std::size_t vertex_count( const std::vector<edge> &ed ) const;
 
 
 	/**
@@ -154,7 +153,7 @@ private:
 	*/
 	void mol_cluster2graph( std::vector<edge> &edges,
 	                        const std::vector<int> &cluster,
-	                        const neigh_list &mol_nlist );
+	                        const neigh_list &mol_nlist ) const;
 };
 
 
