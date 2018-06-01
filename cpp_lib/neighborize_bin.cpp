@@ -3,6 +3,8 @@
 #include <cmath>
 #include "my_timer.hpp"
 
+#define USE_OPENMP 1
+
 #ifdef USE_OPENMP
 #include <omp.h>
 constexpr const bool use_openmp = true;
@@ -112,9 +114,12 @@ void neighborizer_bin::setup_bins()
 		atom_to_bin.clear();
 	}
 	atom_to_bin.resize( b.N );
+	bin_size = rc;
 
-	double pad = 0.1*rc;
-	bin_size = rc + pad;
+	double Lx = xhi[0] - xlo[0];
+	double Ly = xhi[1] - xlo[1];
+	double Lz = xhi[2] - xlo[2];
+
 
 	Nx = std::floor( (xhi[0] - xlo[0]) / bin_size );
 	Ny = std::floor( (xhi[1] - xlo[1]) / bin_size );
@@ -142,20 +147,27 @@ void neighborizer_bin::setup_bins()
 	bin_size = ( bin_size_x > bin_size_y ) ? bin_size_x : bin_size_y;
 	bin_size = ( bin_size_z > bin_size )   ? bin_size_z : bin_size;
 
-	if( !quiet ) std::cerr << "  ....Bin size = " << bin_size << ".\n";
 
+	if( !quiet ) std::cerr << "  ....Bin size = " << bin_size << ".\n";
 	if( !quiet ) std::cerr << "  ....Making " << Nbins << " bins...\n";
 	try {
 		bins.resize( Nbins );
-	}catch( std::bad_alloc ){
+	}catch( std::bad_alloc & ){
 		std::cerr << "  Failed to allocate " << Nbins
 		          << " bins! Use NSQ binning instead!\n";
 		throw;
 	}
+
 }
 
-void neighborizer_bin::bin_atoms(  )
+void neighborizer_bin::bin_atoms()
 {
+	if( atoms_binned_ ){
+		// This is a no-op.
+		if( !quiet ) std::cerr << "  ....Atoms already binned!\n";
+		return;
+	}
+
 	if( !quiet ) std::cerr << "  ....Binning "
 	                       << s2.size() << " atoms...\n";
 
@@ -216,6 +228,8 @@ void neighborizer_bin::bin_atoms(  )
 			atom_to_bin[j] = bin;
 		}
 	}
+
+	atoms_binned_ = true;
 }
 
 // Adds to the neighbour list of i the atoms in bin that are in range.
@@ -384,18 +398,18 @@ int neighborizer_bin::build( neigh_list &neighs,
 		ni.clear();
 	}
 	n_neighs = 0;
-	if( !quiet ) m.toc("Clearing neigh list");
+	if( !quiet ) m.toc("  Clearing neigh list");
 
 	// 0. Allocates bins and atom_to_bin containers,
 	//    sets number of bins and bin size
 	if( !quiet ) m.tic();
 	setup_bins();
-	if( !quiet ) m.toc("Setting up bins");
+	if( !quiet ) m.toc("  Setting up bins");
 
 	// 1. Put each atom that is not filtered in a bin.
 	if( !quiet ) m.tic();
 	bin_atoms();
-	if( !quiet ) m.toc("Binning atoms");
+	if( !quiet ) m.toc("  Binning atoms");
 
 	// 2. Loop over atoms in first group, get their bin on-the-fly,
 	//    and neighbourize the atoms in that and adjacent bins, which
@@ -418,11 +432,26 @@ int neighborizer_bin::build( neigh_list &neighs,
 			neigh_bin_atom( i, neighs, criterion );
 		}
 	}
-	if( !quiet ) m.toc("Neighborizing");
+	if( !quiet ) m.toc("  Neighborizing");
 
 
 	return n_neighs;
 }
+
+
+int neighborizer_bin::get_atom_bin( int atom ) const
+{
+	if( !bins_setup() ){
+		my_warning( __FILE__, __LINE__,
+		            "Bins not built yet! Call setup_bins() first!" );
+		return -1;
+	}
+
+	return( atom_to_bin[atom] );
+}
+
+
+
 
 
 } //namespace neighborize

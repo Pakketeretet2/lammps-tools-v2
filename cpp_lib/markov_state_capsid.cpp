@@ -359,6 +359,7 @@ int msm_id_capsid::to_markov_state( const block_data &b ) const
 		}
 	}
 
+	/*
 
 	// Note: if your bond_average is 1.5 then technically
 	// this step is not needed:
@@ -388,7 +389,9 @@ int msm_id_capsid::to_markov_state( const block_data &b ) const
 	if( nearby ){
 		markov_state += most_bonds_possible*most_mols_possible;
 	}
+	*/
 
+	int markov_state = max_gamma;
 	return markov_state;
 }
 

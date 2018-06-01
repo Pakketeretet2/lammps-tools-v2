@@ -435,6 +435,17 @@ neigh_list get_empty_neigh_list()
 	return nl;
 }
 
-} // namespace lammps_tools
+
+std::vector<int> all( const lammps_tools::block_data &b )
+{
+	std::vector<int> a( b.N );
+	for( int i = 0; i < b.N; ++i ){
+		a[i] = i;
+	}
+	return a;
+}
+
 
 } // namespace neighborize
+
+} // namespace lammps_tools

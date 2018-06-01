@@ -28,11 +28,19 @@ public:
 	                  const std::vector<int> &s2, int dims, double rc )
 		: neighborizer( b, s1, s2, dims ), atom_to_bin(), bins(),
 		  rc(rc), n_neighs(0), Nx(0), Ny(0), Nz(0),
-		  Nbins(0), bin_size(0.0)
+		  Nbins(0), bin_size(0.0), atoms_binned_( false )
 	{}
+	virtual ~neighborizer_bin(){}
 
-	~neighborizer_bin(){}
+	int get_atom_bin( int atom ) const;
 
+	void setup_bins();
+	void bin_atoms();
+
+	int n_bins() const { return bins.size(); }
+
+	bool atoms_binned() const { return atoms_binned_; }
+	bool bins_setup() const { return !atom_to_bin.empty(); }
 
 private:
 	virtual int build( neigh_list &neighs,
@@ -49,10 +57,6 @@ private:
 	int  shift_bin_index( int bin, int xinc, int yinc, int zinc );
 
 	// These do the actual work:
-
-	void setup_bins();
-	void bin_atoms();
-
 	void add_bin_neighs( int i, const std::vector<int> &bin,
 	                     neigh_list &neighs,
 	                     const are_neighbours &criterion );
@@ -76,6 +80,7 @@ private:
 	int n_neighs;
 	int Nx, Ny, Nz, Nbins;
 	double bin_size;
+	bool atoms_binned_;
 };
 
 } //namespace neighborize

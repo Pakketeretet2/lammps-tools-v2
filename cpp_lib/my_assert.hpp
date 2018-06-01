@@ -39,6 +39,7 @@ inline void my_assert_terminate( const std::string &file, int line, bool test,
 	}
 }
 
+
 inline void my_logic_error_terminate( const std::string &file, int line,
                                       const std::string &msg )
 {
@@ -46,6 +47,8 @@ inline void my_logic_error_terminate( const std::string &file, int line,
 	          << msg << "\n";
 	std::terminate();
 }
+
+
 inline void my_runtime_error_terminate( const std::string &file, int line,
                                         const std::string &msg )
 {
@@ -53,6 +56,7 @@ inline void my_runtime_error_terminate( const std::string &file, int line,
 	          << msg << "\n";
 	std::terminate();
 }
+
 
 #ifndef LEGACY_COMPILER
 // Implementation of assertions and the like that throw an exception:
@@ -65,6 +69,8 @@ inline void my_assert_except( const std::string &file, int line, bool test,
 		throw std::runtime_error( ss.str() );
 	}
 }
+
+
 inline void my_logic_error_except( const std::string &file, int line,
                                    const std::string &msg )
 {
@@ -72,6 +78,7 @@ inline void my_logic_error_except( const std::string &file, int line,
 	ss << file << " ( " << line << " ): " << msg;
 	throw std::logic_error( ss.str() );
 }
+
 
 inline void my_runtime_error_except( const std::string &file, int line,
                                      const std::string &msg )
@@ -81,6 +88,7 @@ inline void my_runtime_error_except( const std::string &file, int line,
 	throw std::runtime_error( ss.str() );
 }
 #endif // #ifndef LEGACY_COMPILER
+
 
 /**
    \brief asserts that test is true, and if not, terminates.
