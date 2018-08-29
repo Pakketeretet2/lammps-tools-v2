@@ -599,6 +599,7 @@ int dump_reader_hoomd_gsd::get_next_block( block_data &block )
 	                                          "orientation.z", "orientation.w" } );
 	}
 	if( optional_data_found[MOMENT_INERTIA] ){
+		std::cerr << "Found moment of inertia!\n";
 		add_optional_data<double_type>( tmp, moment_inertia, 3,
 		                                { "mom_inertia.x", "mom_inertia.y",
 		                                  "mom_inertia.z" } );
