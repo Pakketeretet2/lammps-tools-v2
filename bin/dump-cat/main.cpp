@@ -26,6 +26,7 @@ int main( int argc, char **argv )
 	std::string out_file = "-";
 	bool to_local = false;
 	bool silent = false;
+	bool ignore_first = false;
 
 	int i = 1;
 	while( i < argc ){
@@ -43,6 +44,9 @@ int main( int argc, char **argv )
 			}else if( a == "-h" || a == "--help" ){
 				print_usage();
 				return 1;
+			}else if( a == "-i" || a == "--ignore-first" ){
+				ignore_first = true;
+				i += 1;
 			}else if( a == "-s" || a == "--silent" ){
 				silent = true;
 				i += 1;
@@ -64,6 +68,9 @@ int main( int argc, char **argv )
 		std::cerr << "\n";
 	}
 	std::cerr << "Headers are " << headers << ".\n";
+	if( ignore_first ){
+		std::cerr << "Dropping first frame of subsequent dump file!\n";
+	}
 
 	std::ofstream *out_fstream = nullptr;
 	std::ostream *out = nullptr;
@@ -120,6 +127,7 @@ int main( int argc, char **argv )
 		}
 
 	}else{
+		int dump_idx = 0;
 		for( const std::string &dname : dumps ){
 			int fformat = FILE_FORMAT_PLAIN;
 			if( util::ends_with( dname, ".bin" ) ){
@@ -133,6 +141,10 @@ int main( int argc, char **argv )
 				std::unique_ptr<readers::dump_reader_lammps> d(
 					readers::make_dump_reader_lammps( dname, fformat, readers::dump_reader_lammps::LOCAL ) );
 				d->set_column_headers( util::split( headers ) );
+				if( ignore_first && dump_idx > 0 ){
+					d->next_block(b);
+				}
+
 				while( d->next_block(b) == 0 ){
 					writers::block_to_lammps_dump( *out, b,
 					                               out_fformat,
@@ -143,6 +155,11 @@ int main( int argc, char **argv )
 				std::unique_ptr<readers::dump_reader_lammps> d(
 					readers::make_dump_reader_lammps( dname, fformat ) );
 				d->set_column_headers( util::split( headers ) );
+
+				if( ignore_first && dump_idx > 0 ){
+					d->next_block(b);
+				}
+
 				while( d->next_block(b) == 0 ){
 					writers::block_to_lammps_dump( *out, b,
 					                               out_fformat,
@@ -150,7 +167,7 @@ int main( int argc, char **argv )
 					status_print();
 				}
 			}
-
+			++dump_idx;
 		}
 	}
 	if( out_fstream ) delete out_fstream;

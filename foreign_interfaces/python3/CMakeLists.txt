@@ -51,9 +51,15 @@ foreach(SRC_FILE
     lammpstools/block_data_python.cpp
     lammpstools/block_writers_python.cpp
     lammpstools/bond_order_python.cpp
+    lammpstools/correlation_python.cpp
+    lammpstools/coarsening_python.cpp
     lammpstools/conversions_python.cpp
-    lammpstools/dump_reader_python.cpp
+    lammpstools/center_of_mass_python.cpp
+    lammpstools/density_distribution_python.cpp
     lammpstools/data_field_python.cpp
+    lammpstools/dump_reader_python.cpp
+    lammpstools/fourier_python.cpp
+    lammpstools/histogram_python.cpp
     lammpstools/icosahedra_python.cpp
     lammpstools/neighborize_python.cpp
     lammpstools/scatter_python.cpp

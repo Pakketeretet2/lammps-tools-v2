@@ -22,7 +22,7 @@ class data_field:
     def __next__(self):
         if self.internal_iter_counter >= self.size():
             raise StopIteration
-        
+
         value = self.__getitem__(self.internal_iter_counter)
         self.internal_iter_counter += 1
         return value
@@ -38,6 +38,7 @@ class data_field:
 
     def set_size(self, size):
         data_field_.set_size( self.handle, size )
+
 
     def get_data(self):
         """ Returns the raw data interpreted as the proper type. """
@@ -93,4 +94,3 @@ class data_field:
 def new_data_field(name, dtype, size):
     """ Makes a freshly instantiated data_field and returns a handle. """
     return data_field( data_field_.new_data_field( name, dtype, size ), dtype )
-

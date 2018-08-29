@@ -52,3 +52,36 @@ TEST_CASE ( "LAMMPS dump file gets written correctly.", "[write_lammps_dump]" ) 
 		status = d->next_block( b2 );
 	}
 }
+
+
+TEST_CASE ( "HOOMD dump file file gets written correctly.", "[write_hoomd_gsd]" )
+{
+	std::string fname = "triangles.gsd";
+
+	using namespace lammps_tools;
+	using namespace readers;
+	using namespace writers;
+
+	std::shared_ptr<dump_reader> r(
+		make_dump_reader( fname, FILE_FORMAT_BIN, DUMP_FORMAT_HOOMD ) );
+	block_data b;
+	std::cerr << "Reading block...\n";
+	int status = r->next_block(b);
+	REQUIRE( status == 0 );
+	REQUIRE( b.tstep == 0 );
+	REQUIRE( b.N == 98560 );
+	REQUIRE( b.N_types == 8 );
+
+	// Try to write, make sure no info is lost?
+	std::cerr << "At block " << b.tstep << ", N = " << b.N << "\n";
+
+	block_to_hoomd_gsd( "triangles_copy.gsd", b, "wb" );
+	block_to_hoomd_gsd( "triangles_copy2.gsd", b, "ab" );
+
+	int nblock = 0;
+	while( r->next_block(b) == 0 && nblock < 250 ){
+		std::cerr << "At block " << b.tstep << ", N = " << b.N << "\n";
+		block_to_hoomd_gsd( "triangles_copy.gsd", b, "ab" );
+		++nblock;
+	}
+}

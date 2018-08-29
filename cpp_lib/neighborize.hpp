@@ -123,6 +123,23 @@ private:
 
 };
 
+
+/**
+   \brief Constructs a vector that represents all atoms for given block_data.
+
+   \param b  The block_data to construct the all-vector for.
+
+   \note It really just returns a vector containing the indices 0 to b.N-1.
+   This is a function to make sure you don't accidentally take the IDs.
+
+   \returns a vector containing all atoms.
+*/
+std::vector<int> all( const lammps_tools::block_data &b );
+
+
+
+
+
 /**
    \brief Removes double entries in neigh list.
 

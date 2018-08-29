@@ -10,6 +10,7 @@ namespace lammps_tools {
 namespace neighborize {
 
 using lammps_tools::constants::pi;
+
 void compute_rdf( const block_data &b, int Nbins, double r0, double r1,
                   int dims, int itype, int jtype,
                   std::vector<double> &rdf, std::vector<double> &coord )
@@ -100,7 +101,9 @@ void compute_rdf_with_neighs( const block_data &b, int Nbins,
 		}else{
 			coord[bin] = coord[bin-1] + rdf[bin]*n_ideal;
 		}
+		rdf[bin] /= adds;
 	}
+
 	std::ofstream out("rdf_test.dat");
 	for( int bin = 0; bin < Nbins; ++bin ){
 		out << bin << " " << r0 + dr*bin << " " << rdf[bin]
@@ -167,15 +170,23 @@ std::vector<double> rdf( const block_data &b, int Nbins, double r0, double r1,
 	}else{
 		volume_scale = pi / V;
 	}
-	volume_scale *= b.N;
+	volume_scale *= adds;
 
 	// V is already set, it is total volume for 3D or area for 2D.
 	for( int bin = 0; bin < Nbins; ++bin ){
 		double bin_r   = r0 + dr*bin;
 		double bin_r_p = bin_r + dr;
+		double bin_r2 = bin_r*bin_r;
+		double bin_r_p2 = bin_r_p*bin_r_p;
+
 		double bin_r3 = bin_r*bin_r*bin_r;
 		double bin_r_p3 = bin_r_p*bin_r_p*bin_r_p;
-		double n_ideal = volume_scale*( bin_r_p3 - bin_r3 );
+		double n_ideal = 1;
+		if( dims == 2 ){
+			n_ideal = volume_scale*( bin_r_p2 - bin_r2 );
+		}else{
+			n_ideal = volume_scale*( bin_r_p3 - bin_r3 );
+		}
 
 		rrdf[bin] /= n_ideal;
 	}

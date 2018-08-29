@@ -77,7 +77,7 @@ TEST_CASE ( "LAMMPS plain text dump file gets read correctly.", "[read_lammps_du
 
 	for( int i = 0; i < 2; ++i ){
 		int status = r->next_block( b );
-		break;
+
 		REQUIRE( status == 0 );
 		REQUIRE( b.N == 4000 );
 
@@ -378,4 +378,41 @@ TEST_CASE ( "Setting data type explicitly works.", "[read_lammps_dump_explicit_d
 
 	const std::vector<int> &x2 = data_as<int>( b.get_special_field( block_data::X ) );
 	REQUIRE( x2[im2[127]] == 2 );
+}
+
+
+
+TEST_CASE ( "HOOMD dump file file gets read correctly.", "[read_hoomd_gsd]" )
+{
+	using namespace lammps_tools;
+	using namespace readers;
+
+	for( std::string fname : {"traj.gsd", "traj_two_types.gsd"} ){
+
+		std::shared_ptr<dump_reader> r(
+			make_dump_reader( fname, FILE_FORMAT_BIN, DUMP_FORMAT_HOOMD ) );
+		block_data b;
+		int status = r->next_block(b);
+		REQUIRE( status == 0 );
+		REQUIRE( b.tstep == 0 );
+		if( fname == "traj.gsd" ){
+			REQUIRE( b.N == 1000000 );
+			REQUIRE( b.N_types == 1 );
+		}else{
+			REQUIRE( b.N == 8000 );
+			REQUIRE( b.N_types == 2 );
+
+			REQUIRE( b.ati.type_names[0] == "__UNUSED__" );
+			REQUIRE( b.ati.type_names[1] == "wtfmanIhatethis" );
+			REQUIRE( b.ati.type_names[2] == "Russian Привет" );
+		}
+
+		std::cerr << "\nDump file " << fname << " has types:";
+		for( std::size_t i = 0; i < b.ati.type_names.size(); ++i ){
+			std::cerr << " " << b.ati.type_names[i]
+			          << " (" << i << ")";
+		}
+		std::cerr << "\n";
+	}
+
 }

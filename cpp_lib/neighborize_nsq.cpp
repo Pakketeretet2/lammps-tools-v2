@@ -23,7 +23,6 @@ int neighborizer_nsq::build( neigh_list &neighs,
 	const std::vector<double> &z = data_as<double>(
 		b.get_special_field( block_data::Z ) );
 
-	std::cerr << "x[3] = " << x[3] << ", " << y[3] << ", " << z[3] << "\n";
 	for( int i : s1 ){
 		int idi = id[i];
 		for( int j : s2 ){

@@ -6,7 +6,9 @@
 #include "my_assert.hpp"
 #include "neighborize.hpp"
 
+#include <cmath>
 #include <iostream>
+
 
 namespace lammps_tools {
 
@@ -35,7 +37,7 @@ bool is_in( int idx, const std::vector<int> &cluster )
 
 void msm_id_capsid::cluster2edges( std::vector<edge> &edges,
                                    const std::vector<int> &cluster,
-                                   const neigh_list &mol_nlist )
+                                   const neigh_list &mol_nlist ) const
 {
 	for( int idx : cluster ){
 		for( std::size_t jdx : mol_nlist[idx] ){
@@ -61,7 +63,7 @@ double msm_id_capsid::shortest_cluster_dist(
 	const std::vector<int> &neighc,
 	const std::vector<int> &largest_cluster,
 	const std::vector<int> &not_in_cluster,
-	const std::vector<int> &mol2com )
+	const std::vector<int> &mol2com ) const
 {
 	double dist = b.dom.xhi[0] - b.dom.xlo[0];
 
@@ -100,7 +102,7 @@ double msm_id_capsid::shortest_cluster_dist(
 }
 
 
-int msm_id_capsid::prune_edges( std::vector<edge> &edges )
+int msm_id_capsid::prune_edges( std::vector<edge> &edges ) const
 {
 	int n_removed = 0;
 	std::map< int, int > vertex_counts;
@@ -134,7 +136,7 @@ int msm_id_capsid::prune_edges( std::vector<edge> &edges )
 
 
 // Calculates the number of different vertices in the given graph
-std::size_t msm_id_capsid::vertex_count( const std::vector<edge> &ed )
+std::size_t msm_id_capsid::vertex_count( const std::vector<edge> &ed ) const
 {
 	// std::cerr << "    Size of { ";
 	std::size_t size = 0;
@@ -160,7 +162,7 @@ std::size_t msm_id_capsid::vertex_count( const std::vector<edge> &ed )
 
 void msm_id_capsid::mol_cluster2graph( std::vector<edge> &edges,
                                        const std::vector<int> &cluster,
-                                       const neigh_list &mol_nlist )
+                                       const neigh_list &mol_nlist ) const
 {
 	/*
 	std::cerr << "  Analyzing cluster with entries";
@@ -191,10 +193,8 @@ void msm_id_capsid::mol_cluster2graph( std::vector<edge> &edges,
 }
 
 
-int msm_id_capsid::to_markov_state( const lammps_tools::block_data &b )
+int msm_id_capsid::to_markov_state( const block_data &b ) const
 {
-	using namespace lammps_tools;
-
 	// Types to consider for binding.
 	std::vector<int> type_i = { 3, 5, 7 };
 	std::vector<int> type_j = { 4, 6, 8 };
@@ -245,7 +245,7 @@ int msm_id_capsid::to_markov_state( const lammps_tools::block_data &b )
 		}
 	}
 
-	my_assert( ilist.size() == jlist.size() &&
+	my_assert( __FILE__, __LINE__, ilist.size() == jlist.size(),
 	           "Binding sites not assigned properly!" );
 
 	double scale_factor = static_cast<double>(b.N) / nmols;
@@ -325,11 +325,12 @@ int msm_id_capsid::to_markov_state( const lammps_tools::block_data &b )
 
 		// Construct cluster bond topology:
 		std::vector<edge> edges;
-		mol_cluster2graph( edges, cluster, mol_nlist );
+	        mol_cluster2graph( edges, cluster, mol_nlist );
 		std::size_t size = cluster.size();
 
 		if( size > 1 ){
-			my_assert( size == vertex_count(edges) &&
+			my_assert( __FILE__, __LINE__,
+			           size == vertex_count(edges),
 			           "Cluster size != number of vertices!" );
 		}
 
@@ -358,6 +359,7 @@ int msm_id_capsid::to_markov_state( const lammps_tools::block_data &b )
 		}
 	}
 
+	/*
 
 	// Note: if your bond_average is 1.5 then technically
 	// this step is not needed:
@@ -387,7 +389,9 @@ int msm_id_capsid::to_markov_state( const lammps_tools::block_data &b )
 	if( nearby ){
 		markov_state += most_bonds_possible*most_mols_possible;
 	}
+	*/
 
+	int markov_state = max_gamma;
 	return markov_state;
 }
 
