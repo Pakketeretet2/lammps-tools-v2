@@ -24,6 +24,17 @@ SPECIAL_COLS_ORIENT_Y  = block_data_.SPECIAL_COLS.ORIENT_Y
 SPECIAL_COLS_ORIENT_Z  = block_data_.SPECIAL_COLS.ORIENT_Z
 SPECIAL_COLS_ORIENT_W  = block_data_.SPECIAL_COLS.ORIENT_W
 
+
+VectorDouble = block_data_.VectorDouble
+VectorInt = block_data_.VectorInt
+VectorComplexDouble = block_data_.VectorComplexDouble
+VectorComplexInt = block_data_.VectorComplexInt
+
+
+
+
+
+
 class xyz_array_acessor:
     """ Provides an abstraction to indexing the xyz array in block data. """
     def __init__(self, x_arr, y_arr, z_arr):
@@ -400,8 +411,6 @@ def new_block_data():
 def delete_block_data(b):
     """ Deletes block_data. """
     block_data_.delete_block_data( b.get_ref_() )
-
-
 
 
 

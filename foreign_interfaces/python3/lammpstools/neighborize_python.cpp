@@ -7,8 +7,7 @@
 #include "../../../cpp_lib/skeletonize.hpp"
 #include "../../../cpp_lib/cluster_finder.hpp"
 
-PYBIND11_MAKE_OPAQUE(std::vector<int>)
-PYBIND11_MAKE_OPAQUE(std::vector<double>)
+#include "make_vectors_opaque.hpp"
 
 PYBIND11_PLUGIN(neighborize_) {
 	using namespace lammps_tools;
