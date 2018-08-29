@@ -13,6 +13,16 @@
 #include <iosfwd>
 #include <memory>
 
+#ifdef THREADED_READ_BLOCKS
+namespace moodycamel {
+template <typename T, size_t MAX_BLOCK_SIZE> class ReaderWriterQueue;
+}
+#else
+namespace moodycamel {
+template <typename T, size_t MAX_BLOCK_SIZE = 512> class ReaderWriterQueue;
+}
+#endif
+
 
 namespace lammps_tools {
 
@@ -20,16 +30,15 @@ namespace lammps_tools {
 namespace readers {
 
 
-
 /// A generic class for reading in dump files.
 class dump_reader
 {
 public:
-	/// Empty constructor; this just defines the interface.
-	dump_reader() : quiet(true) {}
+	/// Allocates the queue.
+	dump_reader();
 
 	/// Empty destructor:
-	virtual ~dump_reader(){}
+	virtual ~dump_reader();
 
 	/**
 	   Attempts to read in the next block from file.
@@ -47,6 +56,7 @@ public:
 	/// Checks if the internal file is good:
 	bool good() const { return check_good(); }
 
+	/// If true, do not print output to stderr
 	bool quiet;
 
 private:
@@ -54,6 +64,18 @@ private:
 	virtual bool check_eof()  const = 0;
 	virtual bool check_good() const = 0;
 
+	/// Implementation of serial next_block
+	int next_block_impl( block_data &block, bool warn_if_no_special );
+
+	/// Implementation of threaded next_block
+	int next_block_thr_impl( block_data &block, bool warn_if_no_special );
+
+
+	/// Contains a buffer to store the blocks in.
+	moodycamel::ReaderWriterQueue<block_data,512> *read_blocks;
+	/// If true, the first read was called and a thread will start
+	/// filling read_blocks.
+	bool read_started;
 };
 
 

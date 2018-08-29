@@ -36,8 +36,7 @@ std::vector<cx_double > fft_double( int Nx, int Ny, int Nz,
 std::vector<cx_double > fft_int( int Nx, int Ny, int Nz,
                                  const std::vector<int> &data );
 
-
-
+std::vector<double> make_frequency_grid( const std::vector<double> &x );
 
 
 

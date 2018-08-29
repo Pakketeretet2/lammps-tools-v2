@@ -1,6 +1,6 @@
 #include "fourier.hpp"
 #include "my_assert.hpp"
-
+#include "constants.hpp"
 
 #ifdef HAVE_ARMADILLO
 #include <armadillo>
@@ -8,6 +8,8 @@ constexpr const bool use_armadillo = true;
 #else
 constexpr const bool use_armadillo = false;
 #endif // HAVE_ARMADILLO
+
+#include "histogram.hpp"
 
 
 namespace lammps_tools {
@@ -17,10 +19,19 @@ namespace fourier {
 using cx_double = std::complex<double>;
 
 
-arma::cx_mat data_to_mat( int Nx, int Ny, const std::vector<cx_double> &data );
-std::vector<cx_double> mat_to_data( int Nx, int Ny, const arma::cx_mat &X );
-arma::cx_vec data_to_vec( const std::vector<cx_double> &data );
-std::vector<cx_double> vec_to_data( const arma::cx_vec &X );
+
+template <typename ret_type, typename T>
+ret_type data_to_mat( int Nx, int Ny, const std::vector<T> &data );
+
+template <typename ret_type, typename T>
+std::vector<T> mat_to_data( int Nx, int Ny, const ret_type &X );
+
+template <typename ret_type, typename T>
+ret_type data_to_vec( const std::vector<T> &data );
+
+template <typename ret_type, typename T>
+std::vector<T> vec_to_data( const ret_type &X );
+
 
 
 std::vector<double> fft_abs( const std::vector<cx_double > &fft )
@@ -56,76 +67,81 @@ std::vector<double> fft_imag( const std::vector<cx_double > &fft )
 std::vector<cx_double > fft_shift1( const std::vector<cx_double > &fft )
 {
 	arma::cx_vec X(fft);
-	return vec_to_data( arma::fft( X ) );
+	std::size_t Nx = fft.size();
+	std::size_t Nlo = Nx/2;
+
+	if( 2*Nlo == Nx ){
+		// If Nx is uneven, say 8, we need the following remap:
+		// [ 0 1 2 3 4 5 6 7 ] -->
+		// [ 4 5 6 7 0 1 2 3 ]
+		for( std::size_t i = 0; i < Nlo; ++i ){
+			X(i) = fft[i+Nlo];
+			X(i+Nlo) = fft[i];
+		}
+	}else{
+		// If Nx is uneven, say 7, we need the following remap:
+		// [ 0 1 2 3 4 5 6 ] -->
+		// [ 4 5 6 3 0 1 2 ]
+		for( std::size_t i = 0; i < Nlo; ++i ){
+			X(i) = fft[i+Nlo+1];
+			X(i+Nlo+1) = fft[i];
+		}
+	}
+	return vec_to_data<arma::cx_vec, cx_double>( X );
 }
 
 
 std::vector<cx_double > ifft_shift1( const std::vector<cx_double > &fft )
 {
-	arma::cx_vec X(fft);
-	return vec_to_data( arma::ifft( X ) );
+	return fft_shift1( fft );
 }
 
 
 std::vector<cx_double > fft_shift2( int  Nx, int Ny,
                                     const std::vector<cx_double > &fft )
 {
-	arma::cx_mat X = data_to_mat( Nx, Ny, fft );
+	arma::cx_mat X = data_to_mat<arma::cx_mat, cx_double>( Nx, Ny, fft );
 	arma::cx_mat Xshift(Nx, Ny);
 
 	int Nx_lower = Nx/2;
 	int Ny_lower = Ny/2;
+	int Nx_upper = Nx_lower;
+	int Ny_upper = Nx_lower;
 
-	// Check. If Nx or Ny are uneven, then it is kinda weird...
+	// If Nx is uneven
+	bool x_even = 2*Nx_lower == Nx;
+	bool y_even = 2*Ny_lower == Ny;
 
-	// First quadrant:
-	auto XQ1 = X.submat(0, 0, Nx_lower, Ny_lower);
-	auto XQ2 = X.submat(Nx_lower, 0, Nx, Ny_lower);
-	auto XQ3 = X.submat(0, Ny_lower, Nx_lower, Ny);
-	auto XQ4 = X.submat(Nx_lower, Ny_lower, Nx, Ny);
+	if( !x_even ) Nx_upper++;
+	if( !y_even ) Ny_upper++;
 
-	auto XsQ1 = Xshift.submat(0, 0, Nx_lower, Ny_lower);
-	auto XsQ2 = Xshift.submat(Nx_lower, 0, Nx, Ny_lower);
-	auto XsQ3 = Xshift.submat(0, Ny_lower, Nx_lower, Ny);
-	auto XsQ4 = Xshift.submat(Nx_lower, Ny_lower, Nx, Ny);
+	for( std::size_t i = 0; i < Nx_lower; ++i ){
+		// Quadrant 1 --> Quadrant 4
+		for( std::size_t j = 0; j < Ny_lower; ++j ){
+			Xshift(i,j) = X(Nx_upper+i, Ny_upper+j);
+		}
+		// Quadrant 2 --> Quadrant 3
+		for( std::size_t j = 0; j < Ny_lower; ++j ){
+			Xshift(i+Nx_upper,j) = X(i, Ny_upper+j);
+		}
+		// Quadrant 3 --> Quadrant 2
+		for( std::size_t j = 0; j < Ny_lower; ++j ){
+			Xshift(i,j+Ny_upper) = X(Nx_upper+i, j);
+		}
+		// Quadrant 4 --> Quadrant 1
+		for( std::size_t j = 0; j < Ny_lower; ++j ){
+			Xshift(Nx_upper + i, Ny_upper + j) = X(i, j);
+		}
+	}
 
-	XsQ1 = XQ4;
-	XsQ2 = XQ3;
-	XsQ3 = XQ2;
-	XsQ4 = XQ1;
-
-	return mat_to_data(Nx, Ny, Xshift);
+	return mat_to_data<arma::cx_mat, cx_double>(Nx, Ny, Xshift);
 }
 
 
 std::vector<cx_double > ifft_shift2( int  Nx, int Ny,
                                      const std::vector<cx_double > &fft )
 {
-	arma::cx_mat X = data_to_mat( Nx, Ny, fft );
-	arma::cx_mat Xishift( Nx, Ny ); // , fft );
-
-	int Nx_lower = Nx/2;
-	int Ny_lower = Ny/2;
-
-	// Check. If Nx or Ny are uneven, then it is kinda weird...
-
-	// First quadrant:
-	auto XQ1 = X.submat(0, 0, Nx_lower, Ny_lower);
-	auto XQ2 = X.submat(Nx_lower, 0, Nx, Ny_lower);
-	auto XQ3 = X.submat(0, Ny_lower, Nx_lower, Ny);
-	auto XQ4 = X.submat(Nx_lower, Ny_lower, Nx, Ny);
-
-	auto XsQ1 = Xishift.submat(0, 0, Nx_lower, Ny_lower);
-	auto XsQ2 = Xishift.submat(Nx_lower, 0, Nx, Ny_lower);
-	auto XsQ3 = Xishift.submat(0, Ny_lower, Nx_lower, Ny);
-	auto XsQ4 = Xishift.submat(Nx_lower, Ny_lower, Nx, Ny);
-
-	XsQ1 = XQ4;
-	XsQ2 = XQ3;
-	XsQ3 = XQ2;
-	XsQ4 = XQ1;
-
-	return mat_to_data(Nx, Ny, Xishift);
+	return fft_shift2( Nx, Ny, fft );
 }
 
 
@@ -198,21 +214,9 @@ std::vector<cx_double> fft2_impl( int Nx, int Ny,
 
 #ifdef HAVE_ARMADILLO
 	// Convert data to a matrix:
-	arma::mat X( Nx, Ny );
-
-	for( std::size_t i = 0; i < data.size(); ++i ){
-		std::size_t ix = i % Nx;
-		std::size_t iy = i / Nx;
-		std::size_t ifull = ix + Nx*iy;
-		my_assert( __FILE__, __LINE__, ifull == i,
-		           "Incorrect reduction to index!" );
-		X( ix, iy ) = data[i];
-	}
-
+	arma::mat X = data_to_mat<arma::mat, double>( Nx, Ny, data );
 	arma::cx_mat Y = fft2( X );
-
-
-
+	fft = mat_to_data<arma::cx_mat, cx_double>( Ny, Ny, Y );
 #endif
 	return fft;
 }
@@ -269,17 +273,17 @@ std::vector<cx_double> fft_double( int Nx, int Ny, int Nz,
 
 
 std::vector<cx_double> fft_int( int Nx, int Ny, int Nz,
-                             const std::vector<int> &data )
+                                const std::vector<int> &data )
 {
 	std::vector<double> data_d( data.begin(), data.end() );
 	return fft_double( Nx, Ny, Nz, data_d );
 }
 
 
-
-arma::cx_mat data_to_mat( int Nx, int Ny, const std::vector<cx_double> &data )
+template <typename ret_type, typename T>
+ret_type data_to_mat( int Nx, int Ny, const std::vector<T> &data )
 {
-	arma::cx_mat X( Nx, Ny );
+	ret_type X( Nx, Ny );
 	for( std::size_t i = 0; i < data.size(); ++i ){
 		std::size_t ix = i % Nx;
 		std::size_t iy = i / Nx;
@@ -293,7 +297,8 @@ arma::cx_mat data_to_mat( int Nx, int Ny, const std::vector<cx_double> &data )
 }
 
 
-std::vector<cx_double> mat_to_data( int Nx, int Ny, const arma::cx_mat &X )
+template <typename ret_type, typename T>
+std::vector<T> mat_to_data( int Nx, int Ny, const ret_type &X )
 {
 	std::vector<cx_double> data( Nx*Ny );
 	for( std::size_t i = 0; i < data.size(); ++i ){
@@ -308,7 +313,8 @@ std::vector<cx_double> mat_to_data( int Nx, int Ny, const arma::cx_mat &X )
 }
 
 
-arma::cx_vec data_to_vec( const std::vector<cx_double> &data )
+template <typename ret_type, typename T>
+ret_type data_to_vec( const std::vector<T> &data )
 {
 	arma::cx_vec vec( data.size() );
 	for( std::size_t i = 0; i < data.size(); ++i ){
@@ -318,7 +324,8 @@ arma::cx_vec data_to_vec( const std::vector<cx_double> &data )
 }
 
 
-std::vector<cx_double> vec_to_data( const arma::cx_vec &X )
+template <typename ret_type, typename T>
+std::vector<T> vec_to_data( const ret_type &X )
 {
 	std::vector<cx_double> data( X.size() );
 	for( std::size_t i = 0; i < X.size(); ++i ){
@@ -328,9 +335,49 @@ std::vector<cx_double> vec_to_data( const arma::cx_vec &X )
 }
 
 
+std::vector<double> make_frequency_grid( const std::vector<double> &x )
+{
+	// Grid has to be equispaced.
+	std::size_t N = x.size();
+
+	double dx = x[1] - x[0];
+	for( std::size_t i = 0; i < N - 1; ++i ){
+		my_assert( __FILE__, __LINE__,
+		           std::fabs(x[i+1]-x[i]-dx) < 1e-12,
+		           "Grid needs to be equispaced!" );
+	}
+
+	double fmax = 1.0 / dx;
+	double fmin = fmax / N;
+	double offset = -fmax/2.0;
+	std::vector<double> grid(x.size());
+	bool N_is_odd = N % 2;
+
+	if( N_is_odd ){
+		offset += 0.5*fmin;
+		for( std::size_t j = 0; j < N/2; ++j ){
+			double fj = offset;
+			grid[j] = fj + j*fmin;
+		}
+		offset -= fmin;
+		for( std::size_t j = N/2+1; j < N; ++j ){
+			double fj = offset;
+			grid[j] = fj + j*fmin;
+		}
+	}else{
+		for( std::size_t j = 0; j < N; ++j ){
+			double fj = offset;
+			grid[j] = fj + j*fmin;
+		}
+	}
+
+	return grid;
+}
+
 
 
 
 } // namespace fourier
+
 
 } // lammps_tools

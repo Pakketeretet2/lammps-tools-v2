@@ -18,7 +18,7 @@ namespace lammps_tools {
 namespace neighborize {
 
 neighborizer::neighborizer( const block_data &b, const std::vector<int> &s1,
-                            const std::vector<int> &s2, int dims )
+    const std::vector<int> &s2, int dims )
 	: dims(dims), periodic(b.dom.periodic), b(b),
 	  xlo{b.dom.xlo[0], b.dom.xlo[1], b.dom.xlo[2]},
 	  xhi{b.dom.xhi[0], b.dom.xhi[1], b.dom.xhi[2]}, n_atoms(0),

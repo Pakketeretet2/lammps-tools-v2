@@ -325,25 +325,20 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 		// Write the actual type names.
 		// const uint buff_size = n_types*gsd::TYPE_BUFFER_SIZE;
 		std::size_t longest_name = 0;
-		std::cerr << "Writing types...\n";
 		for( int t = 0; t < n_types; ++t ){
 			std::string name = b.ati.type_names[t+1];
 			longest_name = std::max( longest_name, name.length() );
 		}
-		std::cerr << "Longest name is " << longest_name << " long.\n";
 		std::size_t stride = longest_name + 1;
 
 		const uint buff_size = n_types * stride;
 		char *type_names = new char[buff_size]();
-
-		std::cerr << "The type names are:";
 
 		for( int t = 0; t < n_types; ++t ){
 			// Typenames are now stored:
 			char *current_name = type_names + t*stride;
 			// Remember the +1, lammps-tools doesn't use 0-indexed one.
 			std::string tname = b.ati.type_names[t+1];
-			std::cerr << " " << tname;
 			std::size_t idx = 0;
 			for( idx = 0; idx < tname.length(); ++idx ){
 				current_name[idx] = tname[idx];
@@ -351,8 +346,6 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 			current_name[idx] = '\0';
 		}
 
-		std::cerr << "\nWriting type names to a buffer of size "
-		          << n_types << " times " << stride << "\n";
 		/*
 		std::cerr << "That buffer is:\n";
 		for( int i = 0; i < buff_size; ++i ){
@@ -369,7 +362,6 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 
 
 	if( props & TYPEID ){
-		std::cerr << "Writing types to a buffer of size " << N << "\n";
 		status = gsd_write_chunk( gh, "particles/typeid",
 		                          GSD_TYPE_UINT32, N, 1, 0, types );
 		my_assert( __FILE__, __LINE__, status == 0,

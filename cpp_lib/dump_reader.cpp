@@ -7,18 +7,54 @@
 #include "dump_reader_lammps_plain.hpp"
 #include "dump_reader_xyz.hpp"
 
+#ifdef THREADED_READ_BLOCKS
+#include "../dependencies/readerwriterqueue/readerwriterqueue.h"
+constexpr const bool threaded_read_blocks = true;
+#else
+constexpr const bool threaded_read_blocks = false;
+
+// Dummy class:
+namespace moodycamel {
+
+template <typename T, size_t MAX_BLOCK_SIZE>
+class ReaderWriterQueue
+{
+public:
+	ReaderWriterQueue(){};
+
+	T t;
+};
+
+}// namespace moodycamel
+#endif // THREADED_READ_BLOCKS
+
 #include <memory> // Smart pointers.
 
 namespace lammps_tools {
 
 namespace readers {
 
+dump_reader::dump_reader()
+	: quiet(true), read_blocks(nullptr), read_started(false)
+{
+	if( threaded_read_blocks ){
+		read_blocks = new moodycamel::ReaderWriterQueue<block_data>;
+	}
+}
+
+dump_reader::~dump_reader()
+{
+	if( read_blocks ){
+		delete read_blocks;
+	}
+}
+
+
 /**
    \brief adds type names that reflect the integer types of the particles.
 
    \param block The block to modify.
 */
-
 void set_type_names_to_type( block_data &block )
 {
 	block.ati.type_names[0] = "__UNUSED__";
@@ -28,9 +64,28 @@ void set_type_names_to_type( block_data &block )
 }
 
 
+
 int dump_reader::next_block( block_data &block, bool warn_if_no_special )
 {
+	if( threaded_read_blocks ){
+		return next_block_thr_impl( block, warn_if_no_special );
+	}else{
+		return next_block_impl( block, warn_if_no_special );
+	}
+}
+
+
+int dump_reader::next_block_thr_impl( block_data &block,
+				      bool warn_if_no_special )
+{
+	return next_block_impl( block, warn_if_no_special );
+}
+
+
+int dump_reader::next_block_impl( block_data &block, bool warn_if_no_special )
+{
 	int status = get_next_block( block );
+
 	if( status ){
 		if( check_eof() ){
 			std::cerr << "Reached EOF.\n";

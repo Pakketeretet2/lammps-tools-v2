@@ -12,9 +12,12 @@ add_library(lammpstools SHARED
   cpp_lib/block_data.cpp
   cpp_lib/bond_order.cpp
   cpp_lib/center_of_mass.cpp
+  cpp_lib/correlation.cpp
   cpp_lib/cluster_finder.cpp
+  cpp_lib/coarsening.cpp
   cpp_lib/data_field.cpp
   cpp_lib/data_reader_lammps.cpp
+  cpp_lib/density_distribution.cpp
   cpp_lib/domain.cpp
   cpp_lib/dump_reader.cpp
   cpp_lib/dump_reader_hoomd_gsd.cpp
@@ -23,12 +26,15 @@ add_library(lammpstools SHARED
   cpp_lib/dump_reader_lammps_gzip.cpp
   cpp_lib/dump_reader_lammps_plain.cpp
   cpp_lib/dump_reader_xyz.cpp
+  cpp_lib/fourier.cpp
   cpp_lib/icosahedra.cpp
+  cpp_lib/histogram.cpp
   cpp_lib/markov_state_capsid.cpp
   cpp_lib/msd.cpp
   cpp_lib/neighborize_bin.cpp
   cpp_lib/neighborize.cpp
   cpp_lib/neighborize_nsq.cpp
+  cpp_lib/random_generator.cpp
   cpp_lib/rdf.cpp
   cpp_lib/scatter.cpp
   cpp_lib/skeletonize.cpp
@@ -37,29 +43,39 @@ add_library(lammpstools SHARED
   cpp_lib/triangulate.cpp
   cpp_lib/util.cpp
   cpp_lib/writers_hoomd.cpp
-  cpp_lib/writers_lammps.cpp
-  c_interface/lt_block_data.cpp
-  c_interface/lt_block_writers.cpp
-  c_interface/lt_data_field.cpp
-  c_interface/lt_dump_reader.cpp
-  c_interface/lt_transformations.cpp)
+  cpp_lib/writers_lammps.cpp)
+
 
 set(CMAKE_SHARED_LINKER_FLAGS "-shared")
 
 # Custom options:
-option(USE_CGAL        "Use CGAL for Voronoi tesselation."            OFF)
-option(USE_ARMADILLO   "Use Armadillo for normal mode analysis."      OFF)
-option(USE_GSD         "Use GSD for reading HOOMD-Blue GSD files."    OFF)
-option(USE_BOOST_GZIP  "Use boost for reading in GZIP files."         OFF)
-option(USE_EXCEPTIONS  "Use C++ exceptions for error handling."       ON)
-option(LEGACY_COMPILER "Disable some features for ancient compilers." OFF)
-option(USE_ASSERTIONS  "Compile library with assertions enabled."     ON)
+option(USE_CGAL              "Use CGAL for Voronoi tesselation."            OFF)
+option(USE_ARMADILLO         "Use Armadillo for normal mode analysis."      OFF)
+option(USE_GSD               "Use GSD for reading HOOMD-Blue GSD files."    OFF)
+option(USE_BOOST_GZIP        "Use boost for reading in GZIP files."         OFF)
+option(USE_EXCEPTIONS        "Use C++ exceptions for error handling."       ON)
+option(LEGACY_COMPILER       "Disable some features for ancient compilers." OFF)
+option(USE_ASSERTIONS        "Compile library with assertions enabled."     ON)
+option(THREADED_READ_BLOCKS  "Read blocks into a threaded queue."           OFF)
+
+option(INCLUDE_C_INTERFACE "Compile the C interface into the library." OFF)
 
 if(ENABLE_MY_ASSERT)
   add_definitions(-DLT_DEBUG=1)
 else()
   add_definitions(-DLT_DEBUG=0)
 endif()
+
+if(INCLUDE_C_INTERFACE)
+  target_sources(lammpstools PRIVATE
+    c_interface/lt_block_data.cpp
+    c_interface/lt_block_writers.cpp
+    c_interface/lt_data_field.cpp
+    c_interface/lt_dump_reader.cpp
+    c_interface/lt_transformations.cpp)
+endif()
+
+
 
 # Compiler settings:
 set(CXX_STANDARD_REQUIRED "11")
@@ -116,6 +132,14 @@ if(USE_BOOST_GZIP)
     message(WARNING "Cannot find Boost! Not building with it!")
   endif()
 endif(USE_BOOST_GZIP)
+
+
+
+if(THREADED_READ_BLOCKS)
+  set(READERWRITEQUEUE_DIR "../dependencies/readerwritequeue/")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTHREADED_READ_BLOCKS -I${READERWRITEQUEUE_DIR}")
+endif(THREADED_READ_BLOCKS)
+
 
 if(LEGACY_COMPILER)
   set(USE_EXCEPTIONS off)
