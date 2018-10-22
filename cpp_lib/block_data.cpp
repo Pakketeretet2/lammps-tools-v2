@@ -494,6 +494,8 @@ block_data filter_block( const block_data &b, const std::vector<int> &ids )
 	return new_block;
 }
 
+
+
 void block_data::clear()
 {
 	while( n_data_fields() > 0 ){

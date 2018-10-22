@@ -18,9 +18,6 @@ PYBIND11_PLUGIN(fourier_) {
 
 	pybind11::module m("fourier_", "Exposes Fourier transform functions.");
 
-	m.def( "fft", &fourier::fft,
-	       "Perform Fourier transform." );
-
 	m.def( "fft_int", &fourier::fft_int,
 	       "Perform Fourier transform on discrete data." );
 

@@ -27,8 +27,7 @@ public:
 	neighborizer_bin( const block_data &b, const std::vector<int> &s1,
 	                  const std::vector<int> &s2, int dims, double rc )
 		: neighborizer( b, s1, s2, dims ), atom_to_bin(), bins(),
-		  rc(rc), n_neighs(0), Nx(0), Ny(0), Nz(0),
-		  Nbins(0), bin_size(0.0), atoms_binned_( false )
+		  rc(rc), Nx(0), Ny(0), Nz(0), Nbins(0), bin_size(0.0), atoms_binned_( false )
 	{}
 	virtual ~neighborizer_bin(){}
 
@@ -42,33 +41,42 @@ public:
 	bool atoms_binned() const { return atoms_binned_; }
 	bool bins_setup() const { return !atom_to_bin.empty(); }
 
-private:
-	virtual int build( neigh_list &neighs,
-	                   const are_neighbours &criterion );
-
 	// Some helper functions:
-	int  xyz_index_to_bin_index( int ix, int iy, int iz );
-	int  position_to_bin_index( double x, double y, double z );
-	void bin_index_to_xyz_index( int bin, int &ix, int &iy, int &iz );
+	int  xyz_index_to_bin_index( int ix, int iy, int iz ) const;
+	int  position_to_bin_index( double x, double y, double z ) const;
+	void bin_index_to_xyz_index( int bin, int &ix, int &iy, int &iz ) const;
 	void position_to_xyz_index( double x, double y, double z,
-	                            int &ix, int &iy, int &iz );
+	                            int &ix, int &iy, int &iz ) const;
 
 
-	int  shift_bin_index( int bin, int xinc, int yinc, int zinc );
+	int  shift_bin_index( int bin, int xinc, int yinc, int zinc ) const;
 
 	// These do the actual work:
 	void add_bin_neighs( int i, const std::vector<int> &bin,
 	                     neigh_list &neighs,
-	                     const are_neighbours &criterion );
+	                     int &n_neighs,
+	                     const are_neighbours &criterion ) const;
 
 	void neigh_bin_atom( int i, neigh_list &neighs,
-	                     const are_neighbours &criterion );
+	                     int &n_neighs,
+	                     const are_neighbours &criterion ) const;
 
 	void add_neighs_from_bin_2d( int i, neigh_list &neighs,
-	                             const are_neighbours &criterion );
+	                             int &n_neighs,
+	                             const are_neighbours &criterion ) const;
 
 	void add_neighs_from_bin_3d( int i, neigh_list &neighs,
-	                             const are_neighbours &criterion );
+	                             int &n_neighs,
+	                             const are_neighbours &criterion ) const;
+
+	const std::vector<int> &get_bin( int i ) const { return bins[i]; }
+
+
+private:
+	virtual int build( neigh_list &neighs,
+	                   const are_neighbours &criterion );
+
+
 
 	// members:
 	std::vector<int> atom_to_bin;
@@ -77,7 +85,6 @@ private:
 
 	double rc;
 
-	int n_neighs;
 	int Nx, Ny, Nz, Nbins;
 	double bin_size;
 	bool atoms_binned_;
