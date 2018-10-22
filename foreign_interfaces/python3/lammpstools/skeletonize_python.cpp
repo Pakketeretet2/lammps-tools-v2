@@ -3,7 +3,8 @@
 
 #include "../../../cpp_lib/skeletonize.hpp"
 
-#include "make_vectors_opaque.hpp"
+PYBIND11_MAKE_OPAQUE(std::vector<int>)
+PYBIND11_MAKE_OPAQUE(std::vector<double>)
 
 PYBIND11_PLUGIN(skeletonize_) {
 	using namespace lammps_tools::skeletonize;
