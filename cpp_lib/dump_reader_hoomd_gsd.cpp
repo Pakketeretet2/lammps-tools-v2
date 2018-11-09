@@ -671,6 +671,17 @@ int64_t dump_reader_hoomd_gsd::file_size() const
 }
 
 
+int dump_reader_hoomd_gsd::fast_forward( uint frame )
+{
+	if (frame >= max_frame) {
+		return -1;
+	}
+
+	current_frame = frame;
+	return 0;
+}
+
+
 
 #endif // HAVE_GSD
 
