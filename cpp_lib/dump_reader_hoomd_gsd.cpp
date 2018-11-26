@@ -647,6 +647,7 @@ int dump_reader_hoomd_gsd::get_next_block( block_data &block )
 	}
 
 	if( optional_data_found[MOMENT_INERTIA] ){
+		std::cerr << "Found moment of inertia!\n";
 		add_optional_data<double_type>( tmp, moment_inertia, 3,
 		                                { "mom_inertia.x", "mom_inertia.y",
 		                                  "mom_inertia.z" } );
@@ -667,6 +668,18 @@ int dump_reader_hoomd_gsd::get_next_block( block_data &block )
 int64_t dump_reader_hoomd_gsd::file_size() const
 {
 	return gh->file_size;
+}
+
+
+int dump_reader_hoomd_gsd::fast_forward( uint frame )
+{
+	if (frame >= max_frame) {
+		return -1;
+	}
+
+	current_frame = frame - 1;
+	std::cerr << "Fast forwarded to frame " << frame << ".\n";
+	return 0;
 }
 
 

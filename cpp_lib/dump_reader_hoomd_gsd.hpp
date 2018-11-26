@@ -42,6 +42,8 @@ public:
 	/// File size in bytes:
 	int64_t file_size() const;
 
+	/// Fast-forward to given chunk:
+	int fast_forward( uint frame );
 
 private:
 	virtual int  get_next_block( block_data &block );
