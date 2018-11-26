@@ -438,6 +438,7 @@ neigh_list get_empty_neigh_list()
 
 std::vector<int> all( const lammps_tools::block_data &b )
 {
+	my_timer timer(std::cerr);
 	std::vector<int> a( b.N );
 	for( int i = 0; i < b.N; ++i ){
 		a[i] = i;

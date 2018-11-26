@@ -23,7 +23,7 @@ namespace lammps_tools {
 */
 struct data_field
 {
-	/// Defines possible data types contained in data_field.
+	/// Defines possible data types contained in data_field
 	enum types { DOUBLE = 0, ///< data_field contains doubles
 	             INT         ///< data_field contains ints
 	};

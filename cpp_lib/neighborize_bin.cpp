@@ -258,7 +258,6 @@ void neighborizer_bin::add_neighs_from_bin_2d( int i, neigh_list &neighs,
                                                int &n_neighs,
                                                const are_neighbours &criterion ) const
 {
-	int loop_idx[9];
 	const std::vector<double> &x = data_as<double>(
 		b.get_special_field( block_data::X ) );
 	const std::vector<double> &y = data_as<double>(
@@ -271,16 +270,8 @@ void neighborizer_bin::add_neighs_from_bin_2d( int i, neigh_list &neighs,
 	double yi = y[i];
 	double zi = z[i];
 
-	loop_idx[0] = position_to_bin_index( xi, yi, zi );
-
-	loop_idx[ 1] = shift_bin_index(loop_idx[0],  1,  0, 0 );
-	loop_idx[ 2] = shift_bin_index(loop_idx[0], -1,  0, 0 );
-	loop_idx[ 3] = shift_bin_index(loop_idx[0],  1,  1, 0 );
-	loop_idx[ 4] = shift_bin_index(loop_idx[0], -1,  1, 0 );
-	loop_idx[ 5] = shift_bin_index(loop_idx[0],  0,  1, 0 );
-	loop_idx[ 6] = shift_bin_index(loop_idx[0],  0, -1, 0 );
-	loop_idx[ 7] = shift_bin_index(loop_idx[0],  1, -1, 0 );
-	loop_idx[ 8] = shift_bin_index(loop_idx[0], -1, -1, 0 );
+	int my_bin = position_to_bin_index( xi, yi, zi );
+	std::vector<int> loop_idx = get_nearby_bins( my_bin, 2 );
 
 	for( int j = 0; j < 9; ++j ){
 		int bin_index = loop_idx[j];
@@ -307,7 +298,6 @@ void neighborizer_bin::add_neighs_from_bin_3d( int i, neigh_list &neighs,
                                                int &n_neighs,
                                                const are_neighbours &criterion ) const
 {
-	int loop_idx[27];
 	const std::vector<double> &x = data_as<double>(
 		b.get_special_field( block_data::X ) );
 	const std::vector<double> &y = data_as<double>(
@@ -319,37 +309,8 @@ void neighborizer_bin::add_neighs_from_bin_3d( int i, neigh_list &neighs,
 	double xi = x[i];
 	double yi = y[i];
 	double zi = z[i];
-
-	loop_idx[0] = position_to_bin_index( xi, yi, zi );
-
-	loop_idx[ 1] = shift_bin_index(loop_idx[0],  1,  0,  0 );
-	loop_idx[ 2] = shift_bin_index(loop_idx[0], -1,  0,  0 );
-	loop_idx[ 3] = shift_bin_index(loop_idx[0],  1,  1,  0 );
-	loop_idx[ 4] = shift_bin_index(loop_idx[0], -1,  1,  0 );
-	loop_idx[ 5] = shift_bin_index(loop_idx[0],  0,  1,  0 );
-	loop_idx[ 6] = shift_bin_index(loop_idx[0],  0, -1,  0 );
-	loop_idx[ 7] = shift_bin_index(loop_idx[0],  1, -1,  0 );
-	loop_idx[ 8] = shift_bin_index(loop_idx[0], -1, -1,  0 );
-
-	loop_idx[ 9] = shift_bin_index(loop_idx[0],  0,  0,  1 );
-	loop_idx[10] = shift_bin_index(loop_idx[0],  1,  0,  1 );
-	loop_idx[11] = shift_bin_index(loop_idx[0], -1,  0,  1 );
-	loop_idx[12] = shift_bin_index(loop_idx[0],  1,  1,  1 );
-	loop_idx[13] = shift_bin_index(loop_idx[0], -1,  1,  1 );
-	loop_idx[14] = shift_bin_index(loop_idx[0],  0,  1,  1 );
-	loop_idx[15] = shift_bin_index(loop_idx[0],  0, -1,  1 );
-	loop_idx[16] = shift_bin_index(loop_idx[0],  1, -1,  1 );
-	loop_idx[17] = shift_bin_index(loop_idx[0], -1, -1,  1 );
-
-	loop_idx[18] = shift_bin_index(loop_idx[0],  0,  0, -1 );
-	loop_idx[19] = shift_bin_index(loop_idx[0],  1,  0, -1 );
-	loop_idx[20] = shift_bin_index(loop_idx[0], -1,  0, -1 );
-	loop_idx[21] = shift_bin_index(loop_idx[0],  1,  1, -1 );
-	loop_idx[22] = shift_bin_index(loop_idx[0], -1,  1, -1 );
-	loop_idx[23] = shift_bin_index(loop_idx[0],  0,  1, -1 );
-	loop_idx[24] = shift_bin_index(loop_idx[0],  0, -1, -1 );
-	loop_idx[25] = shift_bin_index(loop_idx[0],  1, -1, -1 );
-	loop_idx[26] = shift_bin_index(loop_idx[0], -1, -1, -1 );
+	int my_bin = position_to_bin_index( xi, yi, zi );
+	std::vector<int> loop_idx = get_nearby_bins<3>(my_bin);
 
 	for( int j = 0; j < 27; ++j ){
 		int bin_index = loop_idx[j];
