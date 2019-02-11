@@ -147,6 +147,23 @@ inline std::vector<int> &get_mol_rw(  block_data &b )
 }
 
 
+
+inline const std::vector<int> &get_ix( const block_data &b )
+{
+	return data_as<int>( b.get_special_field( block_data::IX ) );
+}
+
+inline const std::vector<int> &get_iy( const block_data &b )
+{
+	return data_as<int>( b.get_special_field( block_data::IY ) );
+}
+
+inline const std::vector<int> &get_iz( const block_data &b )
+{
+	return data_as<int>( b.get_special_field( block_data::IZ ) );
+}
+
+
 } // namespace lammps_tools
 
 #endif // BLOCK_DATA_ACCESS_HPP

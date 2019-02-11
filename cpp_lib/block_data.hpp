@@ -272,6 +272,8 @@ public:
 	/// to the data_fields.
 	bigint clone_particle( bigint idx );
 
+	/// Unwraps position of particle idx.
+	void unwrap_image(std::size_t idx, double dest[3]) const;
 
 private:
 	/// A vector containing pointers to all data fields.

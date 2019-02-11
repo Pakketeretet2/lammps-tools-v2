@@ -44,5 +44,9 @@ PYBIND11_PLUGIN(neighborize_) {
 	       &neighborize::get_empty_neigh_list,
 	       "Creates an empty neighbor list to pass to other functions." );
 
+	m.def( "find_clusters",
+	       &neighborize::neigh_list_to_clusters,
+	       "Finds all clusters based on a given neighbor list." );
+
 	return m.ptr();
 }

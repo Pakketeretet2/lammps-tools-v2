@@ -166,8 +166,9 @@ class dump_reader:
                 print( "Warning: Overwriting", name, "header.",
                        file = sys.stderr )
             else:
-                print( "Guessing header", h, "\tis for", name,
-                       file = sys.stderr )
+                pass
+                #print( "Guessing header", h, "\tis for", name,
+                #       file = sys.stderr )
             self.set_special_column( h, special_col_enum[i] )
             header_set[i] = True
 

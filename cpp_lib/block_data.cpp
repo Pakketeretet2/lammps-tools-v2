@@ -670,5 +670,23 @@ bigint block_data::clone_particle( bigint idx )
 
 
 
+void block_data::unwrap_image(std::size_t idx, double dest[3]) const
+{
+	const std::vector<double> &x = data_as<double>(get_special_field(block_data::X));
+	const std::vector<double> &y = data_as<double>(get_special_field(block_data::Y));
+	const std::vector<double> &z = data_as<double>(get_special_field(block_data::Z));
+
+	const std::vector<int> &ix = data_as<int>(get_special_field(block_data::IX));
+	const std::vector<int> &iy = data_as<int>(get_special_field(block_data::IY));
+	const std::vector<int> &iz = data_as<int>(get_special_field(block_data::IZ));
+
+	dest[0] = x[idx];
+	dest[1] = y[idx];
+	dest[2] = z[idx];
+	int flags[3] = {ix[idx], iy[idx], iz[idx]};
+	dom.unwrap_image(dest, flags);
+}
+
+
 
 } // namespace lammps_tools
