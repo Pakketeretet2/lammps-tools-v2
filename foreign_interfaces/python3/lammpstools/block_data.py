@@ -24,17 +24,6 @@ SPECIAL_COLS_ORIENT_Y  = block_data_.SPECIAL_COLS.ORIENT_Y
 SPECIAL_COLS_ORIENT_Z  = block_data_.SPECIAL_COLS.ORIENT_Z
 SPECIAL_COLS_ORIENT_W  = block_data_.SPECIAL_COLS.ORIENT_W
 
-
-VectorDouble = block_data_.VectorDouble
-VectorInt = block_data_.VectorInt
-VectorComplexDouble = block_data_.VectorComplexDouble
-VectorComplexInt = block_data_.VectorComplexInt
-
-
-
-
-
-
 class xyz_array_acessor:
     """ Provides an abstraction to indexing the xyz array in block data. """
     def __init__(self, x_arr, y_arr, z_arr):
@@ -249,6 +238,38 @@ class block_data:
                                self.meta.domain.xlo[2], self.meta.domain.xhi[2],
                                self.meta.domain.periodic)
 
+    def unwrap_position(self, idx):
+        """ Unwraps the coordinate of particle idx. """
+        if (not block_data_.has_special_field(self.handle, SPECIAL_COLS_IX) or
+            not block_data_.has_special_field(self.handle, SPECIAL_COLS_IY) or
+            not block_data_.has_special_field(self.handle, SPECIAL_COLS_IZ)):
+            print("Cannot unwrap without image flags!", file = sys.stderr)
+            return x[idx]
+
+        else:
+            ix = block_data_.special_field_int(self.handle, SPECIAL_COLS_IX)
+            iy = block_data_.special_field_int(self.handle, SPECIAL_COLS_IY)
+            iz = block_data_.special_field_int(self.handle, SPECIAL_COLS_IZ)
+
+            Lx = self.meta.domain.xhi[0] - self.meta.domain.xlo[0]
+            Ly = self.meta.domain.xhi[1] - self.meta.domain.xlo[1]
+            Lz = self.meta.domain.xhi[2] - self.meta.domain.xlo[2]
+
+            x = block_data_.special_field_double(self.handle, SPECIAL_COLS_X)
+            y = block_data_.special_field_double(self.handle, SPECIAL_COLS_Y)
+            z = block_data_.special_field_double(self.handle, SPECIAL_COLS_Z)
+
+            xtmp = np.array([x[idx],y[idx],z[idx]])
+
+            xtmp[0] += ix[idx]*Lx
+            xtmp[1] += iy[idx]*Ly
+            xtmp[2] += iz[idx]*Lz
+            # print("xtmp =", xtmp, "flags =[", ix[idx], iy[idx], iz[idx], "]", file = sys.stderr)
+
+            return xtmp
+
+
+
 
 def get_arrays_from_handle( handle, no_copy = False ):
     """ Constructs data arrays from block_data_handle and returns them. """
@@ -411,6 +432,7 @@ def new_block_data():
 def delete_block_data(b):
     """ Deletes block_data. """
     block_data_.delete_block_data( b.get_ref_() )
+
 
 
 

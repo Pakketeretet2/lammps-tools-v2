@@ -3,10 +3,10 @@
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
 
-#include "../../../c_interface/lt_block_data.h"
+#include "lt_block_data.h"
 
-#include "make_vectors_opaque.hpp"
-
+PYBIND11_MAKE_OPAQUE(std::vector<int>)
+PYBIND11_MAKE_OPAQUE(std::vector<double>)
 
 const void *vector_int_to_cptr( const std::vector<int> &v )
 {
@@ -25,8 +25,6 @@ PYBIND11_PLUGIN(block_data_) {
 
 	pybind11::bind_vector<std::vector<int>>(m, "VectorInt");
 	pybind11::bind_vector<std::vector<double>>(m, "VectorDouble");
-	pybind11::bind_vector<std::vector<std::complex<double>>>(m, "VectorComplexDouble");
-	pybind11::bind_vector<std::vector<std::complex<int>>>(m, "VectorComplexInt");
 
 	pybind11::class_<lammps_tools::block_data>(m, "block_data")
 		.def(pybind11::init<>());

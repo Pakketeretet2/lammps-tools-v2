@@ -20,13 +20,13 @@ namespace lammps_tools {
 namespace neighborize {
 
 
-int neighborizer_bin::xyz_index_to_bin_index( int ix, int iy, int iz )
+int neighborizer_bin::xyz_index_to_bin_index( int ix, int iy, int iz ) const
 {
 	return ix + Nx*iy + Nx*Ny*iz;
 }
 
 void neighborizer_bin::bin_index_to_xyz_index( int bin, int &ix,
-                                               int &iy, int &iz )
+                                               int &iy, int &iz ) const
 {
 	ix = bin % Nx;
 	iy = ( (bin - ix) % (Nx*Ny) ) / Nx;
@@ -38,7 +38,7 @@ void neighborizer_bin::bin_index_to_xyz_index( int bin, int &ix,
 }
 
 void neighborizer_bin::position_to_xyz_index( double x, double y, double z,
-                                              int &ix, int &iy, int &iz )
+                                              int &ix, int &iy, int &iz ) const
 {
 	ix = ( x - xlo[0] ) / bin_size;
 	iy = ( y - xlo[1] ) / bin_size;
@@ -66,7 +66,7 @@ void neighborizer_bin::position_to_xyz_index( double x, double y, double z,
 	}
 }
 
-int neighborizer_bin::position_to_bin_index( double x, double y, double z )
+int neighborizer_bin::position_to_bin_index( double x, double y, double z ) const
 {
 	int ix, iy, iz;
 	position_to_xyz_index( x, y, z, ix, iy, iz );
@@ -78,7 +78,7 @@ int neighborizer_bin::position_to_bin_index( double x, double y, double z )
 }
 
 
-int neighborizer_bin::shift_bin_index( int bin, int xinc, int yinc, int zinc )
+int neighborizer_bin::shift_bin_index( int bin, int xinc, int yinc, int zinc ) const
 {
 	int ix = bin % Nx;
 	int iy = ( (bin - ix) % (Nx*Ny) ) / Nx;
@@ -115,11 +115,6 @@ void neighborizer_bin::setup_bins()
 	}
 	atom_to_bin.resize( b.N );
 	bin_size = rc;
-
-	double Lx = xhi[0] - xlo[0];
-	double Ly = xhi[1] - xlo[1];
-	double Lz = xhi[2] - xlo[2];
-
 
 	Nx = std::floor( (xhi[0] - xlo[0]) / bin_size );
 	Ny = std::floor( (xhi[1] - xlo[1]) / bin_size );
@@ -235,7 +230,8 @@ void neighborizer_bin::bin_atoms()
 // Adds to the neighbour list of i the atoms in bin that are in range.
 void neighborizer_bin::add_bin_neighs( int i, const std::vector<int> &bin,
                                        neigh_list &neighs,
-                                       const are_neighbours &criterion )
+                                       int &n_neighs,
+                                       const are_neighbours &criterion ) const
 {
 	const std::vector<int> &id = data_as<int>(
 		b.get_special_field( block_data::ID ) );
@@ -259,9 +255,9 @@ void neighborizer_bin::add_bin_neighs( int i, const std::vector<int> &bin,
 
 
 void neighborizer_bin::add_neighs_from_bin_2d( int i, neigh_list &neighs,
-                                               const are_neighbours &criterion )
+                                               int &n_neighs,
+                                               const are_neighbours &criterion ) const
 {
-	int loop_idx[9];
 	const std::vector<double> &x = data_as<double>(
 		b.get_special_field( block_data::X ) );
 	const std::vector<double> &y = data_as<double>(
@@ -274,16 +270,8 @@ void neighborizer_bin::add_neighs_from_bin_2d( int i, neigh_list &neighs,
 	double yi = y[i];
 	double zi = z[i];
 
-	loop_idx[0] = position_to_bin_index( xi, yi, zi );
-
-	loop_idx[ 1] = shift_bin_index(loop_idx[0],  1,  0, 0 );
-	loop_idx[ 2] = shift_bin_index(loop_idx[0], -1,  0, 0 );
-	loop_idx[ 3] = shift_bin_index(loop_idx[0],  1,  1, 0 );
-	loop_idx[ 4] = shift_bin_index(loop_idx[0], -1,  1, 0 );
-	loop_idx[ 5] = shift_bin_index(loop_idx[0],  0,  1, 0 );
-	loop_idx[ 6] = shift_bin_index(loop_idx[0],  0, -1, 0 );
-	loop_idx[ 7] = shift_bin_index(loop_idx[0],  1, -1, 0 );
-	loop_idx[ 8] = shift_bin_index(loop_idx[0], -1, -1, 0 );
+	int my_bin = position_to_bin_index( xi, yi, zi );
+	std::vector<int> loop_idx = get_nearby_bins( my_bin, 2 );
 
 	for( int j = 0; j < 9; ++j ){
 		int bin_index = loop_idx[j];
@@ -301,14 +289,15 @@ void neighborizer_bin::add_neighs_from_bin_2d( int i, neigh_list &neighs,
 			          << " ( id = " << id[i] << ", bin "
 			          << bin_index << " )\n";
 		}
-		add_bin_neighs( i, bin, neighs, criterion );
+		add_bin_neighs( i, bin, neighs, n_neighs, criterion );
 	}
 }
 
+
 void neighborizer_bin::add_neighs_from_bin_3d( int i, neigh_list &neighs,
-                                               const are_neighbours &criterion )
+                                               int &n_neighs,
+                                               const are_neighbours &criterion ) const
 {
-	int loop_idx[27];
 	const std::vector<double> &x = data_as<double>(
 		b.get_special_field( block_data::X ) );
 	const std::vector<double> &y = data_as<double>(
@@ -320,37 +309,8 @@ void neighborizer_bin::add_neighs_from_bin_3d( int i, neigh_list &neighs,
 	double xi = x[i];
 	double yi = y[i];
 	double zi = z[i];
-
-	loop_idx[0] = position_to_bin_index( xi, yi, zi );
-
-	loop_idx[ 1] = shift_bin_index(loop_idx[0],  1,  0,  0 );
-	loop_idx[ 2] = shift_bin_index(loop_idx[0], -1,  0,  0 );
-	loop_idx[ 3] = shift_bin_index(loop_idx[0],  1,  1,  0 );
-	loop_idx[ 4] = shift_bin_index(loop_idx[0], -1,  1,  0 );
-	loop_idx[ 5] = shift_bin_index(loop_idx[0],  0,  1,  0 );
-	loop_idx[ 6] = shift_bin_index(loop_idx[0],  0, -1,  0 );
-	loop_idx[ 7] = shift_bin_index(loop_idx[0],  1, -1,  0 );
-	loop_idx[ 8] = shift_bin_index(loop_idx[0], -1, -1,  0 );
-
-	loop_idx[ 9] = shift_bin_index(loop_idx[0],  0,  0,  1 );
-	loop_idx[10] = shift_bin_index(loop_idx[0],  1,  0,  1 );
-	loop_idx[11] = shift_bin_index(loop_idx[0], -1,  0,  1 );
-	loop_idx[12] = shift_bin_index(loop_idx[0],  1,  1,  1 );
-	loop_idx[13] = shift_bin_index(loop_idx[0], -1,  1,  1 );
-	loop_idx[14] = shift_bin_index(loop_idx[0],  0,  1,  1 );
-	loop_idx[15] = shift_bin_index(loop_idx[0],  0, -1,  1 );
-	loop_idx[16] = shift_bin_index(loop_idx[0],  1, -1,  1 );
-	loop_idx[17] = shift_bin_index(loop_idx[0], -1, -1,  1 );
-
-	loop_idx[18] = shift_bin_index(loop_idx[0],  0,  0, -1 );
-	loop_idx[19] = shift_bin_index(loop_idx[0],  1,  0, -1 );
-	loop_idx[20] = shift_bin_index(loop_idx[0], -1,  0, -1 );
-	loop_idx[21] = shift_bin_index(loop_idx[0],  1,  1, -1 );
-	loop_idx[22] = shift_bin_index(loop_idx[0], -1,  1, -1 );
-	loop_idx[23] = shift_bin_index(loop_idx[0],  0,  1, -1 );
-	loop_idx[24] = shift_bin_index(loop_idx[0],  0, -1, -1 );
-	loop_idx[25] = shift_bin_index(loop_idx[0],  1, -1, -1 );
-	loop_idx[26] = shift_bin_index(loop_idx[0], -1, -1, -1 );
+	int my_bin = position_to_bin_index( xi, yi, zi );
+	std::vector<int> loop_idx = get_nearby_bins<3>(my_bin);
 
 	for( int j = 0; j < 27; ++j ){
 		int bin_index = loop_idx[j];
@@ -370,18 +330,19 @@ void neighborizer_bin::add_neighs_from_bin_3d( int i, neigh_list &neighs,
 			          << " ( id = " << id[i] << ", bin "
 			          << ix << ", " << iy << ", " << iz << " )\n";
 		}
-		add_bin_neighs( i, bin, neighs, criterion );
+		add_bin_neighs( i, bin, neighs, n_neighs, criterion );
 	}
 }
 
 
 void neighborizer_bin::neigh_bin_atom( int i, neigh_list &neighs,
-                                       const are_neighbours &criterion )
+                                       int &n_neighs,
+                                       const are_neighbours &criterion ) const
 {
 	if( dims == 2 ){
-		add_neighs_from_bin_2d( i, neighs, criterion );
+		add_neighs_from_bin_2d( i, neighs, n_neighs, criterion );
 	}else{
-		add_neighs_from_bin_3d( i, neighs, criterion );
+		add_neighs_from_bin_3d( i, neighs, n_neighs, criterion );
 	}
 }
 
@@ -397,7 +358,7 @@ int neighborizer_bin::build( neigh_list &neighs,
 	for( std::vector<int> &ni : neighs ){
 		ni.clear();
 	}
-	n_neighs = 0;
+	int n_neighs = 0;
 	if( !quiet ) m.toc("  Clearing neigh list");
 
 	// 0. Allocates bins and atom_to_bin containers,
@@ -425,11 +386,11 @@ int neighborizer_bin::build( neigh_list &neighs,
 		}
 		for( std::size_t j = 0; j < s1_vec.size(); ++j ){
 			int i = s1_vec[j];
-			neigh_bin_atom( i, neighs, criterion );
+			neigh_bin_atom( i, neighs, n_neighs, criterion );
 		}
 	}else{
 		for( int i : s1 ){
-			neigh_bin_atom( i, neighs, criterion );
+			neigh_bin_atom( i, neighs, n_neighs, criterion );
 		}
 	}
 	if( !quiet ) m.toc("  Neighborizing");

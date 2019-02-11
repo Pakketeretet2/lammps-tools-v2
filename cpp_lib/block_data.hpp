@@ -64,7 +64,10 @@ public:
 
 	// Public members:
 	bigint tstep;       ///< The current time step
-	bigint N;           ///< The number of atoms
+	bigint N;           ///< The total number of atoms
+	bigint N_ghost;     ///< The number of "ghost" atoms.
+	bigint N_true;      ///< The number of non-ghost atoms.
+
 	int    N_types;     ///< The number of atom types
 	int    atom_style;  ///< The current atom style
 
@@ -251,6 +254,26 @@ public:
 
 	std::size_t name2index( const std::string &name ) const;
 
+	/**
+	   Constructs "ghost" atoms at the edge of the boundary to more quickly
+	   calculate distances in periodic domains. This creates an additional
+	   layer of atoms rc thick that extends from the border and contains
+	   copies of atoms that are on the other side of the periodic domain.
+	*/
+	void add_ghost_atoms( double rc, int dims );
+
+
+	/// Returns true if the block contains ghost atoms.
+	bool have_ghost_atoms() const
+	{ return N_ghost > 0; }
+
+
+	/// "Clones" (creates a copy) of a particle and adds it
+	/// to the data_fields.
+	bigint clone_particle( bigint idx );
+
+	/// Unwraps position of particle idx.
+	void unwrap_image(std::size_t idx, double dest[3]) const;
 
 private:
 	/// A vector containing pointers to all data fields.

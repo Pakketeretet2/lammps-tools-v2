@@ -9,7 +9,7 @@
 
 #include "block_data.hpp"
 
-
+#include <cmath>
 
 namespace lammps_tools {
 
@@ -58,6 +58,18 @@ std::vector<int> box_count( const lammps_tools::block_data &b,
                             const std::vector<int> &boxes,
                             int N_boxes, int itype, bool quiet );
 
+
+/**
+   \brief Calculates the distance between two boxes.
+
+   \param bin_i    The index of box i
+   \param bin_j    The index of box j
+   \param dx       The box width
+   \param Nx       The number of boxes in each dim.
+   \param dim      The number of dimensions.
+*/
+double box_distance( int bin_i, int bin_j, double dx,
+                     int Nx, int dim );
 
 
 } // namespace density

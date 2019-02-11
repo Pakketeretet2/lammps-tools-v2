@@ -3,6 +3,8 @@
 #include "correlation.hpp"
 #include "my_timer.hpp"
 #include "neighborize.hpp"
+#include "neighborize_bin.hpp"
+
 
 #include <cmath>
 
@@ -15,35 +17,18 @@ namespace correlate {
 
 
 template <typename T>
-std::vector<double> correlate_impl( const lammps_tools::block_data &b,
-                                    const std::vector<T> &data,
-                                    double x0, double x1, double dx, int dims )
+void correlate_impl( const lammps_tools::block_data &b,
+                     const std::vector<T> &data,
+                     std::vector<double> &Cr,
+                     double x0, double x1, double dx, int dims )
 {
 	// x1 is the max, so you can bin the atoms
 	std::cerr << "Correlating data between " << x0 << " and "
 	          << x1 << "...\n";
-	my_timer timer( std::cerr );
-	std::vector<int> all_vec = neighborize::all(b);
-	/*
-	neighborize::neigh_list neighs = nearest_neighs( b, 0, 0,
-	                                                 neighborize::DIST_BIN,
-	                                                 dims, x1 );
-	*/
-	int method = neighborize::DIST_BIN;
-	neighborize::neigh_list neighs = neighborize::nearest_neighs(b, 0, 0,
-	                                                             method,
-	                                                             dims, x1);
-	if( method == neighborize::DIST_NSQ ){
-		timer.toc( "Building neighbor list (NSQ)" );
-	}else{
-		timer.toc( "Building neighbor list (BIN)" );
-	}
-
-
 	double Lgrid = x1 - x0;
-	int n_bins = 1 + Lgrid / dx;
+	int n_bins = Lgrid / dx;
 
-	std::vector<double> corr( n_bins );
+	Cr.resize( n_bins, 0.0 );
 	std::vector<double> counts( n_bins );
 
 	const std::vector<double> &x = get_x(b);
@@ -52,35 +37,48 @@ std::vector<double> correlate_impl( const lammps_tools::block_data &b,
 
 	const double pi = constants::pi;
 
+	my_timer timer( std::cerr );
+	std::vector<int> a = neighborize::all(b);
+	neighborize::neighborizer_bin nb( b, a, a, 2, x1 );
+	nb.setup_bins();
+	nb.bin_atoms();
+	timer.toc("Binning atoms");
+
+
 	timer.tic();
-	// For each atom, loop over its neighbors and
-	// correlate the data between them.
-	for( int i = 0; i < b.N; ++i ){
-		double xi[3] = { x[i], y[i], z[i] };
-		T di = data[i];
-		// You also need to take into account the
-		// self-correlation in this case.
+	std::cerr << "Correlating " << nb.n_bins() << " bins...\n";
 
-		for( int j : neighs[i] ){
-			if( i > j ) continue; // No double counting.
-			T dj = data[j];
+	// Loop over the bins rather than the atoms.
+	for( int bin_i = 0; bin_i < nb.n_bins(); ++bin_i ){
+		std::vector<int> loop_idx = nb.get_nearby_bins<2>(bin_i);
+		for( int bin_j : loop_idx ){
+			if (bin_j < bin_i) continue;
 
-			double xj[3] = { x[j], y[j], z[j] };
-			double rij[3];
-			double r2 = b.dom.dist_2( xi, xj, rij );
-			double r  = std::sqrt(r2);
+			// Loop over all particles in bin_i:
+			for( int i : nb.get_bin(bin_i) ){
+				double xi[3] = { x[i], y[i], z[i] };
+				T di = data[i];
+				// You also need to take into account the
+				// self-correlation in this case.
 
-			int bin = ( r - x0 ) / dx;
-			if( bin >= n_bins || bin < 0 ) continue;
+				for( int j : nb.get_bin(bin_j) ){
+					T dj = data[j];
+					double xj[3] = { x[j], y[j], z[j] };
+					double rij[3];
+					double r2 = b.dom.dist_2( xi, xj, rij );
+					double r  = std::sqrt(r2);
 
-			double didj = di*dj;
-			corr[bin] += didj;
+					int bin = ( r - x0 ) / dx;
+					if( bin >= n_bins || bin < 0 ) continue;
 
-			counts[bin] += 1.0;
+					// You will encounter i == j twice.
+					double didj = di*dj * ( ( i == j ) ? 0.5 : 1.0 );
+					Cr[bin] += didj;
+
+					counts[bin] += 1.0;
+				}
+			}
 		}
-		// Count self-correlation too:
-		corr[0]   += di*di;
-		counts[0] += 1.0;
 	}
 	timer.toc( "Correlating data" );
 
@@ -93,27 +91,28 @@ std::vector<double> correlate_impl( const lammps_tools::block_data &b,
 		if( counts[bin] > 0 ){
 			// double factor = 1.0 / (counts[bin]*bin_V);
 			double factor = 1.0 / counts[bin];
-			corr[bin] *= factor;
+			Cr[bin] *= factor;
 		}
 	}
 
-	return corr;
 }
 
 
 
-std::vector<double> correlate_int( const lammps_tools::block_data &b,
-                                   const std::vector<int> &data,
-                                   double x0, double x1, double dx, int dims )
+void correlate_int( const lammps_tools::block_data &b,
+                    const std::vector<int> &data,
+                    std::vector<double> &Cr,
+                    double x0, double x1, double dx, int dims )
 {
-	return correlate_impl<int>( b, data, x0, x1, dx, dims );
+	correlate_impl<int>( b, data, Cr, x0, x1, dx, dims );
 }
 
-std::vector<double> correlate_double( const lammps_tools::block_data &b,
-                                      const std::vector<double> &data,
-                                      double x0, double x1, double dx, int dims )
+void correlate_double( const lammps_tools::block_data &b,
+                       const std::vector<double> &data,
+                       std::vector<double> &Cr,
+                       double x0, double x1, double dx, int dims )
 {
-	return correlate_impl<double>( b, data, x0, x1, dx, dims );
+	correlate_impl<double>( b, data, Cr, x0, x1, dx, dims );
 }
 
 

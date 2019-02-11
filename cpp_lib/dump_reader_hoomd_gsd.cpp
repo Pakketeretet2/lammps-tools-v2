@@ -677,8 +677,8 @@ int dump_reader_hoomd_gsd::fast_forward( uint frame )
 		return -1;
 	}
 
-	current_frame = frame-1; // Because get_next_block immediately adds 1.
-	std::cerr << "Fast forwarded to frame " << current_frame+1 << "\n";
+	current_frame = frame - 1;
+	std::cerr << "Fast forwarded to frame " << frame << ".\n";
 	return 0;
 }
 

@@ -16,6 +16,12 @@ def neigh_list_dist( block_data, itype, jtype, method, dims, rc,
                                                 mol_policy,
                                                 bond_policy, quiet )
 
+def find_clusters( neigh_list, sort_clusters = False ):
+    clusters = neighborize_.find_clusters(neigh_list)
+    if sort_clusters:
+        clusters.sort( key = len, reverse = True )
+    return clusters
+
 
 def neigh_list_dist_indexed( block_data, i_idxs, j_idxs, method, dims, rc,
                              mol_policy = 0, bond_policy = 0, quiet = True ):

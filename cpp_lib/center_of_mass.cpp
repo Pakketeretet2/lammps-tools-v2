@@ -24,6 +24,7 @@ point geometric_center( const block_data &b )
 	return geometric_center( b, s.begin(), s.end() );
 }
 
+
 template <typename iter>
 point center_of_mass( const block_data &b, iter it, iter end )
 {
@@ -55,10 +56,19 @@ point weighted_pos_avg( const block_data &b, iter it, iter end, functor w )
 	const std::vector<double> &y = get_y(b);
 	const std::vector<double> &z = get_z(b);
 
+	// Check if the block has image flags:
+	const std::vector<int> &ix = get_ix(b);
+	const std::vector<int> &iy = get_iy(b);
+	const std::vector<int> &iz = get_iz(b);
+
+
 	double c = 0.0;
 	for( iter i = it; i != end; ++i ){
 		int idi = *i;
 		int idx = im[idi];
+
+		// Convert position with the image flags.
+
 		double ww = w( b, idx );
 
 		p.x += ww*x[ idx ];

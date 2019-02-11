@@ -7,7 +7,8 @@
 #include "../../../cpp_lib/skeletonize.hpp"
 #include "../../../cpp_lib/cluster_finder.hpp"
 
-#include "make_vectors_opaque.hpp"
+PYBIND11_MAKE_OPAQUE(std::vector<int>)
+PYBIND11_MAKE_OPAQUE(std::vector<double>)
 
 PYBIND11_PLUGIN(neighborize_) {
 	using namespace lammps_tools;
@@ -42,6 +43,10 @@ PYBIND11_PLUGIN(neighborize_) {
 	m.def( "get_empty_neighbor_list",
 	       &neighborize::get_empty_neigh_list,
 	       "Creates an empty neighbor list to pass to other functions." );
+
+	m.def( "find_clusters",
+	       &neighborize::neigh_list_to_clusters,
+	       "Finds all clusters based on a given neighbor list." );
 
 	return m.ptr();
 }

@@ -31,14 +31,16 @@ namespace correlate {
 
    \returns the correlation of given data.
 */
-std::vector<double> correlate_int( const lammps_tools::block_data &b,
-                                   const std::vector<int> &data,
-                                   double x0, double x1, double dx, int dims );
+void correlate_int( const lammps_tools::block_data &b,
+                    const std::vector<int> &data,
+                    std::vector<double> &Cr,
+                    double x0, double x1, double dx, int dims );
 
 
-std::vector<double> correlate_double( const lammps_tools::block_data &b,
-                                      const std::vector<double> &data,
-                                      double x0, double x1, double dx, int dims );
+void correlate_double( const lammps_tools::block_data &b,
+                       const std::vector<double> &data,
+                       std::vector<double> &Cr,
+                       double x0, double x1, double dx, int dims );
 
 
 

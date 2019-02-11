@@ -5,7 +5,10 @@
 #include <sstream>
 #include <vector>
 
-#include "make_vectors_opaque.hpp"
+
+
+PYBIND11_MAKE_OPAQUE(std::vector<int>)
+PYBIND11_MAKE_OPAQUE(std::vector<double>)
 
 /*
   Wrappers for C++ types:

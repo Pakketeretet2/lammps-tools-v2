@@ -117,6 +117,42 @@ std::vector<double> density_distribution( const lammps_tools::block_data &b,
 }
 
 
+double box_distance( int bin_i, int bin_j, double dx,
+                     int Nx, int dim )
+{
+	// Get the and y and optionally z index of the box.
+	int ix = bin_i % Nx;
+	int jx = bin_j % Nx;
+
+	int iy = (bin_i - ix) / Nx % Nx;
+	int jy = (bin_j - jx) / Nx % Nx;
+
+	int iz = 0, jz = 0;
+	if( dim == 3 ){
+		int Nx2 = Nx*Nx;
+		iz = (bin_i - ix - iy*Nx)/Nx2;
+		jz = (bin_j - jx - jy*Nx)/Nx2;
+	}
+
+
+	int idx = ix - jx;
+	int idy = iy - jy;
+	int idz = iz - jz;
+	int Nxh = Nx / 2;
+
+	if( idx > Nxh ) idx = Nx - idx;
+	if( idy > Nxh ) idy = Nx - idy;
+	if( idz > Nxh ) idz = Nx - idz;
+
+	double rx = idx * dx;
+	double ry = idy * dx;
+	double rz = idz * dx;
+
+	double r2 = rx*rx + ry*ry + rz*rz;
+	return std::sqrt(r2);
+}
+
+
 } // namespace density
 
 } // namespace lammps_tools

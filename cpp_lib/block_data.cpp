@@ -4,12 +4,15 @@
 #include "id_map.hpp"
 #include "my_assert.hpp"
 
+#include <iostream>
+
 using namespace lammps_tools;
 
 namespace lammps_tools {
 
 block_data::block_data()
-	: tstep( 0 ), N( 0 ), N_types( 1 ), atom_style( ATOM_STYLE_ATOMIC ),
+	: tstep( 0 ), N( 0 ), N_ghost(0), N_true(0),
+	  N_types( 1 ), atom_style( ATOM_STYLE_ATOMIC ),
 	  dom(), top(), ati(N_types), data(),
 	  special_fields_by_name ( N_SPECIAL_FIELDS, "" ),
 	  special_fields_by_index( N_SPECIAL_FIELDS, -1 ),
@@ -17,7 +20,8 @@ block_data::block_data()
 { }
 
 block_data::block_data( std::size_t n_atoms )
-	: tstep( 0 ), N( n_atoms ), N_types( 1 ), atom_style( ATOM_STYLE_ATOMIC ),
+	: tstep( 0 ), N( n_atoms ), N_ghost(0), N_true(0),
+	  N_types( 1 ), atom_style( ATOM_STYLE_ATOMIC ),
 	  dom(), top(), ati(N_types), data(),
 	  special_fields_by_name ( N_SPECIAL_FIELDS, "" ),
 	  special_fields_by_index( N_SPECIAL_FIELDS, -1 ),
@@ -27,6 +31,8 @@ block_data::block_data( std::size_t n_atoms )
 block_data::block_data( const block_data &o )
 	: tstep( o.tstep ),
 	  N( o.N ),
+	  N_ghost( o.N_ghost ),
+	  N_true( o.N_true ),
 	  N_types( o.N_types ),
 	  atom_style( o.atom_style ),
 	  dom( o.dom ),
@@ -175,12 +181,12 @@ std::size_t block_data::n_data_fields() const
 
 void block_data::set_natoms( std::size_t new_size )
 {
-	N = new_size;
 	for( data_field *d : data ){
 		my_assert( __FILE__, __LINE__, d,
 		           "Data field not initialised in attempted resize!" );
-		d->resize(N);
+		d->resize(new_size);
 	}
+	N = new_size;
 }
 
 
@@ -340,6 +346,8 @@ void swap( block_data &f, block_data &s )
 
 	f.tstep = s.tstep;
 	f.N = s.N;
+	f.N_ghost = s.N_ghost;
+	f.N_true = s.N_true;
 	f.N_types = s.N_types;
 	f.atom_style = s.atom_style;
 	swap( f.dom, s.dom );
@@ -494,6 +502,8 @@ block_data filter_block( const block_data &b, const std::vector<int> &ids )
 	return new_block;
 }
 
+
+
 void block_data::clear()
 {
 	while( n_data_fields() > 0 ){
@@ -504,5 +514,179 @@ void block_data::clear()
 		delete df;
 	}
 }
+
+
+void block_data::add_ghost_atoms( double rc, int dims )
+{
+	// For each atom, if it is within rc of the edge, create a copy
+	// for each periodic boundary it is within rc of.
+	my_assert( __FILE__, __LINE__, !have_ghost_atoms(),
+	           "Adding ghost atoms more than once not supported!" );
+	std::cerr << "Adding ghost atoms...\n";
+	int ghost_added = 0;
+
+	using dfd = data_field_double;
+	dfd *xx = static_cast<dfd*>(get_special_field_rw( block_data::X ));
+	dfd *yy = static_cast<dfd*>(get_special_field_rw( block_data::Y ));
+	dfd *zz = static_cast<dfd*>(get_special_field_rw( block_data::Z ));
+
+	bool periodic_x = dom.periodic & domain::BIT_X;
+	bool periodic_y = dom.periodic & domain::BIT_Y;
+	bool periodic_z = dom.periodic & domain::BIT_Z;
+	if (dims == 2) periodic_z = false;
+
+	bigint old_N = N;
+
+	for( bigint i = 0; i < old_N; ++i ){
+		double x = (*xx)[i];
+		double y = (*yy)[i];
+		double z = (*zz)[i];
+
+		int flip_x = 0; // 1 means "add to the right" with right being
+		int flip_y = 0; // at xhi, -1 means "add to the left" with left
+		int flip_z = 0; // being at xlo, 0 means nothing needed.
+
+		if (periodic_x) {
+			// Suppose xlo = 0, xhi = 10, rc = 1.
+			// Then any position [0,1] and [9,10] needs
+			// mirroring. That means [.2 - 0 ] < rc
+			// or [10 - 9.8 ] < rc:
+			if     (x - dom.xlo[0] <= rc) flip_x =  1;
+			else if(dom.xhi[0] - x <  rc) flip_x = -1;
+		}
+		if (periodic_y) {
+			if     (y - dom.xlo[1] <= rc) flip_y =  1;
+			else if(dom.xhi[1] - y <  rc) flip_y = -1;
+		}
+		if (periodic_z) {
+			if     (z - dom.xlo[2] <= rc) flip_z =  1;
+			else if(dom.xhi[2] - z <  rc) flip_z = -1;
+		}
+
+		if (!flip_x && !flip_y && !flip_z) continue;
+
+		// Handle all the cases:
+		double Lx = dom.xhi[0] - dom.xlo[0];
+		double Ly = dom.xhi[1] - dom.xlo[1];
+		double Lz = dom.xhi[2] - dom.xlo[2];
+
+		double dx = x + flip_x*Lx;
+		double dy = y + flip_y*Ly;
+		double dz = z + flip_z*Lz;
+
+
+		if (flip_x) {
+			bigint new_idx = clone_particle(i);
+			(*xx)[new_idx] = dx;
+			++ghost_added;
+		}
+		if (flip_y) {
+			bigint new_idx = clone_particle(i);
+			(*yy)[new_idx] = dy;
+			++ghost_added;
+		}
+		if (flip_z) {
+			bigint new_idx = clone_particle(i);
+			(*zz)[new_idx] = dz;
+			++ghost_added;
+		}
+
+		if (flip_x && flip_y) {
+			bigint new_idx = clone_particle(i);
+
+			(*xx)[new_idx] = dx;
+			(*yy)[new_idx] = dy;
+			++ghost_added;
+		}
+
+		if (flip_x && flip_z) {
+			bigint new_idx = clone_particle(i);
+			(*xx)[new_idx] = dx;
+			(*zz)[new_idx] = dz;
+			++ghost_added;
+		}
+
+		if (flip_y && flip_z) {
+			bigint new_idx = clone_particle(i);
+			(*yy)[new_idx] = dy;
+			(*zz)[new_idx] = dz;
+			++ghost_added;
+		}
+
+		if (flip_x && flip_y && flip_z) {
+			bigint new_idx = clone_particle(i);
+			(*xx)[new_idx] = dx;
+			(*yy)[new_idx] = dy;
+			(*zz)[new_idx] = dz;
+			++ghost_added;
+		}
+
+	}
+
+	std::cerr << "Added " << ghost_added << " ghost atoms.\n";
+	bigint N_added = N - old_N;
+	my_assert(__FILE__, __LINE__, N_added == ghost_added,
+	          "Mismatch in number of ghosts added!");
+	N_ghost = ghost_added;
+	N_true = old_N;
+	my_assert(__FILE__, __LINE__, N = N_true + N_ghost,
+	          "Mismatch in number of ghosts/true!");
+
+	// Extend the domain:
+	dom.xlo[0] -= rc;
+	dom.xhi[0] += rc;
+	dom.xlo[1] -= rc;
+	dom.xhi[1] += rc;
+	if (dims == 3) {
+		dom.xlo[2] -= rc;
+		dom.xhi[2] += rc;
+	}
+}
+
+
+
+bigint block_data::clone_particle( bigint idx )
+{
+	my_assert(__FILE__, __LINE__, idx >= 0 && idx < N, "Index out of range!");
+	std::size_t new_pos = N;
+	set_natoms(N+1);
+	using dfd = data_field_double;
+	using dfi = data_field_int;
+
+	int n_props = 0;
+
+	for ( data_field *d : data ) {
+		if (d->type() == data_field::DOUBLE) {
+			double val = (*static_cast<dfd*>(d))[idx];
+			(*static_cast<dfd*>(d))[new_pos] = val;
+		}else {
+			int val = (*static_cast<dfi*>(d))[idx];
+			(*static_cast<dfi*>(d))[new_pos] = val;
+		}
+		++n_props;
+	}
+	return new_pos;
+}
+
+
+
+void block_data::unwrap_image(std::size_t idx, double dest[3]) const
+{
+	const std::vector<double> &x = data_as<double>(get_special_field(block_data::X));
+	const std::vector<double> &y = data_as<double>(get_special_field(block_data::Y));
+	const std::vector<double> &z = data_as<double>(get_special_field(block_data::Z));
+
+	const std::vector<int> &ix = data_as<int>(get_special_field(block_data::IX));
+	const std::vector<int> &iy = data_as<int>(get_special_field(block_data::IY));
+	const std::vector<int> &iz = data_as<int>(get_special_field(block_data::IZ));
+
+	dest[0] = x[idx];
+	dest[1] = y[idx];
+	dest[2] = z[idx];
+	int flags[3] = {ix[idx], iy[idx], iz[idx]};
+	dom.unwrap_image(dest, flags);
+}
+
+
 
 } // namespace lammps_tools

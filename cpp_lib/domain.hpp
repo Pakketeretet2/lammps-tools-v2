@@ -86,6 +86,17 @@ struct domain {
 	void rewrap_vector_component( double v[3] ) const;
 
 
+	/**
+	   \brief Unwraps position plus image flags to unwrapped position.
+	*/
+	template <int coord>
+	void unwrap_image_component(double x[3], int flags[3]) const;
+
+	/**
+	   \brief Unwraps position plus image to unwrapped position.
+	*/
+	void unwrap_image(double x[3], int flags[3]) const;
+
 };
 
 inline
@@ -173,6 +184,27 @@ int domain::rewrap_position_component( double x[3] ) const
 	}else{
 		return 0;
 	}
+}
+
+
+template <int coord> inline
+void domain::unwrap_image_component(double x[3], int flags[3]) const
+{
+	double x0 = xlo[coord];
+	double x1 = xhi[coord];
+	double L = x1 - x0;
+	double &xx = x[coord];
+
+	int flag = flags[coord];
+	xx += flag * L;
+}
+
+
+inline void domain::unwrap_image(double x[3], int flags[3]) const
+{
+	unwrap_image_component<0>(x,flags);
+	unwrap_image_component<1>(x,flags);
+	unwrap_image_component<2>(x,flags);
 }
 
 

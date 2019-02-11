@@ -240,6 +240,58 @@ std::vector<cx_double> fft1_impl( const std::vector<double> &data )
 }
 
 
+std::vector<cx_double> fft3_impl( int Nx, int Ny, int Nz,
+                               const std::vector<cx_double> & )
+{
+	std::vector<cx_double> fft( Nx*Ny*Nz );
+	my_runtime_error(__FILE__, __LINE__,
+	                 "3D Fourier transform not supported!");
+	return fft;
+}
+
+
+
+std::vector<cx_double> fft2_impl( int Nx, int Ny,
+                                  const std::vector<cx_double> &data )
+{
+	std::vector<cx_double> fft( Nx*Ny );
+
+#ifdef HAVE_ARMADILLO
+	// Convert data to a matrix:
+	arma::cx_mat X = data_to_mat<arma::cx_mat, cx_double>( Nx, Ny, data );
+	arma::cx_mat Y = fft2( X );
+	fft = mat_to_data<arma::cx_mat, cx_double>( Ny, Ny, Y );
+#endif
+	return fft;
+}
+
+
+
+std::vector<cx_double> fft1_impl( const std::vector<cx_double> &data )
+{
+	std::vector<cx_double> fft( data.size() );
+#ifdef HAVE_ARMADILLO
+	// Convert data to a matrix:
+	arma::cx_vec X = data;
+	arma::cx_vec fX = arma::fft(X);
+
+	for( std::size_t i = 0; i < data.size(); ++i ){
+		fft[i] = fX(i);
+	}
+#endif
+
+	return fft;
+}
+
+
+
+
+std::vector<cx_double > fft( int Nx, int Ny, int Nz,
+                             const std::vector<cx_double> &data )
+{
+	return fft_cx_double( Nx, Ny, Nz, data );
+}
+
 
 
 std::vector<cx_double> fft( int Nx, int Ny, int Nz,
@@ -251,6 +303,28 @@ std::vector<cx_double> fft( int Nx, int Ny, int Nz,
 
 std::vector<cx_double> fft_double( int Nx, int Ny, int Nz,
                                    const std::vector<double> &data )
+{
+	if( !use_armadillo ){
+		std::vector<cx_double> fft( data.size() );
+		my_warning( __FILE__, __LINE__,
+		            "Cannot perform FFT without Armadillo1" );
+		return fft;
+	}else{
+		if( Nz == 1 ){
+			if( Ny == 1 ){
+				return fft1_impl( data );
+			}else{
+				return fft2_impl( Nx, Ny, data );
+			}
+		}else{
+			return fft3_impl( Nx, Ny, Nz, data );
+		}
+	}
+}
+
+
+std::vector<cx_double> fft_cx_double( int Nx, int Ny, int Nz,
+                                      const std::vector<cx_double> &data )
 {
 	if( !use_armadillo ){
 		std::vector<cx_double> fft( data.size() );

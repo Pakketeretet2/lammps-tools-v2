@@ -7,7 +7,8 @@
 
 #include "../../../cpp_lib/bond_order.hpp"
 
-#include "make_vectors_opaque.hpp"
+PYBIND11_MAKE_OPAQUE(std::vector<int>)
+PYBIND11_MAKE_OPAQUE(std::vector<double>)
 
 // Converts a numpy array to a vector so that it can be passed to bond_order
 namespace {

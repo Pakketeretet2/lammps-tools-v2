@@ -5,7 +5,8 @@
 #include "lt_block_data.h"
 #include "lt_data_field.h"
 
-#include "make_vectors_opaque.hpp"
+PYBIND11_MAKE_OPAQUE(std::vector<int>)
+PYBIND11_MAKE_OPAQUE(std::vector<double>)
 
 PYBIND11_PLUGIN(data_field_) {
 	pybind11::module m("data_field_", "Exposes data_field through pybind11");

@@ -23,6 +23,9 @@ std::vector<double> fft_imag( const std::vector<cx_double > &fft );
 std::vector<cx_double > fft( int Nx, int Ny, int Nz,
                              const std::vector<double> &data );
 
+std::vector<cx_double > fft( int Nx, int Ny, int Nz,
+                             const std::vector<cx_double> &data );
+
 std::vector<cx_double > fft_shift( int  Nx, int Ny, int Nz,
                                    const std::vector<cx_double > &fft );
 
@@ -32,6 +35,10 @@ std::vector<cx_double > ifft_shift( int  Nx, int Ny, int Nz,
 
 std::vector<cx_double > fft_double( int Nx, int Ny, int Nz,
                                     const std::vector<double> &data );
+
+std::vector<cx_double> fft_cx_double( int Nx, int Ny, int Nz,
+                                      const std::vector<cx_double> &data );
+
 
 std::vector<cx_double > fft_int( int Nx, int Ny, int Nz,
                                  const std::vector<int> &data );
