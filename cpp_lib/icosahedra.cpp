@@ -76,7 +76,7 @@ block_data filter_block_data( const block_data &b,
 
 	std::vector<int> filter_ids = patch_types_to_ids( b, patches1,
 	                                                  patches2 );
-	return filter_block( b, filter_ids );
+	return filter_by_id( b, filter_ids );
 }
 
 

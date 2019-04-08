@@ -227,6 +227,8 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 	box[1] = L[1];
 	box[2] = L[2];
 
+	my_assert(__FILE__, __LINE__, N > 0, "N <= 0 does not make sense!");
+
 	if( props & TIME_STEP ){
 		status = gsd_write_chunk( gh, "configuration/step",
 		                          GSD_TYPE_UINT64, 1, 1, 0, &step );
@@ -270,6 +272,11 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 	}
 
 	types = new uint32_t[N];
+	if (!types) {
+		std::cerr << "Memory allocation for " << N*sizeof(uint32_t)
+		          << " failed!\n";
+		return -1;
+	}
 	int n_types = 0;
 
 	for( std::size_t i = 0; i < N; ++i ){
