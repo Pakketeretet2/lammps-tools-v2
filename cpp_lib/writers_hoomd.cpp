@@ -311,8 +311,10 @@ int block_to_hoomd_gsd( gsd_handle *gh, const block_data &b, uint props )
 			xi[d] = xd - b.dom.xlo[d];
 			xi[d] -= 0.5*L[d];
 
+			constexpr const double tol = 1e-8;
+
 			// Check box bounds:
-			if( xi[d] > 0.5*L[d] || xi[d] < -0.5*L[d] ){
+			if( xi[d] > (0.5 + tol)*L[d] || xi[d] < -(0.5 + tol)*L[d] ){
 				std::cerr << "Particle " << id[i]
 				          << " is out of box bound in "
 				          << "dim " << d << " ( "

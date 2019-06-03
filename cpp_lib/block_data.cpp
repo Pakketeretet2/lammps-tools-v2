@@ -161,6 +161,8 @@ void block_data::print_internal_state()
 	std::cerr << "\n\n";
 }
 
+
+
 block_data &block_data::operator=( block_data o )
 {
 	if( this != &o ){
