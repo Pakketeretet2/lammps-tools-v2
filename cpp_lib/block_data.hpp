@@ -303,11 +303,31 @@ private:
    \note this _copies_ data from b and return it. b is not modified.
 
    \param b     Block to filter
-   \param ids   Indices to filter out.
+   \param ids   Particle IDs to filter out.
 
    \returns the filtered block.
 */
-block_data filter_block( const block_data &b, const std::vector<int> &ids );
+block_data filter_by_id( const block_data &b, const std::vector<int> &ids );
+
+
+
+/**
+   \brief Filters out the given ids from given block_data.
+
+   In principle a lot of functionality can be achieved by looping over indices,
+   but filtering might improve cache optimality, especially when a lot of
+   particles are to be ignored.
+
+   \note this _copies_ data from b and return it. b is not modified.
+
+   \param b     Block to filter
+   \param ids   Particle IDs to filter out.
+
+   \returns the filtered block.
+*/
+block_data filter_by_index( const block_data &b, const std::vector<int> &idxs );
+
+
 
 
 
