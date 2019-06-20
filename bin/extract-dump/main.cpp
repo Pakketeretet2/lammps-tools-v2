@@ -38,9 +38,14 @@ void print_dump_info(std::string dump_file, int file_format,
 	dr->set_column_headers(headers);
 	int n_frames = 0;
 	block_data b;
+	my_timer timer(std::cerr);
 	while (dr->next_block(b) == 0) {
 		++n_frames;
+		if (n_frames % 10 == 0) {
+			std::cerr << "  At frame " << n_frames << "...\n";
+		}
 	}
+	timer.toc("Reading all frames.");
 	std::cout << "Dump file:         " << dump_file << "\n";
 	std::cerr << "Number of frames:  " << n_frames  << "\n";
 }
