@@ -41,7 +41,7 @@ public:
 	virtual ~dump_reader_lammps() {}
 
 	/// Sets up a vector containing the expected columns.
-	void set_column_headers( const std::vector<std::string> &headers );
+	virtual void set_column_headers(const std::vector<std::string> &headers);
 
 	void set_column_header( std::size_t idx, const std::string &header,
 	                        int special_field_type = block_data::UNKNOWN );

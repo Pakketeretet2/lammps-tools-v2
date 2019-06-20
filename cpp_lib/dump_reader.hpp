@@ -59,6 +59,10 @@ public:
 	/// If true, do not print output to stderr
 	bool quiet;
 
+	/// Some dump readers need to specify headers for the columns.
+	virtual void set_column_headers(const std::vector<std::string> &headers)
+	{}
+
 private:
 	virtual int  get_next_block( block_data &block ) = 0;
 	virtual bool check_eof()  const = 0;
