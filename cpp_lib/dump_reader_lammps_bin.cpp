@@ -254,6 +254,10 @@ int dump_reader_lammps_bin::skip_n_blocks( uint n )
 	block_data b;
 	int size_one, nchunk;
 	int result = next_block_meta(b, size_one, nchunk);
+	if (result) {
+		// This means you hit EOF while trying to read meta!
+		return -1;
+	}
 	int block_size = 0;
 	std::fread(&n,sizeof(int),1,in);
 	// At this point you would read in n doubles.
@@ -261,7 +265,6 @@ int dump_reader_lammps_bin::skip_n_blocks( uint n )
 	// Instead you can just fseek.
 	// in.seekg(n*sizeof(double), std::cur);
 	std::fseek(in, n*sizeof(double), SEEK_CUR);
-	
 	return 0;
 }	
 
