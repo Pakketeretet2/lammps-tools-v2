@@ -45,6 +45,10 @@ public:
 	                        int dump_style = dump_reader_lammps::CUSTOM );
 
 
+	// This reader knows the size of each block in chars, so can skip ahead.
+	virtual int skip_n_blocks( uint n );
+
+	
 	/// Cleanup:
 	virtual ~dump_reader_lammps_bin();
 

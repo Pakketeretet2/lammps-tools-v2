@@ -63,6 +63,14 @@ public:
 	virtual void set_column_headers(const std::vector<std::string> &headers)
 	{}
 
+	/// Skips n blocks, might not actually be fast.
+	virtual int skip_n_blocks( uint n );
+
+
+	/// Skips to specific block from current block.
+	virtual int skip_to_block( uint n, uint current );
+	
+
 private:
 	virtual int  get_next_block( block_data &block ) = 0;
 	virtual bool check_eof()  const = 0;

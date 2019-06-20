@@ -6,7 +6,7 @@
 #include <sstream>
 
 #include "readers.hpp"
-#include "dump_reader_lammps.hpp"
+#include "dump_reader_lammps_bin.hpp"
 #include "my_timer.hpp"
 #include "util.hpp"
 #include "writers.hpp"
@@ -183,13 +183,37 @@ int main(int argc, char **argv)
 	                                                 file_format,
 	                                                 DUMP_FORMAT_LAMMPS));
 	dr->set_column_headers(headers);
-	int n_frames = 0;
-	block_data b;
-	while (dr->next_block(b) == 0) {
-		if (util::contains(frames, n_frames)) {
+
+	if (file_format == FILE_FORMAT_BIN) {
+		int cur_frame = 0;
+		int j = 0;
+		block_data b;
+
+		dump_reader_lammps_bin *d =
+			dynamic_cast<dump_reader_lammps_bin*>(dr.get());
+
+		for (int next_frame : frames) {
+			d->skip_to_block(next_frame, cur_frame);
+			if (d->next_block(b)) {
+				std::cerr << "Error reading block "
+				          << next_frame << "!\n";
+				return -1;
+			}
+			std::cerr << "Read block at t=" << b.tstep << "\n";
 			block_to_lammps_dump(std::cout, b, file_format);
+			cur_frame = next_frame;
 		}
-		++n_frames;
+
+		
+	} else {
+		int n_frames = 0;
+		block_data b;
+		while (dr->next_block(b) == 0) {
+			if (util::contains(frames, n_frames)) {
+				block_to_lammps_dump(std::cout, b, file_format);
+			}
+			++n_frames;
+		}
 	}
 		
 	
