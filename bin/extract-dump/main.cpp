@@ -40,18 +40,22 @@ void print_dump_info(std::string dump_file, int file_format,
 	block_data b;
 	my_timer timer;
 	double performance = 0;
+	double elapsed = 0;
 	while (dr->next_block(b) == 0) {
 		++n_frames;
 		if (n_frames % 50 == 0) {
-			double elapsed = timer.toc();
-			performance = n_frames / elapsed;
+			elapsed = timer.toc();
+			performance = 1000*n_frames / elapsed;
 			std::cerr << "  At frame " << n_frames << " ("
 			          << performance << "blocks/s)...\n";
 		}
 	}
-	timer.toc("Reading all frames.");
+	elapsed = timer.toc();
+	std::cerr << "Reading out all frames took " << elapsed/1000 << " s ("
+	          << elapsed << " ms). Performance: " << performance
+	          << " blocks/s.\n";
 	std::cout << "Dump file:         " << dump_file << "\n";
-	std::cerr << "Number of frames:  " << n_frames  << "\n";
+	std::cout << "Number of frames:  " << n_frames  << "\n";
 }
 
 
