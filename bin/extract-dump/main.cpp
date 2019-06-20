@@ -41,7 +41,7 @@ void print_dump_info(std::string dump_file, int file_format,
 	my_timer timer;
 	double performance = 0;
 	double elapsed = 0;
-	while (dr->next_block(b) == 0) {
+	while (dr->skip_n_blocks(1) == 0) {
 		++n_frames;
 		if (n_frames % 50 == 0) {
 			elapsed = timer.toc();
