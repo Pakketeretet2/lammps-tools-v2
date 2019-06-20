@@ -47,7 +47,7 @@ void print_dump_info(std::string dump_file, int file_format,
 			elapsed = timer.toc();
 			performance = 1000*n_frames / elapsed;
 			std::cerr << "  At frame " << n_frames << " ("
-			          << performance << "blocks/s)...\n";
+			          << performance << " blocks/s)...\n";
 		}
 	}
 	elapsed = timer.toc();
