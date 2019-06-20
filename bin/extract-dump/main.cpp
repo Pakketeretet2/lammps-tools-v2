@@ -38,13 +38,13 @@ void print_dump_info(std::string dump_file, int file_format,
 	dr->set_column_headers(headers);
 	int n_frames = 0;
 	block_data b;
-	my_timer timer(std::cerr);
+	my_timer timer;
 	double performance = 0;
 	while (dr->next_block(b) == 0) {
 		++n_frames;
-		double elapsed = timer.toc();
-		performance = n_frames / elapsed;
 		if (n_frames % 50 == 0) {
+			double elapsed = timer.toc();
+			performance = n_frames / elapsed;
 			std::cerr << "  At frame " << n_frames << " ("
 			          << performance << "blocks/s)...\n";
 		}
