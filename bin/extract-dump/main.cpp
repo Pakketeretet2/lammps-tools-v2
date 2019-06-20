@@ -148,6 +148,12 @@ int main(int argc, char **argv)
 		}
 	}
 
+	std::cerr << "Column headers: { ";
+	for (const std::string c : headers) {
+		std::cerr << c << " ";
+	}
+	std::cerr << "}\n";
+
 	if (dump_info) {
 		print_dump_info(dump_file, file_format, headers);
 		return 0;
