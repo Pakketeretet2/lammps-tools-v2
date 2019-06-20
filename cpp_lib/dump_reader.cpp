@@ -49,6 +49,39 @@ dump_reader::~dump_reader()
 	}
 }
 
+// The dumb way is to just read n blocks.
+int dump_reader::skip_n_blocks( uint n )
+{
+	block_data b;
+	while(n > 0) {
+		if (next_block(b) != 0){
+			return -1;
+		} else {
+			--n;
+		}
+	}
+	return 0;
+}
+
+
+
+int dump_reader::skip_to_block(uint n, uint curr)
+{
+	// To skip from block curr to n, we need to do...
+	if (curr == n) return 0; // Nothing.
+	if (n < curr) {
+		std::cerr << "Cannot rewind dump file! Doing nothing!\n";
+		return -1;
+	}
+
+	int diff = n - curr;
+	// You want to skip diff - 1 blocks so that next block to be read is n.
+	// E.g. if curr = 3, n = 7; you want to skip 3 to reach 6, so that
+	// the next read reads 7. If n == curr+1 this should be a no-op.
+	skip_n_blocks(diff-1);
+	return 0;
+}
+	
 
 /**
    \brief adds type names that reflect the integer types of the particles.

@@ -247,6 +247,28 @@ int dump_reader_lammps_bin::next_block_body( block_data &block,
 	return 0;
 }
 
+
+int dump_reader_lammps_bin::skip_n_blocks( uint n )
+{
+	
+	block_data b;
+	int size_one, nchunk;
+	int result = next_block_meta(b, size_one, nchunk);
+	int block_size = 0;
+	std::fread(&n,sizeof(int),1,in);
+	// At this point you would read in n doubles.
+	// std::fread(buf,sizeof(double),n,in);
+	// Instead you can just fseek.
+	// in.seekg(n*sizeof(double), std::cur);
+	std::fseek(in, n*sizeof(double), SEEK_CUR);
+	
+	return 0;
+}	
+
+
+
+
+
 bool dump_reader_lammps_bin::check_eof()  const
 {
 	return std::feof(in);
