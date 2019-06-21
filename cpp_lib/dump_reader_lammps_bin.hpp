@@ -44,6 +44,10 @@ public:
 	                        std::vector<std::string> h,
 	                        int dump_style = dump_reader_lammps::CUSTOM );
 
+	// Skips a single block more efficiently by ignoring
+	// the expected number of chars.
+	int skip_block();
+	
 
 	// This reader knows the size of each block in chars, so can skip ahead.
 	virtual int skip_n_blocks( uint n );

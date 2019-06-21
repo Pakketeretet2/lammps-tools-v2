@@ -97,74 +97,72 @@ int dump_reader_lammps_bin::next_block_meta( block_data &block,
 	int triclinic;
 	int xy,xz,yz;
 
-	while( true ){
-		std::fread( &ntimestep, sizeof(bigint), 1, in );
-		if( !in ){
-			std::cerr << "Error opening binary file!\n";
+	std::fread( &ntimestep, sizeof(bigint), 1, in );
+	if( !in ){
+		std::cerr << "Error opening binary file!\n";
+		return -1;
+	}
+	
+	if( feof(in) ){
+		std::cerr << "EOF encountered in binary file!\n";
+		return 1;
+	}
+	
+	std::fread(&natoms,sizeof(bigint),1,in);
+	std::fread(&triclinic,sizeof(int),1,in);
+	std::fread(&boundary[0][0],6*sizeof(int),1,in);
+	std::fread(xlo  ,sizeof(double),1,in);
+	std::fread(xhi  ,sizeof(double),1,in);
+	std::fread(xlo+1,sizeof(double),1,in);
+	std::fread(xhi+1,sizeof(double),1,in);
+	std::fread(xlo+2,sizeof(double),1,in);
+	std::fread(xhi+2,sizeof(double),1,in);
+	if (triclinic) {
+		std::fread(&xy,sizeof(double),1,in);
+		std::fread(&xz,sizeof(double),1,in);
+		std::fread(&yz,sizeof(double),1,in);
+	}
+	std::fread(&size_one,sizeof(int),1,in);
+	std::fread(&nchunk,sizeof(int),1,in);
+	
+	/*
+	  my_warning_if( __FILE__, __LINE__, nchunk > 1,
+	  "You've got multiple processor "
+	  "chunks incoming!\n" );
+	*/
+	if( nchunk == 0 ){
+		my_warning( __FILE__, __LINE__,
+		            "nchunk was 0. That's not good.\n");
+		if( feof(in) ){
+			std::cerr << "The dump is at EOF, "
+			          << "assuming it's fine...\n";
+			return 2;
+		}else{
 			return -1;
 		}
-
-		if( feof(in) ){
-			std::cerr << "EOF encountered in binary file!\n";
-			return 1;
-		}
-
-		std::fread(&natoms,sizeof(bigint),1,in);
-		std::fread(&triclinic,sizeof(int),1,in);
-		std::fread(&boundary[0][0],6*sizeof(int),1,in);
-		std::fread(xlo  ,sizeof(double),1,in);
-		std::fread(xhi  ,sizeof(double),1,in);
-		std::fread(xlo+1,sizeof(double),1,in);
-		std::fread(xhi+1,sizeof(double),1,in);
-		std::fread(xlo+2,sizeof(double),1,in);
-		std::fread(xhi+2,sizeof(double),1,in);
-		if (triclinic) {
-			std::fread(&xy,sizeof(double),1,in);
-			std::fread(&xz,sizeof(double),1,in);
-			std::fread(&yz,sizeof(double),1,in);
-		}
-		std::fread(&size_one,sizeof(int),1,in);
-		std::fread(&nchunk,sizeof(int),1,in);
-
-		/*
-		my_warning_if( __FILE__, __LINE__, nchunk > 1,
-		               "You've got multiple processor "
-		               "chunks incoming!\n" );
-		*/
-		if( nchunk == 0 ){
-			my_warning( __FILE__, __LINE__,
-			           "nchunk was 0. That's not good.\n");
-			if( feof(in) ){
-				std::cerr << "The dump is at EOF, "
-				          << "assuming it's fine...\n";
-				return 2;
-			}else{
-				return -1;
-			}
-		}
-		block.N = natoms;
-		block.tstep = ntimestep;
-		block.dom.xlo[0] = xlo[0];
-		block.dom.xlo[1] = xlo[1];
-		block.dom.xlo[2] = xlo[2];
-
-		block.dom.xhi[0] = xhi[0];
-		block.dom.xhi[1] = xhi[1];
-		block.dom.xhi[2] = xhi[2];
-
-		block.dom.periodic = 0;
-		if( (boundary[0][0] == 0) && (boundary[0][1] == 0) ){
-			block.dom.periodic += domain::BIT_X;
-		}
-		if( (boundary[1][0] == 0) && (boundary[1][1] == 0) ){
-			block.dom.periodic += domain::BIT_Y;
-		}
-		if( (boundary[2][0] == 0) && (boundary[2][1] == 0) ){
-			block.dom.periodic += domain::BIT_Z;
-		}
-
-		return 0;
 	}
+	block.N = natoms;
+	block.tstep = ntimestep;
+	block.dom.xlo[0] = xlo[0];
+	block.dom.xlo[1] = xlo[1];
+	block.dom.xlo[2] = xlo[2];
+	
+	block.dom.xhi[0] = xhi[0];
+	block.dom.xhi[1] = xhi[1];
+	block.dom.xhi[2] = xhi[2];
+	
+	block.dom.periodic = 0;
+	if( (boundary[0][0] == 0) && (boundary[0][1] == 0) ){
+		block.dom.periodic += domain::BIT_X;
+	}
+	if( (boundary[1][0] == 0) && (boundary[1][1] == 0) ){
+		block.dom.periodic += domain::BIT_Y;
+	}
+	if( (boundary[2][0] == 0) && (boundary[2][1] == 0) ){
+		block.dom.periodic += domain::BIT_Z;
+	}
+	
+	return 0;
 }
 
 int dump_reader_lammps_bin::next_block_body( block_data &block,
@@ -248,23 +246,40 @@ int dump_reader_lammps_bin::next_block_body( block_data &block,
 }
 
 
+
 int dump_reader_lammps_bin::skip_n_blocks( uint n )
+{
+	int status = 0;
+	for( int i = 0; i < n; ++i) {
+		status = skip_block();
+		if (status) return status;
+	}
+	return 0;
+}
+
+
+
+int dump_reader_lammps_bin::skip_block()
 {
 	
 	block_data b;
 	int size_one, nchunk;
 	int result = next_block_meta(b, size_one, nchunk);
-	if (result) {
+	if (result == 1) {
 		// This means you hit EOF while trying to read meta!
+		std::cerr << "Hit EOF when reading meta?\n";
 		return -1;
 	}
 	int block_size = 0;
-	std::fread(&n,sizeof(int),1,in);
-	// At this point you would read in n doubles.
-	// std::fread(buf,sizeof(double),n,in);
-	// Instead you can just fseek.
-	// in.seekg(n*sizeof(double), std::cur);
-	std::fseek(in, n*sizeof(double), SEEK_CUR);
+	int n = 0;
+	// Each chunk has its own internal buffer:
+	for (int i = 0; i < nchunk; ++i) {
+		std::fread(&n,sizeof(int),1,in);
+		// At this point you would read in n doubles for each size_one.
+		int read_size = n*sizeof(double);
+		std::fseek(in, read_size, SEEK_CUR);
+	}
+
 	return 0;
 }	
 
