@@ -193,6 +193,8 @@ int main(int argc, char **argv)
 			dynamic_cast<dump_reader_lammps_bin*>(dr.get());
 
 		for (int next_frame : frames) {
+			std::cerr << "Skipping to frame " << next_frame << " from "
+				  << cur_frame << "\n";
 			d->skip_to_block(next_frame, cur_frame);
 			if (d->next_block(b)) {
 				std::cerr << "Error reading block "
