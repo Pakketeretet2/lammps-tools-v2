@@ -2,6 +2,8 @@
 #include <memory>
 #include <vector>
 
+#include "data_field.hpp"
+#include "block_data_access.hpp"
 #include "writers_lammps.hpp"
 #include "dump_reader_lammps.hpp"
 #include "util.hpp"
@@ -26,6 +28,8 @@ int main( int argc, char **argv )
 	bool to_local = false;
 	bool silent = false;
 	bool ignore_first = false;
+
+	int hack_mol_stride = 0;
 
 	if (argc < 2) {
 		std::cerr << "Pass a dump file!\n";
@@ -55,6 +59,9 @@ int main( int argc, char **argv )
 			}else if( a == "-s" || a == "--silent" ){
 				silent = true;
 				i += 1;
+			} else if( a == "-m" || a == "--hack-mol-stride" ) {
+				hack_mol_stride = std::stoi(argv[i+1]);
+				i += 2;
 			}
 		} else {
 			std::cerr << "Unrecognized trailing argument \""
@@ -63,6 +70,10 @@ int main( int argc, char **argv )
 		}
 	}
 
+	if (hack_mol_stride < 0) {
+		std::cerr << "hack_mol_stride cannot be negative!\n";
+		return -7;
+	}
 	
 	int fformat = FILE_FORMAT_PLAIN;
 	if (util::ends_with(dump, ".bin")) {
@@ -139,6 +150,21 @@ int main( int argc, char **argv )
 		//                               to_local );
 		status_print();
 	}
+
+	if (hack_mol_stride) {
+		
+		// Create a new mol column and use the stride to deduce mol.
+		std::vector<int> mol(b.N);
+		auto ids = get_id(b);
+		for (long i = 0; i < b.N; ++i) {
+			int idm = ids[i] - 1;
+			mol[i] = 1 + idm/hack_mol_stride;
+		}
+	
+		data_field_int mol_field( "mol", mol );
+		b.add_field(mol_field, block_data::MOL);
+	}
+	
 	writers::block_to_lammps_data(*out, b);
 	if( out_fstream ) delete out_fstream;
 }
