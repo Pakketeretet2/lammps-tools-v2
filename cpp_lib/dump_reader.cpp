@@ -75,6 +75,7 @@ int dump_reader::skip_to_block(uint n, uint curr)
 	}
 
 	int diff = n - curr;
+	std::cerr << "Skipping " << diff << " blocks.\n";
 	// You want to skip diff - 1 blocks so that next block to be read is n.
 	// E.g. if curr = 3, n = 7; you want to skip 3 to reach 6, so that
 	// the next read reads 7. If n == curr+1 this should be a no-op.
