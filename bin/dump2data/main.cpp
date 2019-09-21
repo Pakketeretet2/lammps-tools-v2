@@ -28,7 +28,7 @@ int main( int argc, char **argv )
 	bool to_local = false;
 	bool silent = false;
 	bool ignore_first = false;
-
+	bool recreate_img_flags = true;
 	int hack_mol_stride = 0;
 
 	if (argc < 2) {
@@ -58,6 +58,9 @@ int main( int argc, char **argv )
 				i += 1;
 			}else if( a == "-s" || a == "--silent" ){
 				silent = true;
+				i += 1;
+			}else if (a == "-r" || a == "--no-recreate-img-flags") {
+				recreate_img_flags = false;
 				i += 1;
 			} else if( a == "-m" || a == "--hack-mol-stride" ) {
 				hack_mol_stride = std::stoi(argv[i+1]);
@@ -163,6 +166,22 @@ int main( int argc, char **argv )
 	
 		data_field_int mol_field( "mol", mol );
 		b.add_field(mol_field, block_data::MOL);
+	}
+
+	if (recreate_img_flags) {
+		std::vector<int> imx(b.N);
+		std::vector<int> imy(b.N);
+		std::vector<int> imz(b.N);
+
+		b.dom.reconstruct_image_flags(b, imx, imy, imz);
+		data_field_int img_x("ix", imx);
+		data_field_int img_y("iy", imy);
+		data_field_int img_z("iz", imz);
+		
+		b.add_field(img_x, block_data::IX);
+		b.add_field(img_y, block_data::IY);
+		b.add_field(img_z, block_data::IZ);
+		
 	}
 	
 	writers::block_to_lammps_data(*out, b);

@@ -506,7 +506,7 @@ block_data filter_by_id( const block_data &b, const std::vector<int> &ids )
 
 
 
-block_data filter_by_idx( const block_data &b, const std::vector<int> &idxs )
+block_data filter_by_index( const block_data &b, const std::vector<int> &idxs )
 {
 	std::vector<int> ids(idxs.size());
 	int field_id = block_data::special_fields::ID;

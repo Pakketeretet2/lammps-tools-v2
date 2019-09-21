@@ -2,6 +2,7 @@
 #define DOMAIN_HPP
 
 #include <iostream>
+#include <vector>
 
 
 /**
@@ -13,6 +14,12 @@
 
 namespace lammps_tools {
 
+
+// forward decl data_fields and block_data:
+struct block_data;
+struct data_field;
+	
+	
 /**
    \brief This struct contains information about the
           simulation box and its boundaries.
@@ -45,9 +52,13 @@ struct domain {
 
 	   \param[out]  r  Distance vector
 
+	   \param[in]   rewrap If true, rewrap the vector.
+
+
 	   \returns     The Euclidian distance between xi and xj squared
 	*/
-	double dist_2( const double *xi, const double *xj, double *r ) const;
+	double dist_2( const double *xi, const double *xj, double *r,
+	               bool rewrap = true ) const;
 
 	/**
 	   \brief Rewraps position inside periodic boundaries:
@@ -97,16 +108,28 @@ struct domain {
 	*/
 	void unwrap_image(double x[3], int flags[3]) const;
 
+
+	/**
+	   \brief Construct image flags such that all atoms in all molecules
+	   in b are the minimum distance from each other.
+	*/
+	void reconstruct_image_flags(const block_data &b,
+	                             std::vector<int> &image_x,
+	                             std::vector<int> &image_y,
+	                             std::vector<int> &image_z) const;
+
+
 };
 
 inline
-double domain::dist_2( const double *xi, const double *xj, double *r ) const
+double domain::dist_2( const double *xi, const double *xj,
+                       double *r, bool rewrap ) const
 {
 	r[0] = xi[0] - xj[0];
 	r[1] = xi[1] - xj[1];
 	r[2] = xi[2] - xj[2];
 
-	rewrap_vector( r );
+	if (rewrap) rewrap_vector(r);
 
 	return r[0]*r[0] + r[1]*r[1] + r[2]*r[2];
 }
@@ -206,6 +229,10 @@ inline void domain::unwrap_image(double x[3], int flags[3]) const
 	unwrap_image_component<1>(x,flags);
 	unwrap_image_component<2>(x,flags);
 }
+
+
+
+	
 
 
 /// Swap, doesn't need to be friend.
