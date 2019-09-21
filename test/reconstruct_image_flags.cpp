@@ -1,6 +1,7 @@
 #include "block_data.hpp"
 #include "block_data_access.hpp"
 #include "domain.hpp"
+#include "writers.hpp"
 
 #include <catch2/catch.hpp>
 
@@ -69,4 +70,11 @@ TEST_CASE ( "Test if image flag remapping works..", "[reconstruct_image_flag]" )
 	REQUIRE(image_z[4] == 0);
 	REQUIRE(image_z[5] == 0);
 
+	b.set_ntypes(2);
+	b.add_field(data_field_int("ix", image_x), block_data::IX);
+	b.add_field(data_field_int("iy", image_y), block_data::IY);
+	b.add_field(data_field_int("iz", image_z), block_data::IZ);
+
+	writers::block_to_lammps_data("recreate_img_flags.data", b);
+	
 }
