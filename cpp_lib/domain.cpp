@@ -114,14 +114,14 @@ void domain::reconstruct_image_flags(const block_data &b,
 			// Wrap the first particle inside the box:
 
 			int imx = 0, imy = 0, imz = 0;
-			int atom_idx = mol2atom[imol][0];
+			int atom_idx = mol2atom[imol][i];
 			image_x[atom_idx] = imx;
 		        image_y[atom_idx] = imy;
 			image_z[atom_idx] = imz;
 
 			xp[0] = x[atom_idx];
-			xp[1] = x[atom_idx];
-			xp[2] = x[atom_idx];
+			xp[1] = y[atom_idx];
+			xp[2] = z[atom_idx];
 			b.dom.rewrap_vector(xp);
 			
 		}
