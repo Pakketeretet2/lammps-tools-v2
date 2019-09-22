@@ -108,9 +108,6 @@ void domain::reconstruct_image_flags(const block_data &b,
 		double Lz = b.dom.xhi[1] - b.dom.xlo[1];
 		double Ly = b.dom.xhi[2] - b.dom.xlo[2];
 
-		std::cerr << "(Lx, Ly, Lz) = (" << Lx << ", "
-		          << Ly << ", " << Lz << ")\n";
-
 		{
 			// Corner case for first atom in mol:
 			int i = 0;
@@ -168,9 +165,6 @@ void domain::reconstruct_image_flags(const block_data &b,
 				xdum3[1] += Ly*yimgs[flag_i];
 				xdum3[2] += Lz*zimgs[flag_i];
 				double r2 = b.dom.dist_2(xp, xdum3, r, false);
-				std::cerr << "r2 = " << r2 << ", flags = (" <<
-					ximgs[flag_i] << ", " << yimgs[flag_i]
-				          << " " << zimgs[flag_i] << ")\n";
 				if (r2 < r2_min) {
 					r2_min = r2;
 					imx_m = ximgs[flag_i];
@@ -178,8 +172,6 @@ void domain::reconstruct_image_flags(const block_data &b,
 					imz_m = zimgs[flag_i];
 				}
 			}
-			std::cerr << "Distance minimized for flags ("
-			          << imx_m << ", " << imy_m << ", " << imz_m << ")\n";
 			
 			xp[0] = Lx*imx_m + xx[0];
 			xp[1] = Ly*imy_m + xx[1];
