@@ -18,8 +18,8 @@ namespace lammps_tools {
 // forward decl data_fields and block_data:
 struct block_data;
 struct data_field;
-	
-	
+
+
 /**
    \brief This struct contains information about the
           simulation box and its boundaries.
@@ -232,7 +232,7 @@ inline void domain::unwrap_image(double x[3], int flags[3]) const
 
 
 
-	
+
 
 
 /// Swap, doesn't need to be friend.
