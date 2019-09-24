@@ -103,18 +103,12 @@ void domain::reconstruct_image_flags(const block_data &b,
 
 	for (unsigned long imol = 0; imol < mol2atom.size(); ++imol) {
 		if (mol2atom[imol].empty()) continue;
-		const bool debug = false;
-		/*
-		if (imol == 720) {
-			std::cerr << "Checking mol " << imol << "\n";
-			debug = true;
-		}
-		*/
+		bool debug = false;
 
 		double xp[3];
 		double Lx = b.dom.xhi[0] - b.dom.xlo[0];
-		double Lz = b.dom.xhi[1] - b.dom.xlo[1];
-		double Ly = b.dom.xhi[2] - b.dom.xlo[2];
+		double Ly = b.dom.xhi[1] - b.dom.xlo[1];
+		double Lz = b.dom.xhi[2] - b.dom.xlo[2];
 
 		if (debug) std::cerr << "(Lx, Ly, Lz) = ("
 		                     << Lx << ", " << Ly << ", " << Lz << ")\n";
@@ -217,8 +211,12 @@ void domain::reconstruct_image_flags(const block_data &b,
 		        image_y[i] = imy_m;
 			image_z[i] = imz_m;
 
-
-
+			if (r2 > 0.5*std::min(Lx,std::min(Ly,Lz))) {
+				std::cerr << "r^2 = " << r2 << " too large for mol " << imol
+				          << ", atom " << id[i] << "!\n"
+				          << "This mol was at " << xx[0] << ", " << xx[1] << ", " << xx[2] << ") but is now at "
+				          << xp[0] << " " << xp[1] << " " << xp[2] << "\n";
+			}
 			if (debug) std::cerr << "The image flags that minimize "
 			                     << "dist to prev are (" << imx_m
 			                     << ", " << imy_m << ", " << imz_m
