@@ -10,18 +10,18 @@ using namespace lammps_tools;
 namespace lammps_tools {
 
 namespace /* anonymous */ {
-	
+
 struct vec3{
 
 	vec3() : x(0), y(0), z(0) {}
 	vec3(const vec3& o) : x(o.x), y(o.y), z(o.z) {}
-	
+
 	double x, y, z;
 	vec3 &operator+=(const vec3 &o) {
 		x += o.x;
 		y += o.y;
 		z += o.z;
-		
+
 		return *this;
 	}
 	vec3 &operator*=(double scalar) {
@@ -38,7 +38,7 @@ struct vec3{
 	}
 };
 
-} // anonymous namespace	
+} // anonymous namespace
 
 void swap( domain &f, domain &s )
 {
@@ -46,7 +46,7 @@ void swap( domain &f, domain &s )
 
 	swap( f.xlo, s.xlo );
 	swap( f.xhi, s.xhi );
-	
+
 	swap( f.periodic, s.periodic );
 }
 
@@ -56,7 +56,7 @@ domain::domain( const domain &o )
 {
 	std::copy( o.xlo, o.xlo + 3, xlo );
 	std::copy( o.xhi, o.xhi + 3, xhi );
-	
+
 }
 
 
@@ -68,17 +68,18 @@ void domain::reconstruct_image_flags(const block_data &b,
 	if (image_x.empty() || image_x.size() < b.N)  image_x.resize(b.N);
 	if (image_y.empty() || image_y.size() < b.N)  image_y.resize(b.N);
 	if (image_z.empty() || image_z.size() < b.N)  image_z.resize(b.N);
-	
-	
+
+
 	long max_mol = 0;
 	const std::vector<int> &mol = get_mol(b);
 	const std::vector<int> &type = get_type(b);
+	const std::vector<int> &id = get_id(b);
 
 	const std::vector<double> &x = get_x(b);
 	const std::vector<double> &y = get_y(b);
 	const std::vector<double> &z = get_z(b);
 
-	
+
 	for (int i = 0; i < mol.size(); ++i) {
 		if (mol[i] > max_mol) {
 			max_mol = mol[i];
@@ -87,7 +88,7 @@ void domain::reconstruct_image_flags(const block_data &b,
 	long n_mols = max_mol+1;
 	std::vector<int> atom2mol(b.N);
 	std::vector<std::vector<int> > mol2atom(n_mols);
-	
+
 	for (int i = 0; i < b.N; ++i) {
 		mol2atom[mol[i]].push_back(i);
 		atom2mol[i] = mol[i];
@@ -99,15 +100,24 @@ void domain::reconstruct_image_flags(const block_data &b,
 	// we use that position. Otherwise, we adjust the image flags so
 	// that it is whithin the box.
 
-	
-	for (int imol = 0; imol < n_mols; ++imol) {
+
+	for (unsigned long imol = 0; imol < mol2atom.size(); ++imol) {
 		if (mol2atom[imol].empty()) continue;
+		const bool debug = false;
+		/*
+		if (imol == 720) {
+			std::cerr << "Checking mol " << imol << "\n";
+			debug = true;
+		}
+		*/
 
 		double xp[3];
 		double Lx = b.dom.xhi[0] - b.dom.xlo[0];
 		double Lz = b.dom.xhi[1] - b.dom.xlo[1];
 		double Ly = b.dom.xhi[2] - b.dom.xlo[2];
 
+		if (debug) std::cerr << "(Lx, Ly, Lz) = ("
+		                     << Lx << ", " << Ly << ", " << Lz << ")\n";
 
 		{
 			// Corner case for first atom in mol:
@@ -120,32 +130,50 @@ void domain::reconstruct_image_flags(const block_data &b,
 		        image_y[atom_idx] = imy;
 			image_z[atom_idx] = imz;
 
+
 			xp[0] = x[atom_idx];
 			xp[1] = y[atom_idx];
 			xp[2] = z[atom_idx];
-			b.dom.rewrap_vector(xp);
-			
+
+			if (debug) std::cerr << "First atom " << id[atom_idx]
+			                     << " is at (" << xp[0] << ", "
+			                     << xp[1] << ", " << xp[2] << ")\n";
+
+			int ix_[3] = {0,0,0};
+			b.dom.rewrap_position(xp, ix_);
+			if (debug && (ix_[0] || ix_[1] || ix_[2])) {
+				std::cerr << "First atom was out of box, "
+				          << "placing inside.\n";
+			}
+
+
+			if (debug) std::cerr << "We rewrapped that to " << xp[0]
+			                     << ", " << xp[1] << ", " << xp[2]
+			                     << ")\n";
 		}
-		
+
 		for (int j = 1; j < mol2atom[imol].size(); ++j) {
 			int i = mol2atom[imol][j];
 			double xx[3];
-			
+
 			xx[0] = x[i];
 			xx[1] = y[i];
 			xx[2] = z[i];
+
+			if (debug) std::cerr << j+1 << "th atom is " << id[i]
+			                     << " at (" << xx[0] << ", "
+			                     << xx[1] << ", " << xx[2] << ")\n";
 
 			// For each of these, we find image flags that minimize
 			// the distance to the previous atom in the molecule.
 			// This is fine if the molecules are much smaller than
 			// the box.
-			
-			int imx = 0, imy = 0, imz = 0;
+
 			int imx_m = 0, imy_m = 0, imz_m = 0;
 			// each r2 is guaranteed to be smaller than this squared
 			double r2_min = Lx*Lx + Ly*Ly + Lz*Lz;
 
-			double r[3];
+			double r[3] = {0,0,0};
 			int ximgs[27] = {0, 1, -1, 0, 1, -1,  0,  1, -1,
 			                 0, 1, -1, 0, 1, -1,  0,  1, -1,
 			                 0, 1, -1, 0, 1, -1,  0,  1, -1};
@@ -155,7 +183,7 @@ void domain::reconstruct_image_flags(const block_data &b,
 			int zimgs[27] = {0, 0,  0, 0, 0,  0,  0,  0,  0,
 			                 1 ,1,  1, 1, 1,  1,  1,  1,  1,
 			                 -1, -1, -1, -1, -1, -1, -1, -1, -1};
-			             
+
 			for (int flag_i = 0; flag_i < 27; ++flag_i) {
 				double xdum3[3];
 				xdum3[0] = xx[0];
@@ -165,6 +193,7 @@ void domain::reconstruct_image_flags(const block_data &b,
 				xdum3[0] += Lx*ximgs[flag_i];
 				xdum3[1] += Ly*yimgs[flag_i];
 				xdum3[2] += Lz*zimgs[flag_i];
+
 				double r2 = b.dom.dist_2(xp, xdum3, r, false);
 
 				if (r2 < r2_min) {
@@ -174,7 +203,13 @@ void domain::reconstruct_image_flags(const block_data &b,
 					imz_m = zimgs[flag_i];
 				}
 			}
-			
+
+			double xdum3[3] = { Lx*imx_m + xx[0],
+			                    Ly*imy_m + xx[1],
+			                    Lz*imz_m + xx[2] };
+
+			double r2 = b.dom.dist_2(xp, xdum3, r, false);
+
 			xp[0] = Lx*imx_m + xx[0];
 			xp[1] = Ly*imy_m + xx[1];
 			xp[2] = Lz*imz_m + xx[2];
@@ -182,11 +217,21 @@ void domain::reconstruct_image_flags(const block_data &b,
 			image_x[i] = imx_m;
 		        image_y[i] = imy_m;
 			image_z[i] = imz_m;
+
+
+
+			if (debug) std::cerr << "The image flags that minimize "
+			                     << "dist to prev are (" << imx_m
+			                     << ", " << imy_m << ", " << imz_m
+			                     << ") for position of (" << xp[0]
+			                     << ", " << xp[1] << ", " << xp[2]
+			                     << "); distance of (" << r[0]
+			                     << ", " << r[1] << ", " << r[2]
+			                     << "); r^2 = " << r2 << "\n";
 		}
 	}
-		
+
 }
 
 
 } // namespace lammps_tools
-

@@ -35,8 +35,14 @@ int main( int argc, char **argv )
 		std::cerr << "Pass a dump file!\n";
 		return -2;
 	}
-	
+
 	dump = argv[1];
+	if (dump == "-h" || dump == "--help") {
+		// not actually a dump but user wants help:
+		print_usage();
+		return 1;
+	}
+
 	int i = 2;
 	while( i < argc ){
 		std::string a( argv[i] );
@@ -77,14 +83,14 @@ int main( int argc, char **argv )
 		std::cerr << "hack_mol_stride cannot be negative!\n";
 		return -7;
 	}
-	
+
 	int fformat = FILE_FORMAT_PLAIN;
 	if (util::ends_with(dump, ".bin")) {
 		fformat = FILE_FORMAT_BIN;
 	} else if (util::ends_with(dump, ".gz")) {
 		fformat = FILE_FORMAT_GZIP;
 	}
-	
+
 
 	if (headers.empty() && (fformat == FILE_FORMAT_BIN)) {
 		std::cerr << "You need to provide column headesr for binary dump files!\n";
@@ -96,7 +102,7 @@ int main( int argc, char **argv )
 	std::ofstream *out_fstream = nullptr;
 	std::ostream *out = nullptr;
 	int out_fformat = FILE_FORMAT_PLAIN;
-	
+
 	if( out_file == "-" ){
 		out = &std::cout;
 	}else{
@@ -143,10 +149,10 @@ int main( int argc, char **argv )
 			d->set_column_header_as_special(h, block_data::Z);
 		} else if (h == "mol" || h == "MOL") {
 			d->set_column_header_as_special(h, block_data::MOL);
-		} 
+		}
 
 	}
-	
+
 	while( d->next_block(b) == 0 ){
 		//writers::block_to_lammps_dump( *out, b,
 		//                               out_fformat,
@@ -155,7 +161,6 @@ int main( int argc, char **argv )
 	}
 
 	if (hack_mol_stride) {
-		
 		// Create a new mol column and use the stride to deduce mol.
 		std::vector<int> mol(b.N);
 		auto ids = get_id(b);
@@ -163,7 +168,7 @@ int main( int argc, char **argv )
 			int idm = ids[i] - 1;
 			mol[i] = 1 + idm/hack_mol_stride;
 		}
-	
+
 		data_field_int mol_field( "mol", mol );
 		b.add_field(mol_field, block_data::MOL);
 	}
@@ -177,13 +182,13 @@ int main( int argc, char **argv )
 		data_field_int img_x("ix", imx);
 		data_field_int img_y("iy", imy);
 		data_field_int img_z("iz", imz);
-		
+
 		b.add_field(img_x, block_data::IX);
 		b.add_field(img_y, block_data::IY);
 		b.add_field(img_z, block_data::IZ);
-		
+
 	}
-	
+
 	writers::block_to_lammps_data(*out, b);
 	if( out_fstream ) delete out_fstream;
 }
