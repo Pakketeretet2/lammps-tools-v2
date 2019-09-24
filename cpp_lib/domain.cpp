@@ -103,7 +103,7 @@ void domain::reconstruct_image_flags(const block_data &b,
 
 	for (unsigned long imol = 0; imol < mol2atom.size(); ++imol) {
 		if (mol2atom[imol].empty()) continue;
-		bool debug = false;
+		const bool debug = false;
 
 		double xp[3];
 		double Lx = b.dom.xhi[0] - b.dom.xlo[0];
@@ -132,7 +132,7 @@ void domain::reconstruct_image_flags(const block_data &b,
 			if (debug) std::cerr << "First atom " << id[atom_idx]
 			                     << " is at (" << xp[0] << ", "
 			                     << xp[1] << ", " << xp[2] << ")\n";
-
+			/*
 			int ix_[3] = {0,0,0};
 			b.dom.rewrap_position(xp, ix_);
 			if (debug && (ix_[0] || ix_[1] || ix_[2])) {
@@ -141,9 +141,10 @@ void domain::reconstruct_image_flags(const block_data &b,
 			}
 
 
-			if (debug) std::cerr << "We rewrapped that to " << xp[0]
+			if (debug) std::cerr << "We rewrapped that to (" << xp[0]
 			                     << ", " << xp[1] << ", " << xp[2]
 			                     << ")\n";
+			*/
 		}
 
 		for (int j = 1; j < mol2atom[imol].size(); ++j) {
