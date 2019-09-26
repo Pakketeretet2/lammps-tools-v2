@@ -41,7 +41,6 @@ add_library(lammpstools SHARED
   cpp_lib/transformations.cpp
   cpp_lib/triangulate.cpp
   cpp_lib/util.cpp
-  cpp_lib/writers_hoomd.cpp
   cpp_lib/writers_lammps.cpp)
 
 
@@ -116,7 +115,7 @@ endif(USE_ARMADILLO)
 
 if(USE_GSD)
   set(GSD_DIR "../dependencies/gsd/")
-  set(GSD_C_SOURCE "${GSD_DIR}/gsd.c")
+  set(GSD_C_SOURCE "${GSD_DIR}/gsd.c ../cpp_lib/writers_hoomd.cpp")
   target_sources(lammpstools PRIVATE ${GSD_C_SOURCE})
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -DHAVE_GSD -I${GSD_DIR}")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
