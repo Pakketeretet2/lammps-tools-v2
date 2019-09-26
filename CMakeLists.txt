@@ -26,7 +26,6 @@ add_library(lammpstools SHARED
   cpp_lib/dump_reader_lammps_gzip.cpp
   cpp_lib/dump_reader_lammps_plain.cpp
   cpp_lib/dump_reader_xyz.cpp
-  cpp_lib/fourier.cpp
   cpp_lib/icosahedra.cpp
   cpp_lib/histogram.cpp
   cpp_lib/markov_state_capsid.cpp
