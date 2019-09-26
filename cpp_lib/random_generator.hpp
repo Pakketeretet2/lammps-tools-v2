@@ -37,7 +37,7 @@ public:
 	~RanGen();
 
 	/// Random unsigned int
-	uint random_int();
+	unsigned int random_int();
 
 	/// A random sign (i.e., either +1 or -1 with 50% chance)
 	int random_sign();
