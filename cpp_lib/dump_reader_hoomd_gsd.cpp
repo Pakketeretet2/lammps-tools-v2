@@ -684,9 +684,6 @@ int dump_reader_hoomd_gsd::fast_forward( uint frame )
 
 
 
-#endif // HAVE_GSD
-
-
 
 // ***********    Declare all instantiations for templated members:    *********
 #define MAKE_FORWARD_TEMPLATE_DECL_PTR( TYPE ) \
@@ -710,10 +707,11 @@ MAKE_FORWARD_TEMPLATE_DECL_REF(std::vector<uint8_t>)
 MAKE_FORWARD_TEMPLATE_DECL_REF(std::vector<uint32_t>)
 
 
-
 #undef MAKE_FORWARD_TEMPLATE_DECL_REF
 #undef MAKE_FORWARD_TEMPLATE_DECL_PTR
 
+
+#endif // HAVE_GSD
 
 // ***********    End of declarations of templated members.     ****************
 
