@@ -20,7 +20,7 @@ public:
 	~RanMT();
 
 	double uniform();
-	uint random_int();
+	unsigned int random_int();
 private:
 	std::mt19937_64 mt_rand;
 	std::uniform_real_distribution<double> u_dist;

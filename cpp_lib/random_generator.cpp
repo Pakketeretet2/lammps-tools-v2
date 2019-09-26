@@ -5,6 +5,10 @@
 #include "random_generator.hpp"
 
 
+// Some compilers do not define uint:
+typedef unsigned int uint;
+
+
 /**
    \brief Initialize the random generator.
 */
