@@ -116,6 +116,7 @@ class dump_reader:
                 #block_data_.print_stats( bh )
                 b = block_data.block_data_custom.init_from_handle(
                     bh, self.no_block_data_copy )
+                self.status = -1
             return b
         else:
             return None

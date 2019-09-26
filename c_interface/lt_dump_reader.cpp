@@ -122,7 +122,7 @@ int lt_get_next_block( lt_dump_reader_handle drh, lt_block_data_handle *bdh )
 	}catch( std::runtime_error &e ){
 		std::cerr << "Error occured in lt_get_next_block! "
 		          << e.what() << "\n";
-		std::terminate();
+		return -1;
 	}
 }
 
@@ -136,7 +136,7 @@ int lt_number_of_blocks( lt_dump_reader_handle drh )
 	}catch( std::runtime_error &e ){
 		std::cerr << "Error occured in lt_number_of_blocks! "
 		          << e.what() << "\n";
-		std::terminate();
+		return -1;
 	}
 }
 
@@ -154,7 +154,7 @@ void lt_set_col_header( lt_dump_reader_handle drh, int n, const char *header )
 		}catch( std::runtime_error &e ){
 			std::cerr << "Error occured in lt_set_col_header! "
 			          << e.what() << "\n";
-			std::terminate();
+			return -1;
 		}
 	}
 }
@@ -179,7 +179,7 @@ bool lt_set_column_header_as_special( lt_dump_reader_handle drh,
 			std::cerr << "Error occured in "
 			          << "lt_set_column_header_as_special! "
 			          << e.what() << "\n";
-			std::terminate();
+			return -1;
 		}
 	}else{
 		std::cerr << "Error casting to LAMMPS dump reader!\n";
@@ -202,7 +202,7 @@ bool lt_set_column_type( lt_dump_reader_handle drh,
 		}catch( std::runtime_error &e ){
 			std::cerr << "Error occured in lt_set_column_type! "
 			          << e.what() << "\n";
-			std::terminate();
+			return false;
 		}
 		return true;
 	}else{
@@ -227,7 +227,7 @@ int  lt_get_column_type( lt_dump_reader_handle drh,
 		}catch( std::runtime_error &e ){
 			std::cerr << "Error occured in lt_get_column_type! "
 			          << e.what() << "\n";
-			std::terminate();
+			return -1;
 		}
 	}else{
 		std::cerr << "Error casting to LAMMPS dump reader!\n";
