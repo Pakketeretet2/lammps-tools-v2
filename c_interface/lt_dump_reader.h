@@ -121,8 +121,10 @@ int lt_number_of_blocks( lt_dump_reader_handle drh );
    \param drh      Handle to the dump reader.
    \param n        The column index to set.
    \param headers  The header as array of '\0'-terminated char arrays.
+
+   \returns 0 on succes, non-zero otherwise
 */
-void lt_set_col_header( lt_dump_reader_handle drh, int n, const char *header );
+int lt_set_col_header( lt_dump_reader_handle drh, int n, const char *header );
 
 
 /**

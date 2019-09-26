@@ -141,12 +141,12 @@ int lt_number_of_blocks( lt_dump_reader_handle drh )
 }
 
 
-void lt_set_col_header( lt_dump_reader_handle drh, int n, const char *header )
+int lt_set_col_header( lt_dump_reader_handle drh, int n, const char *header )
 {
 	using lammps_tools::readers::dump_reader_lammps;
 	if( drh.dformat != lammps_tools::DUMP_FORMAT_LAMMPS ){
 		std::cerr << "Ignoring column headers for non-LAMMPS dump...\n";
-		return;
+		return -1;
 	}
 	if( dump_reader_lammps *drl = attempt_lammps_dump_reader_cast( drh ) ){
 		try{
@@ -157,6 +157,7 @@ void lt_set_col_header( lt_dump_reader_handle drh, int n, const char *header )
 			return -1;
 		}
 	}
+	return 0;
 }
 
 bool lt_set_column_header_as_special( lt_dump_reader_handle drh,
