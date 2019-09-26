@@ -19,6 +19,7 @@ enum LT_DATA_FIELD_TYPES {
 	DATA_FIELD_INT	  = lammps_tools::data_field::INT
 };
 
+
 struct lt_data_field_handle
 {
 private:
