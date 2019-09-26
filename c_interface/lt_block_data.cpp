@@ -307,3 +307,4 @@ void lt_block_data_filter( lt_block_data_handle *dest, int size, const void *ids
 		lammps_tools::filter_by_id( src->get_const_ref(), id_vec );
 	dest->bd = new lammps_tools::block_data( temp_b );
 }
+
