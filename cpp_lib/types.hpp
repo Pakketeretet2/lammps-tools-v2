@@ -15,6 +15,7 @@
 namespace lammps_tools {
 
 typedef int64_t       bigint;    ///< signed long of guaranteed size (64 bits)
+typedef unsigned int  uint;      ///< Because some compilers do not define uint.
 
 /// Use a union to easily read specific data from binary:
 template <typename data_type>
