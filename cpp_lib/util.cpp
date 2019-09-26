@@ -8,7 +8,6 @@
 #include <vector>
 #include <unistd.h>
 
-#include "gsd.h"
 
 using namespace lammps_tools;
 

@@ -19,9 +19,6 @@
 #include "zip.hpp"
 
 
-// Forward-declare for some utils.
-struct gsd_handle;
-
 
 namespace lammps_tools {
 
