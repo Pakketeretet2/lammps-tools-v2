@@ -97,7 +97,7 @@ int lt_block_writers_lammps_dump( const char *fname, const char *w_mode,
 int lt_block_writers_hoomd_gsd( const char *fname, const char *w_mode,
                                 const lt_block_data_handle * bdh )
 {
-
+#ifdef HAVE_GSD
 	if( std::strcmp( fname, "-" ) == 0 ){
 		std::cerr << "Writing HOOMD to stdout is not supported!\n";
 		return -1;
@@ -106,6 +106,11 @@ int lt_block_writers_hoomd_gsd( const char *fname, const char *w_mode,
 
 	return lammps_tools::writers::block_to_hoomd_gsd( fname, *bdh->bd,
 	                                                  w_mode );
+#else
+	std::cerr << "Cannot write HOOMD files without GSD support!\n";
+	std::cerr << "Recompile lammpstools with USE_GSD on!\n";
+	return -1;
+#endif
 }
 
 
