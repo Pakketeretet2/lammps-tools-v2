@@ -58,6 +58,13 @@ lt_data_field_handle *lt_new_data_field( const char *name, int dtype, int size )
 }
 
 
+lt_data_field_handle *lt_new_empty_data_field()
+{
+	auto n = new lt_data_field_handle;
+	return n;
+}
+
+
 
 int lt_data_field_size( const lt_data_field_handle *d )
 {

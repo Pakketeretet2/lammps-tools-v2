@@ -118,7 +118,8 @@ class block_data:
         self.data_types = np.zeros( N, dtype = int )
 
         for i in range(0, N):
-            df = block_data_.data_by_index(self.handle,i)
+            df = data_field_.new_empty_data_field()
+            block_data_.data_by_index(df,self.handle, i)
             ttype = data_field_.get_type( df )
             self.data_types[i] = ttype
 
@@ -209,7 +210,8 @@ class block_data:
                                            special_field_type )
 
         # Check if the data field is properly added:
-        test_data_field = block_data_.data_by_name( self.handle, d.name() )
+        test_data_field = data_field_.new_data_field()
+        block_data_.data_by_name( test_data_field.handle, self.handle, d.name() )
         if data_field.data_field(test_data_field).name() != d.name():
             raise RuntimeError("Data field mismatch!")
 

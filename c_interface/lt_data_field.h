@@ -83,6 +83,8 @@ int lt_data_field_set_indexed_double_data( lt_data_field_handle *d,
 
 
 lt_data_field_handle *lt_new_data_field( const char *name, int dtype, int size );
+lt_data_field_handle *lt_new_empty_data_field();
+
 void lt_delete_data_field( lt_data_field_handle *d );
 
 } // extern "C"

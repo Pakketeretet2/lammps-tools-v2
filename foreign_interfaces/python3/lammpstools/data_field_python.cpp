@@ -26,6 +26,8 @@ PYBIND11_PLUGIN(data_field_) {
 	m.def("set_size", &lt_data_field_set_size, "Sets the size of data field.");
 	m.def("set_name", &lt_data_field_set_name, "Sets the name of data field.");
 	m.def("new_data_field", &lt_new_data_field, "Creates a new data field.");
+	m.def("new_empty_data_field", &lt_new_empty_data_field, "Creates a new empty data field.");
+
 	m.def("delete_data_field", &lt_delete_data_field, "Deletes data field.");
 
 	m.def("get_indexed_int_data", &lt_data_field_get_indexed_int_data,
