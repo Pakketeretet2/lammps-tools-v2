@@ -57,17 +57,17 @@ const std::vector<int> &lt_special_field_int( lt_block_data_handle *bdh,
 }
 
 
-int lt_data_by_name( lt_data_field_handle *h,
+int lt_data_by_name( lt_data_field_handle &h,
                      lt_block_data_handle *bdh, const char *name )
 {
 	const std::string n(name);
-	h->set(nullptr);
+	h.set(nullptr);
 	const lammps_tools::block_data &b = *bdh->bd;
 
 	for( std::size_t i = 0; i < b.n_data_fields(); ++i ){
 		if( n == b[i].name ){
 			const lammps_tools::data_field *df = &b[i];
-			h->set( df );
+			h.set( df );
 			return 0;
 		}
 	}
@@ -75,10 +75,10 @@ int lt_data_by_name( lt_data_field_handle *h,
 }
 
 
-int lt_data_by_index( lt_data_field_handle *h,
+int lt_data_by_index( lt_data_field_handle &h,
                        lt_block_data_handle *bdh, int i )
 {
-	h->set(nullptr);
+	h.set(nullptr);
 	const lammps_tools::block_data &b = *bdh->bd;
 	std::size_t ii = i;
 	if( i < 0 || ii >= b.n_data_fields() ){
@@ -88,7 +88,7 @@ int lt_data_by_index( lt_data_field_handle *h,
 	}
 
 	// This cannot go wrong as the index is already asserted to be OK.
-	h->set(&b[i]);
+	h.set(&b[i]);
 	return 0;
 }
 
@@ -151,7 +151,7 @@ void lt_block_data_set_data_impl( lt_block_data_handle *bdh,
                                   const std::vector<T> &data )
 {
 	lt_data_field_handle dfh;
-	int status = lt_data_by_name( &dfh, bdh, name );
+	int status = lt_data_by_name( dfh, bdh, name );
 	if (status || dfh.get() == nullptr ){
 		// These are equivalent errors I think.
 		std::cerr << "Could not find field named " << name << "!\n";
@@ -307,4 +307,3 @@ void lt_block_data_filter( lt_block_data_handle *dest, int size, const void *ids
 		lammps_tools::filter_by_id( src->get_const_ref(), id_vec );
 	dest->bd = new lammps_tools::block_data( temp_b );
 }
-

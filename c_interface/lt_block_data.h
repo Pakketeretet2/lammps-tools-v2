@@ -109,14 +109,14 @@ int lt_n_data_fields( lt_block_data_handle *bdh );
    \brief Set data field specified by name.
    return non-zero on failure
 */
-int lt_data_by_name( lt_data_field_handle *h,
+int lt_data_by_name( lt_data_field_handle &h,
                       lt_block_data_handle *bdh, const char *name );
 
 /**
    \brief Set data field by index, or nullptr if index out of range
    return non-zero on failure
 */
-int lt_data_by_index( lt_data_field_handle *h,
+int lt_data_by_index( lt_data_field_handle &h,
                       lt_block_data_handle *bdh, int i );
 
 
