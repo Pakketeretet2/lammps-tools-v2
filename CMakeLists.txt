@@ -56,7 +56,7 @@ option(LEGACY_COMPILER       "Disable some features for ancient compilers." OFF)
 option(USE_ASSERTIONS        "Compile library with assertions enabled."     ON)
 option(THREADED_READ_BLOCKS  "Read blocks into a threaded queue."           OFF)
 
-option(INCLUDE_C_INTERFACE "Compile the C interface into the library." OFF)
+option(INCLUDE_C_INTERFACE "Compile the C interface into the library." ON)
 
 if(ENABLE_MY_ASSERT)
   add_definitions(-DLT_DEBUG=1)
@@ -72,7 +72,6 @@ if(INCLUDE_C_INTERFACE)
     c_interface/lt_dump_reader.cpp
     c_interface/lt_transformations.cpp)
 endif()
-
 
 
 # Compiler settings:
@@ -115,7 +114,7 @@ endif(USE_ARMADILLO)
 
 if(USE_GSD)
   set(GSD_DIR "../dependencies/gsd/")
-  set(GSD_C_SOURCE "${GSD_DIR}/gsd.c ../cpp_lib/writers_hoomd.cpp")
+  set(GSD_C_SOURCE "${GSD_DIR}/gsd.c" "../cpp_lib/writers_hoomd.cpp")
   target_sources(lammpstools PRIVATE ${GSD_C_SOURCE})
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -DHAVE_GSD -I${GSD_DIR}")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
